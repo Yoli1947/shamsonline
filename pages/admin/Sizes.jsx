@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { Plus, Trash2, Edit, Save, X, RotateCcw } from 'lucide-react'
 import { getSizeCurves, createSizeCurve, updateSizeCurve, deleteSizeCurve } from '../../lib/admin'
 import { SIZE_HEADERS, detectSizeType } from '../../utils/tallesLogic'
-import { SIZE_ORDER } from '../../lib/constants'
+import { SIZE_ORDER, sortSizes } from '../../lib/constants'
 
 export default function Sizes() {
     const [curves, setCurves] = useState([])
@@ -190,14 +190,7 @@ export default function Sizes() {
                                             <td style={{ fontWeight: 600 }}>{curve.name}</td>
                                             <td>
                                                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                                    {[...curve.sizes].sort((a, b) => {
-                                                        const indexA = SIZE_ORDER.indexOf(String(a).toUpperCase());
-                                                        const indexB = SIZE_ORDER.indexOf(String(b).toUpperCase());
-                                                        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-                                                        if (indexA !== -1) return -1;
-                                                        if (indexB !== -1) return 1;
-                                                        return String(a).localeCompare(String(b));
-                                                    }).map((s, i) => (
+                                                    {[...curve.sizes].sort(sortSizes).map((s, i) => (
                                                         <span key={i} className="admin-badge admin-badge-neutral">
                                                             {s}
                                                         </span>

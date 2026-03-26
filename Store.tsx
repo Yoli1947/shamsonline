@@ -17,7 +17,7 @@ import { Product, CartItem } from './types';
 import { Filter, Loader, X, Ruler, Trash2, Tag, Search, Users, Mail, Phone, MapPin, HelpCircle, ShoppingBag, Instagram, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import CheckoutModal from './components/CheckoutModal';
 import CustomerAuthModal from './components/CustomerAuthModal';
-import { SIZE_ORDER } from './lib/constants';
+import { SIZE_ORDER, sortSizes } from './lib/constants';
 import NewsletterModal from './components/NewsletterModal';
 import { useAuth } from './context/AuthContext';
 import { useSettings } from './context/SettingsContext';
@@ -366,14 +366,7 @@ const Store: React.FC = () => {
                 });
             });
 
-            const sortedSizes = Array.from(sizes).sort((a, b) => {
-                const indexA = SIZE_ORDER.indexOf(a);
-                const indexB = SIZE_ORDER.indexOf(b);
-                if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-                if (indexA !== -1) return -1;
-                if (indexB !== -1) return 1;
-                return a.localeCompare(b);
-            });
+            const sortedSizes = Array.from(sizes).sort(sortSizes);
             setAvailableSizes(sortedSizes);
         }
     }, [products, selectedGender]);
@@ -876,7 +869,7 @@ const Store: React.FC = () => {
                                     </span>
                                 ) : (selectedBrand || isBrandFilterOpen ? 'COLECCIÓN EXCLUSIVA' : '')}
                             </span>
-                            <h2 className="font-heading text-2xl md:text-5xl font-bold tracking-tighter text-[var(--color-text)] leading-tight">
+                            <h2 className="font-heading text-lg md:text-2xl font-bold tracking-tighter text-[var(--color-text)] leading-tight mt-6 md:mt-10">
                                 {selectedBrand ? (
                                     <div className="flex flex-col items-start leading-tight animate-in fade-in slide-in-from-left-8 duration-700 mt-2">
                                         <span className="text-2xl md:text-4xl font-black text-[var(--color-text)] tracking-[0.1em] uppercase">

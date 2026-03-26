@@ -692,7 +692,12 @@ export default function ProductForm({ product, onSuccess, onCancel }) {
                                 <select
                                     className="input-premium"
                                     value={gender}
-                                    onChange={e => setGender(e.target.value)}
+                                    onChange={e => {
+                                        setGender(e.target.value);
+                                        // Reset category when gender changes so user picks a matching one
+                                        setFormData(prev => ({ ...prev, categoryId: '' }));
+                                        setCatSearch('');
+                                    }}
                                 >
                                     <option value="">Seleccionar Género...</option>
                                     <option value="Hombre">Hombre</option>

@@ -173,7 +173,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onOpenD
         {/* Prices */}
         <div className="mt-auto pt-2 space-y-1.5">
           <div className="flex items-center gap-2">
-            <span className="text-base md:text-lg font-bold text-[var(--color-text)] tracking-tighter">
+            <span className="text-sm md:text-sm font-bold text-[var(--color-text)] tracking-tighter">
               ${(product.originalPrice > product.price ? product.originalPrice : (product.price || 0)).toLocaleString()}
             </span>
             <span className="text-[10px] font-medium text-[var(--color-text-muted)] uppercase tracking-widest mt-1">CRÉDITO / DÉBITO</span>
@@ -185,7 +185,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onOpenD
             return (
               <div className="flex flex-col items-start gap-0.5">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm md:text-base font-bold text-emerald-700 tracking-tighter">
+                  <span className="text-xs md:text-xs font-bold text-emerald-700 tracking-tighter">
                     ${transferPrice.toLocaleString()}
                   </span>
                   <span className="text-[10px] font-medium text-emerald-600 uppercase tracking-widest mt-1">

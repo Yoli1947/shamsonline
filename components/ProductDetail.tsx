@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { X, ChevronLeft, ChevronRight, ShoppingBag, Check, ChevronDown, Heart } from 'lucide-react';
 import { Product } from '../types';
-import { COLOR_MAP, SIZE_ORDER } from '../lib/constants';
+import { COLOR_MAP, SIZE_ORDER, sortSizes } from '../lib/constants';
 import { useSettings } from '../context/SettingsContext';
 
 interface ProductDetailProps {
@@ -105,16 +105,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
         if (selectedColor) {
             filteredVariants = variantsWithStock.filter(v => v.color === selectedColor);
         }
-        return Array.from(new Set(filteredVariants.map(v => v.size)))
+        const normalize = (s: string) => s?.toUpperCase() === '2X' ? '2XL' : s?.toUpperCase() === '3X' ? '3XL' : s?.toUpperCase() === '4X' ? '4XL' : s;
+        return Array.from(new Set(filteredVariants.map(v => normalize(v.size))))
             .filter(Boolean)
-            .sort((a, b) => {
-                const indexA = SIZE_ORDER.indexOf(String(a).toUpperCase());
-                const indexB = SIZE_ORDER.indexOf(String(b).toUpperCase());
-                if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-                if (indexA !== -1) return -1;
-                if (indexB !== -1) return 1;
-                return String(a).localeCompare(String(b));
-            });
+            .sort(sortSizes);
     }, [variantsWithStock, selectedColor]);
 
     // Reset selected size if it's not available in the newly selected color
@@ -326,7 +320,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
 
                         <div className="mb-4 space-y-2">
                             <div className="flex items-center gap-4">
-                                <span className="text-3xl md:text-4xl font-black text-[var(--color-text)] tracking-tighter">
+                                <span className="text-xl md:text-2xl font-black text-[var(--color-text)] tracking-tighter">
                                     ${(product.originalPrice > product.price ? product.originalPrice : (product.price || 0)).toLocaleString()}
                                 </span>
                                 <span className="text-[11px] font-black tracking-widest text-[var(--color-text-muted)] uppercase mt-auto pb-1.5">Crédito / Débito</span>
