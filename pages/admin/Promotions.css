@@ -1,0 +1,444 @@
+.promotions {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.promotions__header {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.mode-toggle {
+    display: flex;
+    background: #F3F4F6;
+    padding: 0.3rem;
+    border-radius: 0.8rem;
+    border: 1px solid #E5E7EB;
+}
+
+.mode-btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+    color: #9CA3AF;
+    border: none;
+    letter-spacing: 0.05em;
+}
+
+.mode-btn.active {
+    background: #111111;
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.update-actions-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    background: #F3F4F6;
+    padding: 0.4rem;
+    border-radius: 0.8rem;
+    border: 1px solid #E5E7EB;
+}
+
+.action-btn {
+    padding: 0.75rem;
+    border-radius: 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: transparent;
+    color: #9CA3AF;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+
+.action-btn.active.increase {
+    background: rgba(34, 197, 94, 0.08);
+    color: #16A34A;
+    border-color: rgba(34, 197, 94, 0.25);
+}
+
+.action-btn.active.decrease {
+    background: rgba(239, 68, 68, 0.08);
+    color: #DC2626;
+    border-color: rgba(239, 68, 68, 0.25);
+}
+
+.btn-warning {
+    background: #FF8A00;
+    color: white;
+    width: 100%;
+}
+
+.btn-warning:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(255, 138, 0, 0.2);
+}
+
+.badge--orange {
+    background: rgba(255, 138, 0, 0.1);
+    color: #FF8A00;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.5rem;
+}
+
+.promotions__title-area {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.promotions__title-area h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #111111;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.promotions__title-area p {
+    color: #6B7280;
+    margin: 0.25rem 0 0 0;
+    font-size: 0.9rem;
+}
+
+.promotions__grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 2rem;
+}
+
+@media (max-width: 1024px) {
+    .promotions__grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.promotions__card {
+    padding: 2rem;
+    border-radius: 1.5rem;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+}
+
+.promotions__card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #F3F4F6;
+}
+
+.promotions__card-header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+    color: #111111;
+}
+
+.badge--blue {
+    background: #F3F4F6;
+    color: #374151;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.5rem;
+    letter-spacing: 0.05em;
+    border: 1px solid #E5E7EB;
+}
+
+.promotions__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6B7280;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.form-control {
+    width: 100%;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: #111111;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #111111;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
+}
+
+.percentage-input-wrapper {
+    position: relative;
+    max-width: 150px;
+}
+
+.percentage-symbol {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #374151;
+    font-weight: 800;
+}
+
+.form-help {
+    font-size: 0.75rem;
+    color: #9CA3AF;
+    margin-top: 0.5rem;
+}
+
+.promotions__lock {
+    background: #F9FAFB;
+    border: 1px dashed #D1D5DB;
+    border-radius: 1rem;
+    padding: 2rem;
+    text-align: center;
+    margin-top: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.promotions__lock--error {
+    animation: shake 0.4s ease;
+    border-color: #EF4444;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.promotions__lock-icon {
+    color: #F59E0B;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.promotions__lock h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #111111;
+}
+
+.promotions__lock p {
+    font-size: 0.8rem;
+    color: #9CA3AF;
+    margin: 0.5rem 0 1.5rem 0;
+}
+
+.promotions__pin-form {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.promotions__pin-form input {
+    width: 100px;
+    background: #FFFFFF;
+    border: 2px solid #E5E7EB;
+    color: #111111;
+    text-align: center;
+    font-size: 1.25rem;
+    letter-spacing: 0.5em;
+    font-weight: 800;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+}
+
+.promotions__pin-form input:focus {
+    outline: none;
+    border-color: #111111;
+}
+
+.btn-unlock {
+    background: #111111;
+    color: #FFFFFF;
+    font-size: 0.8rem;
+    padding: 0 1.5rem;
+}
+
+.promotions__actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.btn-primary {
+    background: #111111;
+    color: #FFFFFF;
+    width: 100%;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: #374151;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.btn-outline-danger {
+    background: transparent;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #EF4444;
+    white-space: nowrap;
+}
+
+.btn-outline-danger:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: #EF4444;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.status-box {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.status-box--success {
+    background: rgba(34, 197, 94, 0.08);
+    color: #16A34A;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.status-box--error {
+    background: rgba(239, 68, 68, 0.08);
+    color: #DC2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.promotions__info-card {
+    padding: 2rem;
+    border-radius: 1.5rem;
+    height: fit-content;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+}
+
+.promotions__info-card h3 {
+    color: #111111;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.info-list li {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #6B7280;
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.info-list li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: #374151;
+}
+
+.info-list strong {
+    color: #111111;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.warning-note {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: rgba(245, 158, 11, 0.05);
+    border: 1px solid rgba(245, 158, 11, 0.15);
+    border-radius: 0.75rem;
+    display: flex;
+    gap: 0.75rem;
+}
+
+.warning-note p {
+    margin: 0;
+    font-size: 0.75rem;
+    color: #B45309;
+    line-height: 1.4;
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

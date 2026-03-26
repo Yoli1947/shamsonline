@@ -1,0 +1,122 @@
+.customers-page {
+    max-width: 1400px;
+}
+
+.customer-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.customer-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #374151, #6B7280);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: white;
+    font-size: var(--text-lg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.customer-name {
+    font-weight: 600;
+    color: #111111;
+    font-size: var(--text-sm);
+}
+
+.customer-id {
+    font-size: 10px;
+    color: #6B7280;
+    font-family: monospace;
+    margin-top: 2px;
+}
+
+.customer-contact {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    color: #6B7280;
+}
+
+.contact-item span {
+    color: #374151;
+}
+
+.contact-item svg {
+    color: #6B7280;
+}
+
+.customer-dni {
+    font-size: var(--text-xs);
+    color: #374151;
+}
+
+.customer-date {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    color: #6B7280;
+}
+
+.customer-date svg {
+    color: #9CA3AF;
+}
+
+.admin-loading {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 60vh;
+    color: #6B7280;
+    text-transform: uppercase;
+    font-size: var(--text-xs);
+    letter-spacing: 0.2em;
+}
+
+.search-input {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+}
+
+.search-input input {
+    width: 100%;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem 0.75rem 2.8rem;
+    color: #111111;
+    font-size: var(--text-sm);
+    transition: all 0.3s ease;
+}
+
+.search-input input:focus {
+    outline: none;
+    border-color: #111111;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
+}
+
+.search-input input::placeholder {
+    color: #9CA3AF;
+}
+
+.search-input svg {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9CA3AF;
+}

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shams Online | Moda Premium</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Josefin+Sans:wght@100;200;300;400;600;700&display=swap"
+    rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Josefin Sans', 'Inter', sans-serif;
+      background-color: #FAF7F2;
+      color: #2C1810;
+      overflow-x: hidden;
+    }
+
+    .font-heading {
+      font-family: 'Josefin Sans', sans-serif;
+      font-weight: 700 !important;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(197, 163, 130, 0.2);
+    }
+
+    .neo-glow {
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.06);
+    }
+
+    .hover-glow:hover {
+      box-shadow: 0 10px 40px rgba(196, 149, 106, 0.25);
+      border-color: rgba(196, 149, 106, 0.4);
+    }
+
+    .bg-vibrant-gradient {
+      background: linear-gradient(135deg, #2C1810 0%, #8B6F5E 100%);
+    }
+
+    .text-vibrant {
+      background: linear-gradient(135deg, #C4956A 0%, #8B6F5E 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Warm Texture */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 2px 2px, rgba(196, 149, 106, 0.06) 1px, transparent 0);
+      background-size: 40px 40px;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Warm Light Blobs */
+    .bg-blob {
+      position: fixed;
+      width: 800px;
+      height: 800px;
+      border-radius: 50%;
+      filter: blur(140px);
+      z-index: -2;
+      opacity: 0.15;
+      pointer-events: none;
+      animation: drift 20s infinite alternate;
+    }
+
+    .blob-1 {
+      top: -200px;
+      right: -100px;
+      background: #D4A574;
+      animation-delay: 0s;
+    }
+
+    .blob-2 {
+      bottom: -200px;
+      left: -100px;
+      background: #C4956A;
+      animation-delay: -5s;
+    }
+
+    .blob-3 {
+      top: 40%;
+      left: -300px;
+      background: #E8D5C0;
+      opacity: 0.2;
+      animation-delay: -10s;
+    }
+
+    @keyframes drift {
+      from {
+        transform: translate(0, 0) scale(1);
+      }
+
+      to {
+        transform: translate(100px, 50px) scale(1.1);
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #F0E8DC;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #C4956A;
+      border-radius: 10px;
+    }
+
+    @keyframes marquee {
+      0% {
+        transform: translateX(0);
+      }
+
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+    .animate-marquee {
+      display: flex;
+      width: 200%;
+      animation: marquee 30s linear infinite;
+    }
+
+    .premium-glow {
+      box-shadow: 0 0 20px rgba(196, 149, 106, 0.3), inset 0 0 10px rgba(196, 149, 106, 0.05);
+      border-color: #C4956A !important;
+    }
+
+    .vibrant-border-gradient {
+      border: 1px solid transparent;
+      background: linear-gradient(#FAF7F2, #FAF7F2) padding-box,
+        linear-gradient(135deg, #C4956A 0%, #8B6F5E 100%) border-box;
+    }
+
+    .filter-btn-active {
+      background: rgba(196, 149, 106, 0.15);
+      border-color: #C4956A;
+      color: #8B6F5E;
+      box-shadow: 0 2px 12px rgba(196, 149, 106, 0.2);
+      transform: translateY(-2px);
+    }
+
+    @keyframes pulse-border {
+      0% {
+        box-shadow: 0 0 0 0 rgba(196, 149, 106, 0.4);
+      }
+
+      70% {
+        box-shadow: 0 0 0 10px rgba(196, 149, 106, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(196, 149, 106, 0);
+      }
+    }
+
+    .animate-pulse-glow {
+      animation: pulse-border 2s infinite;
+    }
+
+    @keyframes pulse-gentle {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(196, 149, 106, 0.15);
+      }
+
+      50% {
+        transform: scale(1.02);
+        box-shadow: 0 0 20px rgba(196, 149, 106, 0.3);
+      }
+
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(196, 149, 106, 0.15);
+      }
+    }
+
+    .animate-pulse-gentle {
+      animation: pulse-gentle 3s ease-in-out infinite;
+    }
+  </style>
+
+  <link rel="stylesheet" href="/index.css">
+
+  <!-- Google Analytics GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-KFYN1MD2M5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-KFYN1MD2M5');
+  </script>
+</head>
+
+<body>
+  <div id="root">
+    <div
+      style="background-color: #FAF7F2; color: #2C1810; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif; flex-direction: column;">
+      <h2 style="color: #C4956A;">CARGANDO APLICACIÓN...</h2>
+      <p id="loading-status" style="margin-top: 10px; color: #666; font-size: 12px;">Inicializando módulos...</p>
+      <div id="error-display"
+        style="display: none; color: #ff4444; margin-top: 20px; max-width: 80%; text-align: center;"></div>
+    </div>
+  </div>
+  <script>
+    window.onerror = function (message, source, lineno, colno, error) {
+      document.getElementById('loading-status').style.display = 'none';
+      const errorDisplay = document.getElementById('error-display');
+      errorDisplay.style.display = 'block';
+      errorDisplay.innerHTML = '<strong>Error Crítico:</strong><br>' + message +
+        '<br><small>' + source + ':' + lineno + '</small>';
+    };
+    window.addEventListener('unhandledrejection', function (event) {
+      document.getElementById('loading-status').style.display = 'none';
+      const errorDisplay = document.getElementById('error-display');
+      errorDisplay.style.display = 'block';
+      errorDisplay.innerHTML = '<strong>Promesa Rechazada:</strong><br>' + event.reason;
+    });
+  </script>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
+</html>

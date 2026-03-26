@@ -1,0 +1,224 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+.admin-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #F3F4F6;
+    font-family: 'Outfit', sans-serif;
+    color: #111111;
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-login__container {
+    width: 100%;
+    max-width: 440px;
+    padding: 3.5rem 3rem;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 2rem;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+
+.admin-login__container:hover {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    border-color: #D1D5DB;
+}
+
+.admin-login__header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.admin-login-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #F3F4F6;
+    border: 1px solid #E5E7EB;
+    margin-bottom: 1.5rem;
+    color: #111111;
+}
+
+.admin-login__header h1 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.75rem;
+    margin: 0 0 0.75rem 0;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #111111;
+}
+
+.admin-login__header h1 span {
+    color: #6B7280;
+}
+
+.admin-login__header p {
+    color: #6B7280;
+    font-size: 0.8rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin: 0;
+}
+
+.admin-login__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    position: relative;
+}
+
+.form-group label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #6B7280;
+    margin-left: 0.5rem;
+    transition: color 0.3s ease;
+}
+
+.form-group:focus-within label {
+    color: #111111;
+}
+
+.form-group input {
+    padding: 1rem 1.25rem;
+    border: 1px solid #E5E7EB;
+    border-radius: 1rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    background-color: #FFFFFF;
+    color: #111111;
+    letter-spacing: 0.05em;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #111111;
+    background-color: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
+}
+
+.form-group input::placeholder {
+    color: #9CA3AF;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: 1px solid #E5E7EB;
+    color: #6B7280;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    padding: 0.4rem 0.75rem;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+}
+
+.password-toggle:hover {
+    background: #F3F4F6;
+    color: #111111;
+    border-color: #D1D5DB;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.125rem 1.5rem;
+    border-radius: 1rem;
+    font-weight: 800;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    margin-top: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary {
+    background: #111111;
+    color: #FFFFFF;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: #374151;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.btn-primary:disabled {
+    background: #E5E7EB;
+    color: #9CA3AF;
+    cursor: not-allowed;
+}
+
+.admin-login__error {
+    padding: 1rem;
+    background-color: rgba(220, 38, 38, 0.07);
+    border: 1px solid rgba(220, 38, 38, 0.25);
+    color: #DC2626;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    text-align: center;
+    font-weight: 500;
+}
+
+.benefit-badge {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: #374151;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.admin-login__footer {
+    text-align: center;
+    font-size: 0.65rem;
+    color: #9CA3AF;
+    margin-top: 2rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
