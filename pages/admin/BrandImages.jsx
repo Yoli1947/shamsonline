@@ -103,7 +103,7 @@ export default function BrandImages() {
                         disabled={saving || !hasChanges}
                         className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
                             hasChanges
-                                ? 'bg-[#C4956A] text-black hover:bg-white'
+                                ? 'bg-[#DCDCDC] text-black hover:bg-white'
                                 : 'bg-white text-[var(--color-text-muted)] cursor-not-allowed'
                         }`}
                     >
@@ -115,7 +115,7 @@ export default function BrandImages() {
 
             {loading ? (
                 <div className="flex items-center justify-center py-24">
-                    <Loader size={32} className="animate-spin text-[#C4956A]" />
+                    <Loader size={32} className="animate-spin text-[#DCDCDC]" />
                 </div>
             ) : (
                 <div className="space-y-10">
@@ -127,7 +127,7 @@ export default function BrandImages() {
                                     <img
                                         src={selected[group.name]}
                                         alt={group.name}
-                                        className="w-10 h-14 rounded-lg object-cover border-2 border-[#C4956A] shadow-[0_0_12px_rgba(196,149,106,0.3)]"
+                                        className="w-10 h-14 rounded-lg object-cover border-2 border-[#DCDCDC] shadow-[0_0_12px_rgba(196,149,106,0.3)]"
                                     />
                                 )}
                                 <div>
@@ -146,7 +146,7 @@ export default function BrandImages() {
                                             onClick={() => handleSelect(group.name, url)}
                                             className={`relative shrink-0 w-28 md:w-32 aspect-[3/4] rounded-xl overflow-hidden border-2 transition-all ${
                                                 isSelected
-                                                    ? 'border-[#C4956A] shadow-[0_0_16px_rgba(196,149,106,0.4)] scale-105 z-10'
+                                                    ? 'border-[#DCDCDC] shadow-[0_0_16px_rgba(196,149,106,0.4)] scale-105 z-10'
                                                     : 'border-[var(--color-border)] hover:border-white/30'
                                             }`}
                                         >
@@ -157,8 +157,8 @@ export default function BrandImages() {
                                                 loading="lazy"
                                             />
                                             {isSelected && (
-                                                <div className="absolute inset-0 bg-[#C4956A]/10 flex items-center justify-center">
-                                                    <div className="bg-[#C4956A] rounded-full p-1 shadow-lg">
+                                                <div className="absolute inset-0 bg-[#DCDCDC]/10 flex items-center justify-center">
+                                                    <div className="bg-[#DCDCDC] rounded-full p-1 shadow-lg">
                                                         <CheckCircle2 size={18} className="text-black" />
                                                     </div>
                                                 </div>

@@ -70,7 +70,7 @@ export default function Customers() {
     if (loading && customers.length === 0) {
         return (
             <div className="admin-loading">
-                <RefreshCw className="animate-spin text-[#C4956A] mb-4" size={48} />
+                <RefreshCw className="animate-spin text-[#DCDCDC] mb-4" size={48} />
                 <p>Cargando base de datos de clientes...</p>
             </div>
         )

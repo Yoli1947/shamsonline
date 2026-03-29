@@ -112,7 +112,7 @@ export default function Sizes() {
 
             {/* Crear Nueva */}
             <div className="admin-card">
-                <h3 style={{ fontFamily: 'Syncopate, sans-serif', fontSize: '1rem', fontWeight: 700, marginBottom: '1.5rem', marginTop: 0, color: '#C4956A' }}>Nueva Curva de Talles</h3>
+                <h3 style={{ fontFamily: 'Syncopate, sans-serif', fontSize: '1rem', fontWeight: 700, marginBottom: '1.5rem', marginTop: 0, color: '#DCDCDC' }}>Nueva Curva de Talles</h3>
                 <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '1rem', alignItems: 'end' }}>
                     <div className="form-group">
                         <label style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', display: 'block', color: '#999' }}>Nombre Referencia</label>

@@ -6,9 +6,9 @@ const PrivacyPolicy: React.FC = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text)]">
+        <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', color: '#000000' }}>
             {/* Header */}
-            <div className="border-b border-[var(--color-border)] px-6 py-5 flex items-center gap-4 sticky top-0 bg-[var(--color-background)]/95 backdrop-blur-sm z-50">
+            <div style={{ borderBottom: '1px solid #e5e5e5', padding: '20px 24px', display: 'flex', alignItems: 'center', gap: '16px', position: 'sticky', top: 0, backgroundColor: '#ffffff', zIndex: 50 }}>
                 <button
                     onClick={() => navigate(-1)}
                     className="flex items-center gap-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors text-xs font-black tracking-widest uppercase"
@@ -31,7 +31,7 @@ const PrivacyPolicy: React.FC = () => {
                     <p className="text-[var(--color-text-muted)] text-sm tracking-widest">Última actualización: Febrero 2026</p>
                 </div>
 
-                <div className="w-full h-px bg-white/10" />
+                <div style={{ width: '100%', height: '1px', backgroundColor: '#e5e5e5' }} />
 
                 {/* Sección 1 */}
                 <section className="space-y-4">
@@ -59,7 +59,7 @@ const PrivacyPolicy: React.FC = () => {
                             'Preferencias de navegación en el sitio',
                         ].map((item, i) => (
                             <li key={i} className="flex items-start gap-3">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#C4956A] mt-2 shrink-0" />
+                                <span style={{ width: '6px', height: '6px', backgroundColor: '#000', marginTop: '6px', flexShrink: 0, display: 'inline-block' }} />
                                 {item}
                             </li>
                         ))}
@@ -81,7 +81,7 @@ const PrivacyPolicy: React.FC = () => {
                             'Enviarte comunicaciones comerciales (solo con tu consentimiento)',
                         ].map((item, i) => (
                             <li key={i} className="flex items-start gap-3">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#C4956A] mt-2 shrink-0" />
+                                <span style={{ width: '6px', height: '6px', backgroundColor: '#000', marginTop: '6px', flexShrink: 0, display: 'inline-block' }} />
                                 {item}
                             </li>
                         ))}
@@ -109,7 +109,7 @@ const PrivacyPolicy: React.FC = () => {
                             'Autoridades fiscales o judiciales cuando la ley lo exija',
                         ].map((item, i) => (
                             <li key={i} className="flex items-start gap-3">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#C4956A] mt-2 shrink-0" />
+                                <span style={{ width: '6px', height: '6px', backgroundColor: '#000', marginTop: '6px', flexShrink: 0, display: 'inline-block' }} />
                                 {item}
                             </li>
                         ))}
@@ -140,7 +140,7 @@ const PrivacyPolicy: React.FC = () => {
                             'Mejorar el rendimiento y velocidad de carga del sitio',
                         ].map((item, i) => (
                             <li key={i} className="flex items-start gap-3">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#C4956A] mt-2 shrink-0" />
+                                <span style={{ width: '6px', height: '6px', backgroundColor: '#000', marginTop: '6px', flexShrink: 0, display: 'inline-block' }} />
                                 {item}
                             </li>
                         ))}
@@ -173,7 +173,7 @@ const PrivacyPolicy: React.FC = () => {
                             'Revocar tu consentimiento en cualquier momento',
                         ].map((item, i) => (
                             <li key={i} className="flex items-start gap-3">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#C4956A] mt-2 shrink-0" />
+                                <span style={{ width: '6px', height: '6px', backgroundColor: '#000', marginTop: '6px', flexShrink: 0, display: 'inline-block' }} />
                                 {item}
                             </li>
                         ))}
@@ -202,7 +202,7 @@ const PrivacyPolicy: React.FC = () => {
                     </p>
                 </section>
 
-                <div className="w-full h-px bg-white/10" />
+                <div style={{ width: '100%', height: '1px', backgroundColor: '#e5e5e5' }} />
 
                 {/* Footer de la página */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-8">
@@ -212,7 +212,7 @@ const PrivacyPolicy: React.FC = () => {
                     </div>
                     <button
                         onClick={() => navigate('/')}
-                        className="text-[10px] font-black tracking-[0.4em] text-black uppercase hover:text-[var(--color-text)] transition-colors border border-[#C4956A]/30 px-6 py-3 rounded-full hover:bg-[#C4956A] hover:border-[#C4956A]"
+                        style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#000', textTransform: 'uppercase', border: '1px solid #e5e5e5', padding: '12px 24px', backgroundColor: '#fff', cursor: 'pointer', display: 'inline-block' }}
                     >
                         Ir a la tienda
                     </button>

@@ -154,7 +154,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="fixed md:absolute top-4 right-4 z-20 bg-[var(--color-background)]/40 hover:bg-[var(--color-background-alt)] backdrop-blur-md border border-[#C4956A]/20 text-[var(--color-text)] p-2 rounded-none transition-all"
+                    className="fixed md:absolute top-4 right-4 z-20 bg-[var(--color-background)]/40 hover:bg-[var(--color-background-alt)] backdrop-blur-md border border-[#DCDCDC]/20 text-[var(--color-text)] p-2 rounded-none transition-all"
                 >
                     <X size={20} />
                 </button>
@@ -306,7 +306,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                 <div className="w-full md:w-[40%] p-6 md:p-8 md:overflow-y-auto flex flex-col bg-[var(--color-background)] min-h-[50vh]">
                     <div className="flex-1">
                         <div className="mb-1">
-                            <span className="text-[#C4956A] uppercase tracking-[0.4em] text-[8px] font-black">{product.brand}</span>
+                            <span className="text-[var(--color-text-muted)] uppercase tracking-[0.4em] text-[8px] font-black">{product.brand}</span>
                         </div>
                         <div className="flex justify-between items-start mb-4">
                             <h2 className="font-heading text-xl md:text-2xl font-bold tracking-tighter text-[var(--color-text)] uppercase leading-none break-words pr-4">{product.name}</h2>
@@ -320,10 +320,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
 
                         <div className="mb-4 space-y-2">
                             <div className="flex items-center gap-4">
-                                <span className="text-xl md:text-2xl font-black text-[var(--color-text)] tracking-tighter">
+                                <span className="text-lg md:text-xl font-black text-[var(--color-text)] tracking-tighter">
                                     ${(product.originalPrice > product.price ? product.originalPrice : (product.price || 0)).toLocaleString()}
                                 </span>
-                                <span className="text-[11px] font-black tracking-widest text-[var(--color-text-muted)] uppercase mt-auto pb-1.5">Crédito / Débito</span>
+                                <span className="text-[10px] font-black tracking-widest text-[var(--color-text-muted)] uppercase mt-auto pb-1">Crédito / Débito</span>
                             </div>
                             {(() => {
                                 const creditPrice = product.originalPrice > product.price ? product.originalPrice : (product.price || 0);
@@ -331,11 +331,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                                 const discountPct = Math.round((creditPrice - transferPrice) / creditPrice * 100);
                                 return (
                                     <div className="flex items-center gap-3">
-                                        <span className="text-2xl md:text-3xl font-black text-emerald-400 tracking-tighter">
+                                        <span className="text-xl md:text-2xl font-black text-[var(--color-text)] tracking-tighter">
                                             ${transferPrice.toLocaleString()}
                                         </span>
-                                        <span className="text-[11px] font-black tracking-widest text-emerald-500 uppercase mt-auto pb-1.5">Transferencia</span>
-                                        <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-1 rounded-none text-[10px] font-black tracking-widest mt-auto mb-1.5">-{discountPct}%</span>
+                                        <span className="text-[10px] font-black tracking-widest text-[var(--color-text-muted)] uppercase mt-auto pb-1">Transferencia</span>
+                                        <span className="bg-black/5 text-[var(--color-text)] border border-black/10 px-2 py-1 rounded-none text-[9px] font-black tracking-widest mt-auto mb-1">-{discountPct}%</span>
                                     </div>
                                 );
                             })()}
@@ -345,10 +345,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                             href={`https://wa.me/5493412175258?text=${encodeURIComponent(`Hola! Quería consultar por el pago vía transferencia de: ${product.name}`)}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 mb-6 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-none hover:bg-emerald-500/20 transition-all group"
+                            className="inline-flex items-center gap-2 mb-6 px-4 py-2 bg-black/5 border border-black/10 rounded-none hover:bg-black/10 transition-all group"
                         >
-                            <span className="w-2 h-2 bg-emerald-500 rounded-none group-hover:animate-pulse" />
-                            <span className="text-[10px] font-black tracking-widest text-emerald-400 uppercase">Consultar transferencia por WhatsApp</span>
+                            <span className="w-2 h-2 bg-black rounded-none" />
+                            <span className="text-[10px] font-black tracking-widest text-[var(--color-text)] uppercase">Consultar transferencia por WhatsApp</span>
                         </a>
 
                         <div className="h-px bg-white/5 w-full mb-4" />
@@ -366,7 +366,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                         {selectedColor && (
                             <div className="mb-6 flex items-center gap-3">
                                 <span className="text-[10px] font-black tracking-[0.3em] text-[var(--color-text-muted)] uppercase">COLOR SELECCIONADO:</span>
-                                <span className="text-[#C4956A] text-xs font-black uppercase tracking-[0.2em] bg-[var(--color-background-alt)] px-3 py-1.5 rounded-none border border-[var(--color-border)]">
+                                <span className="text-[#DCDCDC] text-xs font-black uppercase tracking-[0.2em] bg-[var(--color-background-alt)] px-3 py-1.5 rounded-none border border-[var(--color-border)]">
                                     {selectedColor}
                                 </span>
                             </div>
@@ -376,7 +376,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                         {/* {colorOptions.length > 0 && (
                             <div className="mb-8">
                                 <label className="text-[10px] font-black tracking-[0.2em] text-zinc-500 uppercase block mb-4">
-                                    COLOR: <span className="text-[#C4956A] ml-2">{selectedColor || 'SELECCIONAR'}</span>
+                                    COLOR: <span className="text-[#DCDCDC] ml-2">{selectedColor || 'SELECCIONAR'}</span>
                                 </label>
                                 <div className="flex flex-wrap gap-3">
                                     {colorOptions.map((opt, idx) => {
@@ -384,7 +384,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                                             <button
                                                 key={idx}
                                                 onClick={() => setSelectedColor(opt.name)}
-                                                className={`w-10 h-10 rounded-none border-2 p-1 transition-all duration-300 ${selectedColor === opt.name ? 'border-[#C4956A] scale-110 shadow-[0_0_15px_rgba(196,149,106,0.4)]' : 'border-white/10 hover:border-white/30 hover:scale-105'}`}
+                                                className={`w-10 h-10 rounded-none border-2 p-1 transition-all duration-300 ${selectedColor === opt.name ? 'border-[#DCDCDC] scale-110 shadow-[0_0_15px_rgba(196,149,106,0.4)]' : 'border-white/10 hover:border-white/30 hover:scale-105'}`}
                                                 title={opt.name}
                                             >
                                                 <div
@@ -401,7 +401,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                          {/* Size Selection */}
                         {sizes.length > 0 && (
                             <div className="mb-8">
-                                <label className="text-[11px] font-black tracking-[0.2em] text-[#C4956A] uppercase block mb-4">
+                                <label className="text-[11px] font-black tracking-[0.2em] text-[var(--color-text-muted)] uppercase block mb-4">
                                     SELECCIONAR MI TALLE:
                                 </label>
                                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
@@ -409,7 +409,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                                         <button
                                             key={idx}
                                             onClick={() => setSelectedSize(String(size))}
-                                            className={`h-14 flex items-center justify-center rounded-none border-2 text-[14px] font-black tracking-widest transition-all duration-300 ${selectedSize === String(size) ? 'bg-[#C4956A] text-white border-[#C4956A] scale-105' : 'bg-[var(--color-background-alt)] text-[var(--color-text)] border-[var(--color-border)] hover:border-[#C4956A] hover:text-[#C4956A]'}`}
+                                            className={`h-14 flex items-center justify-center rounded-none border-2 text-[14px] font-black tracking-widest transition-all duration-300 ${selectedSize === String(size) ? 'bg-[#DCDCDC] text-white border-[#DCDCDC] scale-105' : 'bg-[var(--color-background-alt)] text-[var(--color-text)] border-[var(--color-border)] hover:border-[#DCDCDC] hover:text-[#DCDCDC]'}`}
                                         >
                                             {size}
                                         </button>
@@ -433,10 +433,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                             className={`w-full py-4 rounded-none flex items-center justify-center gap-3 font-black tracking-[0.2em] text-[10px] uppercase transition-all shadow-xl ${isOutOfStock
                                 ? 'bg-[var(--color-background-alt)] text-[var(--color-text-muted)] cursor-not-allowed'
                                 : added
-                                    ? 'bg-emerald-500 text-white'
+                                    ? 'bg-black text-white'
                                     : (sizes.length > 0 && !selectedSize)
                                         ? 'bg-[var(--color-background-alt)] text-[var(--color-text-muted)] cursor-not-allowed'
-                                        : 'bg-[#C4956A] text-white hover:bg-[#2C1810] active:scale-[0.98]'
+                                        : 'bg-[#DCDCDC] text-white hover:bg-[#2C1810] active:scale-[0.98]'
                                 }`}
                         >
                             {isOutOfStock ? (

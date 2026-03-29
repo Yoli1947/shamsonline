@@ -53,7 +53,7 @@ const SortableRow = ({ brand, index, onEdit, onDelete, onToggleActive, isSearchA
                     <div
                         {...attributes}
                         {...listeners}
-                        className="cursor-grab active:cursor-grabbing p-2 text-[var(--color-text-muted)] hover:text-[#C4956A] transition-colors"
+                        className="cursor-grab active:cursor-grabbing p-2 text-[var(--color-text-muted)] hover:text-[#DCDCDC] transition-colors"
                     >
                         <GripVertical size={20} />
                     </div>
@@ -81,7 +81,7 @@ const SortableRow = ({ brand, index, onEdit, onDelete, onToggleActive, isSearchA
             </td>
             <td className="p-4">
                 <span
-                    className="font-bold text-lg cursor-pointer hover:text-[#C4956A] transition-colors"
+                    className="font-bold text-lg cursor-pointer hover:text-[#DCDCDC] transition-colors"
                     onClick={() => onEdit(brand)}
                 >
                     {brand.name}
@@ -104,7 +104,7 @@ const SortableRow = ({ brand, index, onEdit, onDelete, onToggleActive, isSearchA
                     </button>
                     <button
                         onClick={() => onEdit(brand)}
-                        className="p-2 text-[var(--color-text-muted)] hover:text-[#C4956A] hover:bg-[#C4956A]/10 rounded-lg transition-all"
+                        className="p-2 text-[var(--color-text-muted)] hover:text-[#DCDCDC] hover:bg-[#DCDCDC]/10 rounded-lg transition-all"
                         title="Editar"
                     >
                         <Save size={18} />
@@ -204,7 +204,11 @@ const Brands = () => {
 
     const handleSave = async (e) => {
         e.preventDefault();
-        if (!formName.trim()) return;
+        let finalName = formName.trim();
+        const upp = finalName.toUpperCase();
+        if (upp.includes('PERRAMUS') && (upp.includes('INTEX') || upp.includes('INDITEX') || upp.includes('ACACIA'))) {
+            finalName = 'PERRAMUS';
+        }
 
         setSaving(true);
         setStatus(null);
@@ -220,7 +224,7 @@ const Brands = () => {
                 cardImageUrl = await uploadImage(selectedCardFile, 'products');
             }
 
-            const slug = formName.toLowerCase()
+            const slug = finalName.toLowerCase()
                 .replace(/[áàâä]/g, 'a').replace(/[éèêë]/g, 'e')
                 .replace(/[íìîï]/g, 'i').replace(/[óòôö]/g, 'o')
                 .replace(/[úùûü]/g, 'u').replace(/ñ/g, 'n')
@@ -229,13 +233,13 @@ const Brands = () => {
             if (editingBrand) {
                 // Al editar: solo actualizamos name e imágenes, NO el slug (para evitar conflictos)
                 const updatePayload = {
-                    name: formName,
+                    name: finalName,
                     logo_url: logoUrl,
                     card_image_url: cardImageUrl,
                     is_active: true
                 };
                 // Solo actualizar slug si el nombre realmente cambió
-                if (formName !== editingBrand.name) {
+                if (finalName !== editingBrand.name) {
                     updatePayload.slug = slug;
                 }
                 const { error } = await supabase
@@ -249,7 +253,7 @@ const Brands = () => {
                 const { error } = await supabase
                     .from('brands')
                     .insert({
-                        name: formName,
+                        name: finalName,
                         logo_url: logoUrl,
                         card_image_url: cardImageUrl,
                         slug: slug,
@@ -263,7 +267,7 @@ const Brands = () => {
                         const { error: error2 } = await supabase
                             .from('brands')
                             .insert({
-                                name: formName,
+                                name: finalName,
                                 logo_url: logoUrl,
                                 card_image_url: cardImageUrl,
                                 slug: uniqueSlug,
@@ -342,7 +346,7 @@ const Brands = () => {
                 <h1 className="text-3xl font-bold">Administrar Marcas</h1>
                 <button
                     onClick={() => handleOpenModal()}
-                    className="bg-[#C4956A] text-black px-6 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-[#8B6F5E] transition-all transform hover:scale-105"
+                    className="bg-[#DCDCDC] text-black px-6 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-[#8B6F5E] transition-all transform hover:scale-105"
                 >
                     <Plus size={20} /> Nueva Marca
                 </button>
@@ -354,7 +358,7 @@ const Brands = () => {
                     <input
                         type="text"
                         placeholder="Buscar marca..."
-                        className="w-full pl-10 p-2 border rounded-lg bg-white border-[var(--color-border)] text-[var(--color-text)] focus:border-[#C4956A] outline-none"
+                        className="w-full pl-10 p-2 border rounded-lg bg-white border-[var(--color-border)] text-[var(--color-text)] focus:border-[#DCDCDC] outline-none"
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                     />
@@ -365,7 +369,7 @@ const Brands = () => {
             </div>
 
             {loading ? (
-                <div className="flex justify-center p-12"><Loader className="animate-spin text-[#C4956A]" size={48} /></div>
+                <div className="flex justify-center p-12"><Loader className="animate-spin text-[#DCDCDC]" size={48} /></div>
             ) : (
                 <div className="bg-white rounded-xl overflow-hidden border border-[var(--color-border)] shadow-xl">
                     <DndContext
@@ -456,14 +460,14 @@ const Brands = () => {
                                 <div className="modal__field">
                                     <label className="text-[var(--color-text-muted)] font-bold uppercase text-[10px] tracking-widest mb-2 block">Logo (Icono Blanco)</label>
                                     <div
-                                        className="relative group cursor-pointer aspect-video bg-zinc-100 rounded-xl border-2 border-dashed border-zinc-300 overflow-hidden flex flex-col items-center justify-center hover:border-[#C4956A]/50 transition-all"
+                                        className="relative group cursor-pointer aspect-video bg-zinc-100 rounded-xl border-2 border-dashed border-zinc-300 overflow-hidden flex flex-col items-center justify-center hover:border-[#DCDCDC]/50 transition-all"
                                         onClick={() => fileInputRef.current?.click()}
                                     >
                                         {previewUrl ? (
                                             <img src={previewUrl} alt="Preview" className="w-full h-full object-contain p-4" />
                                         ) : (
                                             <>
-                                                <Upload className="text-[var(--color-text-muted)] mb-2 group-hover:text-[#C4956A] transition-colors" size={32} />
+                                                <Upload className="text-[var(--color-text-muted)] mb-2 group-hover:text-[#DCDCDC] transition-colors" size={32} />
                                                 <span className="text-xs text-[var(--color-text-muted)] font-bold uppercase tracking-widest">Click para subir logo</span>
                                             </>
                                         )}
@@ -506,14 +510,14 @@ const Brands = () => {
                                 <div className="modal__field">
                                     <label className="text-[var(--color-text-muted)] font-bold uppercase text-[10px] tracking-widest mb-2 block">Foto de Portada (Carta)</label>
                                     <div
-                                        className="relative group cursor-pointer aspect-video bg-zinc-100 rounded-xl border-2 border-dashed border-zinc-300 overflow-hidden flex flex-col items-center justify-center hover:border-[#C4956A]/50 transition-all"
+                                        className="relative group cursor-pointer aspect-video bg-zinc-100 rounded-xl border-2 border-dashed border-zinc-300 overflow-hidden flex flex-col items-center justify-center hover:border-[#DCDCDC]/50 transition-all"
                                         onClick={() => cardInputRef.current?.click()}
                                     >
                                         {cardPreviewUrl ? (
                                             <img src={cardPreviewUrl} alt="Preview" className="w-full h-full object-cover" />
                                         ) : (
                                             <>
-                                                <Upload className="text-[var(--color-text-muted)] mb-2 group-hover:text-[#C4956A] transition-colors" size={32} />
+                                                <Upload className="text-[var(--color-text-muted)] mb-2 group-hover:text-[#DCDCDC] transition-colors" size={32} />
                                                 <span className="text-xs text-[var(--color-text-muted)] font-bold uppercase tracking-widest text-center">Click para subir foto de fondo</span>
                                             </>
                                         )}
@@ -559,7 +563,7 @@ const Brands = () => {
                                         type="text"
                                         value={formName}
                                         onChange={(e) => setFormName(e.target.value)}
-                                        className="w-full border border-zinc-200 rounded-xl p-3 text-black focus:border-[#C4956A] outline-none font-bold bg-white"
+                                        className="w-full border border-zinc-200 rounded-xl p-3 text-black focus:border-[#DCDCDC] outline-none font-bold bg-white"
                                         placeholder="Ej: PERRAMUS"
                                         required
                                         autoFocus
@@ -570,7 +574,7 @@ const Brands = () => {
                                     <button
                                         type="submit"
                                         disabled={saving}
-                                        className="w-full bg-[#C4956A] text-black py-4 rounded-xl font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-[#8B6F5E] disabled:opacity-50 transition-all transform active:scale-95 shadow-[0_10px_20px_rgba(196,149,106,0.2)]"
+                                        className="w-full bg-[#DCDCDC] text-black py-4 rounded-xl font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-[#8B6F5E] disabled:opacity-50 transition-all transform active:scale-95 shadow-[0_10px_20px_rgba(196,149,106,0.2)]"
                                     >
                                         {saving ? (
                                             <>

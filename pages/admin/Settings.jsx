@@ -67,8 +67,8 @@ export default function Settings() {
     return (
         <div className="admin-settings p-4 md:p-8">
             <header className="flex items-center gap-4 mb-10">
-                <div className="p-3 rounded-2xl bg-[#C4956A]/10 border border-[#C4956A]/20">
-                    <SettingsIcon className="text-[#C4956A]" size={32} />
+                <div className="p-3 rounded-2xl bg-[#DCDCDC]/10 border border-[#DCDCDC]/20">
+                    <SettingsIcon className="text-[#DCDCDC]" size={32} />
                 </div>
                 <div>
                     <h1 className="admin-title !mb-1 text-2xl font-black uppercase tracking-widest text-[var(--color-text)]">Configuración del Sitio</h1>
@@ -80,7 +80,7 @@ export default function Settings() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div className="admin-card glass p-8 !bg-[#0A0A0A]/80 backdrop-blur-xl border-[var(--color-border)]">
                         <div className="flex items-center gap-3 mb-8">
-                            <Percent className="text-[#C4956A]" size={20} />
+                            <Percent className="text-[#DCDCDC]" size={20} />
                             <h2 className="text-lg font-bold text-[var(--color-text)] uppercase tracking-widest">Descuentos y Pagos</h2>
                         </div>
                         <div className="space-y-3">
@@ -94,7 +94,7 @@ export default function Settings() {
                                     max="100"
                                     value={settings.transfer_discount}
                                     onChange={(e) => setSettings({ ...settings, transfer_discount: Number(e.target.value) })}
-                                    className="admin-input !h-16 !text-xl !font-bold !tracking-widest transition-all group-hover:border-[#C4956A]/40"
+                                    className="admin-input !h-16 !text-xl !font-bold !tracking-widest transition-all group-hover:border-[#DCDCDC]/40"
                                 />
                                 <div className="absolute right-6 top-1/2 -translate-y-1/2 text-zinc-600 font-bold">%</div>
                             </div>
@@ -106,7 +106,7 @@ export default function Settings() {
 
                     <div className="admin-card glass p-8 !bg-[#0A0A0A]/80 backdrop-blur-xl border-[var(--color-border)]">
                         <div className="flex items-center gap-3 mb-8">
-                            <Landmark className="text-[#C4956A]" size={20} />
+                            <Landmark className="text-[#DCDCDC]" size={20} />
                             <h2 className="text-lg font-bold text-[var(--color-text)] uppercase tracking-widest">Datos Bancarios (Transferencia)</h2>
                         </div>
                         <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider mb-6 leading-relaxed">

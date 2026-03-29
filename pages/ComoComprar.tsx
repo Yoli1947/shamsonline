@@ -51,63 +51,63 @@ const ComoComprar: React.FC = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text)] selection:bg-black selection:text-white">
+        <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', color: '#000000' }}>
             {/* Header */}
-            <div className="border-b border-[var(--color-border)] px-6 py-5 flex items-center gap-4 sticky top-0 bg-[var(--color-background)]/95 backdrop-blur-sm z-50">
+            <div style={{ borderBottom: '1px solid #e5e5e5', padding: '20px 24px', display: 'flex', alignItems: 'center', gap: '16px', position: 'sticky', top: 0, backgroundColor: '#ffffff', zIndex: 50 }}>
                 <button
                     onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors text-xs font-black tracking-widest uppercase"
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#666', background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 900, letterSpacing: '0.3em', textTransform: 'uppercase' }}
                 >
                     <ArrowLeft size={16} />
                     Volver
                 </button>
-                <span className="text-[var(--color-text)]/20">|</span>
-                <span className="text-[10px] font-black tracking-[0.4em] text-black uppercase">Shams — Guía de Compra</span>
+                <span style={{ color: '#ccc' }}>|</span>
+                <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#000', textTransform: 'uppercase' }}>Shams — Guía de Compra</span>
             </div>
 
-            <div className="max-w-3xl mx-auto px-6 py-16">
+            <div style={{ maxWidth: '768px', margin: '0 auto', padding: '64px 24px' }}>
                 {/* Título */}
-                <div className="text-center mb-20">
-                    <p className="text-black text-[10px] font-black tracking-[0.5em] uppercase mb-4">Paso a paso</p>
-                    <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-6">
-                        Cómo<br /><span className="text-black italic">Comprar</span>
+                <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+                    <p style={{ color: '#999', fontSize: '10px', fontWeight: 900, letterSpacing: '0.5em', textTransform: 'uppercase', marginBottom: '16px' }}>Paso a paso</p>
+                    <h1 style={{ fontSize: '48px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.02em', marginBottom: '24px', color: '#000' }}>
+                        Cómo<br /><span style={{ fontStyle: 'italic' }}>Comprar</span>
                     </h1>
-                    <p className="text-[var(--color-text-muted)] text-xs tracking-[0.2em] font-medium leading-relaxed max-w-md mx-auto uppercase">
+                    <p style={{ color: '#666', fontSize: '11px', letterSpacing: '0.2em', lineHeight: 1.8, textTransform: 'uppercase' }}>
                         Seguí estos simples pasos para realizar tu compra en Shams.
                     </p>
                 </div>
 
                 {/* Steps */}
-                <div className="relative">
+                <div style={{ position: 'relative' }}>
                     {/* Línea vertical conectora */}
-                    <div className="absolute left-8 top-0 bottom-0 w-px bg-gradient-to-b from-[#C4956A]/40 via-[#C4956A]/10 to-transparent hidden md:block" />
+                    <div style={{ position: 'absolute', left: '32px', top: 0, bottom: 0, width: '1px', backgroundColor: '#e5e5e5', display: 'block' }} />
 
-                    <div className="space-y-6">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                         {steps.map((step, index) => {
                             const Icon = step.icon;
                             const isRight = index % 2 !== 0;
                             return (
                                 <div
                                     key={step.number}
-                                    className={`flex items-start gap-6 md:gap-10 ${isRight ? 'md:flex-row-reverse' : ''}`}
+                                    style={{ display: 'flex', alignItems: 'flex-start', gap: '40px', flexDirection: isRight ? 'row-reverse' : 'row' }}
                                 >
-                                    {/* Ícono circular */}
-                                    <div className="relative shrink-0">
-                                        <div className="w-16 h-16 rounded-full bg-[#C4956A]/10 border border-[#C4956A]/30 flex items-center justify-center relative z-10 shadow-[0_0_20px_rgba(196,149,106,0.1)]">
-                                            <Icon size={22} className="text-black" strokeWidth={1.5} />
+                                    {/* Ícono */}
+                                    <div style={{ position: 'relative', flexShrink: 0 }}>
+                                        <div style={{ width: '64px', height: '64px', backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 10 }}>
+                                            <Icon size={22} color="#000" strokeWidth={1.5} />
                                         </div>
-                                        <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#C4956A] text-black text-[9px] font-black flex items-center justify-center">
+                                        <span style={{ position: 'absolute', top: '-8px', right: '-8px', width: '22px', height: '22px', backgroundColor: '#000', color: '#fff', fontSize: '9px', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                             {index + 1}
                                         </span>
                                     </div>
 
                                     {/* Texto */}
-                                    <div className={`flex-1 pb-8 ${isRight ? 'md:text-right' : ''}`}>
-                                        <p className="text-[9px] font-black tracking-[0.5em] text-black/50 uppercase mb-1">{step.number}</p>
-                                        <h3 className="text-lg md:text-xl font-black uppercase tracking-tight text-[var(--color-text)] mb-2">
+                                    <div style={{ flex: 1, paddingBottom: '32px', textAlign: isRight ? 'right' : 'left' }}>
+                                        <p style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '0.5em', color: '#999', textTransform: 'uppercase', marginBottom: '4px' }}>{step.number}</p>
+                                        <h3 style={{ fontSize: '18px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.01em', color: '#000', marginBottom: '8px' }}>
                                             {step.title}
                                         </h3>
-                                        <p className="text-[var(--color-text-muted)] text-[11px] md:text-xs leading-relaxed tracking-wider font-medium max-w-sm">
+                                        <p style={{ color: '#666', fontSize: '12px', lineHeight: 1.7, letterSpacing: '0.05em', maxWidth: '320px' }}>
                                             {step.description}
                                         </p>
                                     </div>
@@ -118,22 +118,22 @@ const ComoComprar: React.FC = () => {
                 </div>
 
                 {/* CTA */}
-                <div className="mt-20 text-center p-10 rounded-3xl bg-[#C4956A]/5 border border-[#C4956A]/20">
-                    <p className="text-[10px] font-black tracking-[0.5em] text-black uppercase mb-3">¿Tenés dudas?</p>
-                    <p className="text-[var(--color-text-muted)] text-xs tracking-[0.2em] uppercase mb-6">Escribinos por WhatsApp y te ayudamos</p>
+                <div style={{ marginTop: '80px', textAlign: 'center', padding: '40px', border: '1px solid #e5e5e5', backgroundColor: '#fafafa' }}>
+                    <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.5em', color: '#000', textTransform: 'uppercase', marginBottom: '12px' }}>¿Tenés dudas?</p>
+                    <p style={{ color: '#666', fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '24px' }}>Escribinos por WhatsApp y te ayudamos</p>
                     <a
                         href="https://wa.me/5493412175258"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-block px-10 py-4 rounded-full bg-[#C4956A] text-black font-black text-[10px] tracking-[0.4em] uppercase hover:bg-white transition-all shadow-[0_10px_30px_rgba(196,149,106,0.3)]"
+                        style={{ display: 'inline-block', padding: '16px 40px', backgroundColor: '#000', color: '#fff', fontWeight: 900, fontSize: '10px', letterSpacing: '0.4em', textTransform: 'uppercase', textDecoration: 'none' }}
                     >
                         CONSULTAR POR WHATSAPP
                     </a>
                 </div>
 
-                <div className="w-full h-px bg-white/10 mt-16 mb-10" />
-                <div className="text-center opacity-40">
-                    <p className="text-[10px] font-black tracking-[0.4em] text-[var(--color-text-muted)] uppercase">Shams — Rosario, Santa Fe, Argentina</p>
+                <div style={{ width: '100%', height: '1px', backgroundColor: '#e5e5e5', margin: '64px 0 40px' }} />
+                <div style={{ textAlign: 'center', opacity: 0.4 }}>
+                    <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#666', textTransform: 'uppercase' }}>Shams — Rosario, Santa Fe, Argentina</p>
                 </div>
             </div>
         </div>

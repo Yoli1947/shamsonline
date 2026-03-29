@@ -68,7 +68,7 @@ const GiftCards: React.FC = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-3xl font-black tracking-tighter text-[var(--color-text)] flex items-center gap-3">
-                        <Gift className="text-[#C4956A]" />
+                        <Gift className="text-[#DCDCDC]" />
                         GESTIÓN DE GIFT CARDS
                     </h2>
                     <p className="text-[var(--color-text-muted)] text-sm tracking-widest uppercase mt-1">Administra y valida tarjetas de regalo virtuales</p>
@@ -82,7 +82,7 @@ const GiftCards: React.FC = () => {
                             placeholder="Buscar código o nombre..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="bg-white0 border border-[var(--color-border)] rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-[#C4956A] w-64 text-[var(--color-text)]"
+                            className="bg-white0 border border-[var(--color-border)] rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-[#DCDCDC] w-64 text-[var(--color-text)]"
                         />
                     </div>
                 </div>
@@ -124,7 +124,7 @@ const GiftCards: React.FC = () => {
                             {filteredCards.map((gc) => (
                                 <tr key={gc.id} className="hover:bg-white/[0.02] transition-colors group">
                                     <td className="px-6 py-4">
-                                        <span className="font-mono text-[#C4956A] font-black tracking-wider text-sm">{gc.code}</span>
+                                        <span className="font-mono text-[#DCDCDC] font-black tracking-wider text-sm">{gc.code}</span>
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col">

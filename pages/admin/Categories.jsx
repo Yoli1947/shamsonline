@@ -216,7 +216,7 @@ export default function Categories() {
     const renderCategoryGroup = (title, list, groupSubTab) => (
         <div className="categories-admin__group" style={{ marginBottom: '3rem' }}>
             <div className="categories-admin__section-header" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
-                <h2 style={{ fontSize: '1.25rem', color: '#C4956A' }}>{title} ({list.length})</h2>
+                <h2 style={{ fontSize: '1.25rem', color: '#DCDCDC' }}>{title} ({list.length})</h2>
                 <button
                     className="btn btn-primary"
                     onClick={() => {

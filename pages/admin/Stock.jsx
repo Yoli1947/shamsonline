@@ -388,7 +388,7 @@ export default function Stock() {
                     let excelGender = (row['GENERO'] || row['Género'] || row.gender || '').toString().trim().toUpperCase()
 
                     // Normalización de Perramus
-                    if (brandName.includes('PERRAMUS') && (brandName.includes('INTEX') || brandName.includes('INDITEX'))) {
+                    if (brandName.includes('PERRAMUS') && (brandName.includes('INTEX') || brandName.includes('INDITEX') || brandName.includes('ACACIA'))) {
                         brandName = 'PERRAMUS'
                     }
 
@@ -889,7 +889,7 @@ export default function Stock() {
                                 height: '32px',
                                 padding: '0 12px',
                                 fontSize: '10px',
-                                background: isFullscreen ? '#C4956A' : 'transparent',
+                                background: isFullscreen ? '#DCDCDC' : 'transparent',
                                 color: 'var(--color-text)'
                             }}
                             title={isFullscreen ? 'Salir de Pantalla Completa' : 'Ver en Pantalla Completa'}
@@ -1005,7 +1005,7 @@ CREATE POLICY "Full access for variants" ON product_variants FOR ALL TO authenti
                             padding: '0 12px',
                             borderRadius: '8px',
                             background: '#fff',
-                            border: '2px solid #C4956A', // Borde celeste para resaltar
+                            border: '2px solid #DCDCDC', // Borde celeste para resaltar
                             color: '#000',
                             minWidth: '130px',
                             fontWeight: 'bold'
@@ -1069,9 +1069,9 @@ CREATE POLICY "Full access for variants" ON product_variants FOR ALL TO authenti
                                     fontSize: '11px',
                                     fontWeight: '700',
                                     border: '1px solid',
-                                    borderColor: selectedSeasons.includes(s) ? '#C4956A' : 'rgba(255,255,255,0.1)',
-                                    background: selectedSeasons.includes(s) ? '#C4956A10' : 'transparent',
-                                    color: selectedSeasons.includes(s) ? '#C4956A' : '#666',
+                                    borderColor: selectedSeasons.includes(s) ? '#DCDCDC' : 'rgba(255,255,255,0.1)',
+                                    background: selectedSeasons.includes(s) ? '#DCDCDC10' : 'transparent',
+                                    color: selectedSeasons.includes(s) ? '#DCDCDC' : '#666',
                                     cursor: 'pointer',
                                     transition: 'all 0.2s',
                                     textTransform: 'uppercase',
@@ -1155,7 +1155,7 @@ CREATE POLICY "Full access for variants" ON product_variants FOR ALL TO authenti
                                                 <td style={{ padding: '2px 4px' }}>
                                                     <input
                                                         className="stock-input"
-                                                        style={{ width: '100%', textAlign: 'left', height: '22px', fontSize: '10px', color: '#C4956A' }}
+                                                        style={{ width: '100%', textAlign: 'left', height: '22px', fontSize: '10px', color: '#DCDCDC' }}
                                                         value={product.provider_sku || ''}
                                                         onChange={(e) => handleUpdateProduct(product.id, 'provider_sku', e.target.value)}
                                                     />
@@ -1183,7 +1183,7 @@ CREATE POLICY "Full access for variants" ON product_variants FOR ALL TO authenti
                                                     <input
                                                         type="number"
                                                         className="stock-input"
-                                                        style={{ width: '100%', textAlign: 'right', fontWeight: 700, color: '#C4956A', height: '22px', fontSize: '10px' }}
+                                                        style={{ width: '100%', textAlign: 'right', fontWeight: 700, color: '#DCDCDC', height: '22px', fontSize: '10px' }}
                                                         value={product.price || 0}
                                                         onChange={(e) => handleUpdateProduct(product.id, 'price', e.target.value)}
                                                     />
@@ -1200,7 +1200,7 @@ CREATE POLICY "Full access for variants" ON product_variants FOR ALL TO authenti
                                                 {color.substring(0, 10)}
                                             </div>
                                         </td>
-                                        <td style={{ textAlign: 'center', color: '#C4956A', fontWeight: 700, fontSize: '10px' }}>{product.size_type || '-'}</td>
+                                        <td style={{ textAlign: 'center', color: '#DCDCDC', fontWeight: 700, fontSize: '10px' }}>{product.size_type || '-'}</td>
 
                                         {[...Array(12).keys()].map(i => {
                                             const sizeName = (sizeType >= 1 && sizeType <= 8) ? GLOBAL_SIZE_HEADERS[sizeType - 1][i] : null;

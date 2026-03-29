@@ -34,8 +34,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemov
         {/* Header */}
         <div className="p-8 border-b border-[var(--color-border)] flex items-center justify-between bg-[var(--color-background-alt)] backdrop-blur-xl">
           <div className="flex items-center gap-4">
-            <div className="h-10 w-10 rounded-none bg-[#C4956A]/10 flex items-center justify-center border border-[#C4956A]/20">
-              <ShoppingBag size={20} className="text-[#C4956A]" />
+            <div className="h-10 w-10 rounded-none bg-black/5 flex items-center justify-center border border-black/10">
+              <ShoppingBag size={20} className="text-[var(--color-text-muted)]" />
             </div>
             <h2 className="font-heading text-lg font-bold tracking-[0.2em] text-[var(--color-text)] uppercase">Tu Carrito</h2>
           </div>
@@ -50,7 +50,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemov
             <div className="h-full flex flex-col items-center justify-center text-center px-8">
               <div className="h-24 w-24 rounded-none bg-[var(--color-background-alt)] flex items-center justify-center mb-8 border border-[var(--color-border)] relative">
                 <ShoppingBag size={40} className="text-[var(--color-text-muted)]/30" />
-                <div className="absolute -top-2 -right-2 w-6 h-6 bg-[#C4956A] rounded-none blur-sm opacity-50" />
+                <div className="absolute -top-2 -right-2 w-6 h-6 bg-black rounded-none blur-sm opacity-10" />
               </div>
               <p className="text-[var(--color-text-muted)] text-sm font-medium tracking-widest leading-relaxed uppercase opacity-60">Tu selección está vacía</p>
               <button
@@ -58,7 +58,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemov
                   onClose();
                   navigate('/#new');
                 }}
-                className="mt-10 px-8 py-3 bg-[#2C1810] text-white font-black text-[10px] tracking-[0.4em] rounded-none hover:bg-[#C4956A] hover:scale-105 transition-all uppercase"
+                className="mt-10 px-8 py-3 bg-black text-white font-black text-[10px] tracking-[0.4em] rounded-none hover:bg-zinc-700 hover:scale-105 transition-all uppercase"
               >
                 Explorar Colección
               </button>
@@ -81,7 +81,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemov
                       </button>
                     </div>
                     <div className="flex items-center gap-4 mt-2">
-                      <p className="text-[9px] text-[#C4956A] font-black uppercase tracking-[0.2em]">{item.brand}</p>
+                      <p className="text-[9px] text-[var(--color-text-muted)] font-black uppercase tracking-[0.2em]">{item.brand}</p>
                       {(item.selectedSize || item.selectedColor || (item as any).isGiftCard) && (
                         <div className="flex flex-col gap-1 border-l border-[var(--color-border)] pl-3">
                           {(item as any).isGiftCard ? (
@@ -130,7 +130,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemov
                           <span className="text-[12px] text-[var(--color-text-muted)] font-bold tracking-wider">
                             ${((item.originalPrice || 0) * (item.quantity || 1)).toLocaleString()}
                           </span>
-                          <span className="text-[9px] bg-[#C4956A]/10 text-[#C4956A] border border-[#C4956A]/20 px-1.5 py-0.5 rounded-none font-black">
+                          <span className="text-[9px] bg-black/5 text-[var(--color-text-muted)] border border-black/10 px-1.5 py-0.5 rounded-none font-black">
                             -{Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)}%
                           </span>
                         </div>
@@ -156,14 +156,14 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemov
                 <span className="text-[var(--color-text)] text-3xl font-bold tracking-tighter">${(total || 0).toLocaleString()}</span>
               </div>
                {hasPromo && (
-                <span className="text-[10px] text-[#C4956A] font-bold tracking-widest text-center uppercase">+ 10% OFF CÓDIGO PROMO APLICADO</span>
+                <span className="text-[10px] text-[var(--color-text-muted)] font-bold tracking-widest text-center uppercase">+ 10% OFF CÓDIGO PROMO APLICADO</span>
               )}
             </div>
 
              <div className="flex flex-col gap-3">
               <button
                 onClick={onCheckout}
-                className="w-full bg-[#C4956A] text-white py-6 rounded-none font-black text-xs tracking-[0.4em] hover:brightness-110 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 active:scale-95 uppercase"
+                className="w-full bg-black text-white py-6 rounded-none font-black text-xs tracking-[0.4em] hover:bg-zinc-800 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 active:scale-95 uppercase"
               >
                 FINALIZAR COMPRA <ArrowRight size={20} />
               </button>

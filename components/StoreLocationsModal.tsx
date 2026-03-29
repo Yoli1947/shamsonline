@@ -63,44 +63,53 @@ const StoreLocationsModal: React.FC<StoreLocationsModalProps> = ({ isOpen, onClo
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+        <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(6px)' }} className="animate-in fade-in duration-300">
             <div className="absolute inset-0" onClick={onClose} />
-            <div className="relative w-full max-w-3xl bg-[#0a0a0a] border border-white/10 rounded-none overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,1)] animate-in zoom-in-95 duration-500 max-h-[92vh] flex flex-col">
+            <div style={{ position: 'relative', width: '100%', maxWidth: '768px', backgroundColor: '#ffffff', border: '1px solid #e0e0e0', overflow: 'hidden', boxShadow: '0 30px 80px rgba(0,0,0,0.2)', maxHeight: '92vh', display: 'flex', flexDirection: 'column' }} className="animate-in zoom-in-95 duration-500">
 
                 {/* Header */}
-                <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5 shrink-0">
+                <div style={{ padding: '24px', borderBottom: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff', flexShrink: 0 }}>
                     <div>
-                        <h2 className="text-white font-black uppercase tracking-[0.2em] text-lg">Encontrá tu local más cercano</h2>
-                        <p className="text-[#C4956A] text-[10px] font-bold uppercase tracking-[0.3em] opacity-90">Rosario, Santa Fe</p>
+                        <h2 style={{ color: '#000', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', fontSize: '16px' }}>Encontrá tu local más cercano</h2>
+                        <p style={{ color: '#666', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.3em', marginTop: '4px' }}>Rosario, Santa Fe</p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="w-10 h-10 flex items-center justify-center rounded-none bg-black/50 text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+                        style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', cursor: 'pointer', color: '#000' }}
                     >
                         <X size={20} />
                     </button>
                 </div>
 
-                <div className="flex flex-col md:flex-row flex-1 overflow-hidden min-h-0">
+                <div style={{ display: 'flex', flexDirection: 'row', flex: 1, overflow: 'hidden', minHeight: 0 }}>
 
                     {/* Lista de locales */}
-                    <div className="md:w-5/12 overflow-y-auto border-b md:border-b-0 md:border-r border-white/10 shrink-0">
+                    <div style={{ width: '42%', overflowY: 'auto', borderRight: '1px solid #e0e0e0', flexShrink: 0 }}>
                         {PICKUP_LOCATIONS.map((location) => (
                             <button
                                 key={location.id}
                                 onClick={() => setActiveLocation(location)}
-                                className={`w-full text-left p-5 border-b border-white/5 transition-all hover:bg-white/5 ${activeLocation.id === location.id ? 'bg-[#C4956A]/10 border-l-2 border-l-[#C4956A]' : ''}`}
+                                style={{
+                                    width: '100%',
+                                    textAlign: 'left',
+                                    padding: '20px',
+                                    borderBottom: '1px solid #e0e0e0',
+                                    borderLeft: activeLocation.id === location.id ? '3px solid #000' : '3px solid transparent',
+                                    backgroundColor: activeLocation.id === location.id ? '#f5f5f5' : '#fff',
+                                    cursor: 'pointer',
+                                    transition: 'background-color 0.15s'
+                                }}
                             >
-                                <div className="flex items-start gap-3">
-                                    <MapPin size={14} className={`mt-0.5 shrink-0 ${activeLocation.id === location.id ? 'text-[#C4956A]' : 'text-zinc-600'}`} />
+                                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                                    <MapPin size={14} style={{ marginTop: '2px', flexShrink: 0, color: activeLocation.id === location.id ? '#000' : '#999' }} />
                                     <div>
-                                        <p className={`text-[10px] font-black uppercase tracking-wider mb-1 ${activeLocation.id === location.id ? 'text-[#C4956A]' : 'text-white'}`}>
+                                        <p style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px', color: '#000' }}>
                                             {location.name}
                                         </p>
-                                        <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-wider mb-1">{location.address}</p>
-                                        <div className="flex items-center gap-1 text-zinc-600">
+                                        <p style={{ color: '#666', fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>{location.address}</p>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#999' }}>
                                             <Clock size={9} />
-                                            <p className="text-[9px] font-bold uppercase tracking-wider">{location.schedule}</p>
+                                            <p style={{ fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{location.schedule}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -109,25 +118,24 @@ const StoreLocationsModal: React.FC<StoreLocationsModalProps> = ({ isOpen, onClo
                     </div>
 
                     {/* Mapa */}
-                    <div className="flex-1 flex flex-col min-h-[280px] md:min-h-0">
-                        <div className="flex-1 relative">
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '280px' }}>
+                        <div style={{ flex: 1, position: 'relative' }}>
                             <iframe
                                 key={activeLocation.id}
                                 src={activeLocation.embedUrl}
                                 width="100%"
                                 height="100%"
-                                style={{ border: 0, minHeight: '280px' }}
+                                style={{ border: 0, minHeight: '280px', position: 'absolute', inset: 0, width: '100%', height: '100%' }}
                                 allowFullScreen
                                 loading="lazy"
                                 referrerPolicy="no-referrer-when-downgrade"
-                                className="absolute inset-0 w-full h-full"
                             />
                         </div>
                         <a
                             href={activeLocation.mapUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-2 py-3 bg-[#C4956A]/10 hover:bg-[#C4956A]/20 text-[#C4956A] text-[10px] font-black uppercase tracking-[0.3em] transition-colors shrink-0"
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', backgroundColor: '#f5f5f5', borderTop: '1px solid #e0e0e0', color: '#000', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em', textDecoration: 'none', flexShrink: 0 }}
                         >
                             <Map size={12} />
                             ABRIR EN GOOGLE MAPS
@@ -136,10 +144,10 @@ const StoreLocationsModal: React.FC<StoreLocationsModalProps> = ({ isOpen, onClo
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-white/10 flex justify-center bg-white/5 shrink-0">
+                <div style={{ padding: '16px', borderTop: '1px solid #e0e0e0', display: 'flex', justifyContent: 'center', backgroundColor: '#fff', flexShrink: 0 }}>
                     <button
                         onClick={onClose}
-                        className="px-12 py-3 rounded-none bg-white text-black font-black text-[10px] tracking-[0.4em] uppercase hover:bg-[#C4956A] transition-all"
+                        style={{ padding: '12px 48px', backgroundColor: '#000', color: '#fff', fontWeight: 900, fontSize: '10px', letterSpacing: '0.4em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }}
                     >
                         Cerrar
                     </button>

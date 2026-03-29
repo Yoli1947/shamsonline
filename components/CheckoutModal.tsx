@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, Loader, MapPin, ExternalLink } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import { checkPromoAlreadyUsed } from '../lib/orders';
+import GiftCardInput, { GiftCardData, redeemGiftCard } from './GiftCardInput';
 
 interface CheckoutModalProps {
     isOpen: boolean;
@@ -33,6 +34,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
         paymentMethod: 'mercadopago' // 'mercadopago' | 'transferencia' | 'efectivo'
     });
 
+    const [giftCard, setGiftCard] = useState<GiftCardData | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [touched, setTouched] = useState<Record<string, boolean>>({});
     const [shippingQuote, setShippingQuote] = useState<{ cost: number; days: string } | null>(null);
@@ -221,7 +223,32 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
         setLoading(true);
         try {
             const quotedShipping = formData.shippingMethod === 'retiro' ? 0 : (shippingQuote?.cost ?? null);
-            await onConfirm({ ...formData, shippingQuotedCost: quotedShipping, promoAlreadyUsed });
+            const promoFactor = (hasPromo && !promoAlreadyUsed) ? 0.9 : 1;
+            const shipping = formData.shippingMethod === 'retiro' ? 0 : (shippingQuote?.cost ?? 0);
+            const afterPromo = Math.round(total * promoFactor) + shipping;
+            const gcDiscount = giftCard ? giftCard.amountToApply : 0;
+            const amountToChargeMP = Math.max(0, afterPromo - gcDiscount);
+
+            const giftCardApplied = giftCard ? {
+                code: giftCard.code,
+                hash_token: giftCard.hash_token,
+                amount_to_deduct: gcDiscount,
+            } : null;
+
+            // Si la gift card cubre el total → canjear directo sin MP
+            if (giftCard && amountToChargeMP === 0) {
+                const result = await redeemGiftCard(giftCard.hash_token, gcDiscount, '');
+                if (!result.success) throw new Error(result.error || 'Error al canjear la gift card.');
+            }
+
+            await onConfirm({
+                ...formData,
+                shippingQuotedCost: quotedShipping,
+                promoAlreadyUsed,
+                gift_card_applied: giftCardApplied,
+                gift_card_discount: gcDiscount,
+                amount_to_charge_mp: amountToChargeMP,
+            });
         } catch (error: any) {
             console.error(error);
             alert(`Error al procesar el pedido: ${error.message || 'Por favor intente nuevamente'}`);
@@ -253,11 +280,11 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                     autoComplete={autoComplete}
                     required={required}
                     placeholder={placeholder}
-                    className={`w-full bg-[var(--color-background-alt)] border rounded-none p-4 text-[var(--color-text)] placeholder:text-[var(--color-text-muted)]/60 outline-none transition-all ${errors[name] && touched[name]
-                        ? 'border-red-500/50 focus:border-red-500'
+                    className={`w-full bg-[#f5f5f5] text-black rounded-none p-4 outline-none transition-all border ${errors[name] && touched[name]
+                        ? 'border-red-400'
                         : touched[name] && !errors[name] && formData[name]
-                            ? 'border-emerald-500/50 focus:border-emerald-500'
-                            : 'border-[var(--color-border)] focus:border-[#C4956A]'
+                            ? 'border-black'
+                            : 'border-[#e0e0e0] focus:border-black'
                         }`}
                     value={formData[name]}
                     onChange={handleChange}
@@ -269,7 +296,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                         {errors[name] ? (
                             <span className="text-red-500 text-xs font-bold">!</span>
                         ) : formData[name] ? (
-                            <span className="text-emerald-500 text-xs">✓</span>
+                            <span className="text-black text-xs font-bold">✓</span>
                         ) : null}
                     </div>
                 )}
@@ -282,8 +309,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
 
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-[#2C1810]/40 backdrop-blur-sm" onClick={onClose} />
-            <div className="relative bg-[var(--color-background)] w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-none border border-[var(--color-border)] p-8 shadow-2xl animate-in fade-in zoom-in duration-300">
+            <div className="absolute inset-0 backdrop-blur-sm" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={onClose} />
+            <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-none p-8 shadow-2xl animate-in fade-in zoom-in duration-300" style={{ backgroundColor: '#ffffff', border: '1px solid #e0e0e0' }}>
                 <button onClick={onClose} className="absolute top-6 right-6 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">
                     <X size={24} />
                 </button>
@@ -291,7 +318,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                 <div className="mb-8">
                     <h2 className="text-2xl font-black text-[var(--color-text)] uppercase tracking-widest">Finalizar Compra</h2>
                     {hasPromo && (
-                        <div className="mt-2 inline-flex items-center gap-2 bg-[#C4956A]/10 border border-[#C4956A]/30 px-3 py-1.5 rounded-none text-[#C4956A] text-xs font-bold uppercase tracking-widest">
+                        <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-none text-xs font-bold uppercase tracking-widest" style={{ backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', color: '#000' }}>
                             <span>🎉 10% OFF APLICADO (Primera Compra)</span>
                         </div>
                     )}
@@ -319,8 +346,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                 type="button"
                                 onClick={() => setFormData({ ...formData, shippingMethod: 'envio' })}
                                 className={`p-4 rounded-none border text-left transition-all ${formData.shippingMethod === 'envio'
-                                    ? 'border-[#C4956A] bg-[#C4956A]/10 text-[var(--color-text)]'
-                                    : 'border-[var(--color-border)] bg-[var(--color-background-alt)] text-[var(--color-text-muted)] hover:bg-[#E8D5C0]'
+                                    ? 'border-black bg-black/5 text-black'
+                                    : 'border-[#e0e0e0] bg-[#f5f5f5] text-[#666] hover:bg-[#eeeeee]'
                                     }`}
                             >
                                 <span className="block text-xs font-bold uppercase tracking-wider mb-1">Envío a Domicilio</span>
@@ -330,14 +357,14 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                              <button
                                 type="button"
                                 onClick={() => setFormData({ ...formData, shippingMethod: 'retiro' })}
-                                className={`p-4 rounded-none border text-left transition-all relative overflow-hidden group ${formData.shippingMethod === 'retiro'
-                                    ? 'border-[#C4956A] bg-[#C4956A]/10 text-[var(--color-text)]'
-                                    : 'border-[var(--color-border)] bg-[var(--color-background-alt)] text-[var(--color-text-muted)] hover:bg-[#E8D5C0]'
+                                className={`p-4 rounded-none border text-left transition-all relative overflow-hidden ${formData.shippingMethod === 'retiro'
+                                    ? 'border-black bg-black/5 text-black'
+                                    : 'border-[#e0e0e0] bg-[#f5f5f5] text-[#666] hover:bg-[#eeeeee]'
                                     }`}
                             >
-                                <span className="block text-xs font-bold uppercase tracking-wider mb-1 group-hover:text-[#C4956A] transition-colors">Retiro en Local</span>
+                                <span className="block text-xs font-bold uppercase tracking-wider mb-1">Retiro en Local</span>
                                 <span className="text-[10px] opacity-70 block mb-1">Pasá a buscarlo por nuestros locales</span>
-                                <span className="text-[10px] font-black text-[#C4956A] uppercase tracking-widest inline-block mt-1">
+                                <span className="text-[10px] font-black text-black uppercase tracking-widest inline-block mt-1">
                                     GRATIS
                                 </span>
                             </button>
@@ -380,10 +407,10 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                     )}
                                      {!shippingQuoteLoading && shippingQuote && (
                                         <div className="flex items-center gap-2 mt-1">
-                                            <span className="text-[13px] font-black text-[#C4956A]">${shippingQuote.cost.toLocaleString()}</span>
-                                            <span className="text-[10px] text-[var(--color-text-muted)]">costo de envío</span>
+                                            <span className="text-[13px] font-black text-black">${shippingQuote.cost.toLocaleString()}</span>
+                                            <span className="text-[10px] text-[#666]">costo de envío</span>
                                             {shippingQuote.days && (
-                                                <span className="text-[9px] text-[var(--color-text-muted)] bg-white/5 px-2 py-0.5 rounded-none">{shippingQuote.days} días hábiles</span>
+                                                <span className="text-[9px] text-[#666] bg-[#f0f0f0] px-2 py-0.5 rounded-none">{shippingQuote.days} días hábiles</span>
                                             )}
                                         </div>
                                     )}
@@ -409,15 +436,15 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                             key={location.id}
                                              onClick={() => setFormData({ ...formData, pickupLocationId: location.id })}
                                             className={`p-4 rounded-none border transition-all cursor-pointer ${isSelected
-                                                ? 'border-[#C4956A] bg-[#C4956A]/10 text-[var(--color-text)]'
-                                                : 'border-[var(--color-border)] bg-[var(--color-background-alt)] hover:bg-[#E8D5C0] text-[var(--color-text-muted)]'
+                                                ? 'border-black bg-black/5 text-black'
+                                                : 'border-[#e0e0e0] bg-[#f5f5f5] hover:bg-[#eeeeee] text-[#666]'
                                                 }`}
                                         >
                                             <div className="flex items-start gap-3">
                                                 {/* Indicador seleccionado */}
                                                  <div className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-none border-2 flex items-center justify-center transition-all ${isSelected
-                                                    ? 'border-[#C4956A] bg-[#C4956A]'
-                                                    : 'border-[var(--color-border)] bg-transparent'
+                                                    ? 'border-black bg-black'
+                                                    : 'border-[#e0e0e0] bg-transparent'
                                                     }`}>
                                                     {isSelected && (
                                                         <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
@@ -428,7 +455,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                                 <div className="flex-1">
                                                      <div className="flex justify-between items-start">
                                                         <div>
-                                                            <h4 className={`text-sm font-bold uppercase tracking-wider mb-1 flex items-center gap-2 transition-colors ${isSelected ? 'text-[#C4956A]' : 'text-[var(--color-text-muted)]'}`}>
+                                                            <h4 className={`text-sm font-bold uppercase tracking-wider mb-1 flex items-center gap-2 transition-colors ${isSelected ? 'text-black' : 'text-[#666]'}`}>
                                                                  <MapPin size={14} /> {location.name}
                                                             </h4>
                                                             <p className="text-xs text-[var(--color-text)] font-medium mb-1">{location.address}</p>
@@ -439,7 +466,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             onClick={e => e.stopPropagation()}
-                                                            className="flex items-center gap-1 text-[10px] font-bold text-[#C4956A] hover:text-[var(--color-text)] uppercase tracking-widest border border-[#C4956A]/30 px-3 py-1.5 rounded-none hover:bg-[#C4956A]/10 transition-all"
+                                                            className="flex items-center gap-1 text-[10px] font-bold text-[#666] hover:text-black uppercase tracking-widest border border-[#e0e0e0] px-3 py-1.5 rounded-none hover:bg-[#f0f0f0] transition-all"
                                                         >
                                                             Ver Mapa <ExternalLink size={10} />
                                                         </a>
@@ -467,8 +494,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                      type="button"
                                     onClick={() => setFormData({ ...formData, paymentMethod: method.id })}
                                     className={`p-3 rounded-none border text-left transition-all relative overflow-hidden ${formData.paymentMethod === method.id
-                                        ? method.discount ? 'border-emerald-500 bg-emerald-500/10 text-[var(--color-text)]' : 'border-[#C4956A] bg-[#C4956A]/10 text-[var(--color-text)]'
-                                        : 'border-[var(--color-border)] bg-[var(--color-background-alt)] text-[var(--color-text-muted)] hover:bg-[#E8D5C0]'
+                                        ? 'border-black bg-black/5 text-black'
+                                        : 'border-[#e0e0e0] bg-[#f5f5f5] text-[#666] hover:bg-[#eeeeee]'
                                         }`}
                                 >
                                     <span className="block text-[10px] font-bold uppercase tracking-wider mb-1">{method.label}</span>
@@ -489,22 +516,40 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                         <div className="mt-2 text-center text-[10px] text-zinc-500">Verificando beneficio...</div>
                     )}
 
+                    {/* GIFT CARD */}
+                    <div className="pt-4 border-t border-[#e0e0e0]">
+                        {(() => {
+                            const promoFactor = effectiveHasPromo ? 0.9 : 1;
+                            const shipping = formData.shippingMethod === 'retiro' ? 0 : (shippingQuote?.cost ?? 0);
+                            const totalAfterPromo = Math.round(total * promoFactor) + shipping;
+                            return (
+                                <GiftCardInput
+                                    orderTotal={totalAfterPromo}
+                                    applied={giftCard}
+                                    onApply={(data) => setGiftCard(data)}
+                                    onRemove={() => setGiftCard(null)}
+                                />
+                            );
+                        })()}
+                    </div>
+
                      <div className="pt-6 border-t border-[var(--color-border)] flex justify-between items-center mt-6">
                         {(() => {
                             const promoFactor = effectiveHasPromo ? 0.9 : 1;
                             const shipping = formData.shippingMethod === 'retiro' ? 0 : (shippingQuote?.cost ?? 0);
-                            const finalTotal = Math.round(total * promoFactor) + shipping;
+                            const afterPromo = Math.round(total * promoFactor) + shipping;
+                            const gcDiscount = giftCard ? giftCard.amountToApply : 0;
+                            const finalTotal = Math.max(0, afterPromo - gcDiscount);
                             return (
                                  <div className="flex flex-col">
-                                    <span className="text-[10px] uppercase tracking-widest text-[#C4956A]">Total a Pagar</span>
+                                    <span className="text-[10px] uppercase tracking-widest text-[#666]">Total a Pagar</span>
                                      <div className="flex items-baseline gap-2">
-                                        {effectiveHasPromo && (
-                                            <span className="text-sm text-[var(--color-text-muted)] tracking-wider">Total: ${(total + shipping).toLocaleString()}</span>
+                                        {(effectiveHasPromo || gcDiscount > 0) && (
+                                            <span className="text-sm text-[var(--color-text-muted)] tracking-wider line-through">${afterPromo.toLocaleString()}</span>
                                         )}
                                         <span className="text-2xl font-bold text-[var(--color-text)]">${finalTotal.toLocaleString()}</span>
-                                        {effectiveHasPromo && (
-                                            <span className="text-xs text-emerald-400 font-black">-10%</span>
-                                        )}
+                                        {effectiveHasPromo && <span className="text-xs text-black font-black">-10%</span>}
+                                        {gcDiscount > 0 && <span className="text-xs text-black font-black">-GC</span>}
                                     </div>
                                       <span className="text-[10px] text-[var(--color-text-muted)]">
                                         {formData.shippingMethod === 'retiro'
@@ -518,7 +563,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                 </div>
                             );
                         })()}
-                         <button type="submit" disabled={loading} className="bg-[#2C1810] text-white font-black uppercase tracking-widest px-8 py-4 rounded-none hover:bg-[#C4956A] transition-all flex items-center gap-2 disabled:opacity-50">
+                         <button type="submit" disabled={loading} className="bg-black text-white font-black uppercase tracking-widest px-8 py-4 rounded-none hover:bg-zinc-800 transition-all flex items-center gap-2 disabled:opacity-50">
                             {loading ? <Loader className="animate-spin" size={20} /> : 'Confirmar Pedido'}
                         </button>
                     </div>

@@ -48,7 +48,7 @@ const BrandMarquee: React.FC = () => {
             className="flex items-center px-2 md:px-3 group shrink-0"
             onClick={() => handleBrandClick(brand.name)}
           >
-            <span className="text-[10px] md:text-sm font-medium px-4 py-2 md:px-6 md:py-2.5 rounded-none border border-[#C4956A]/40 bg-white/60 text-[var(--color-text-muted)] transition-all duration-300 group-hover:bg-[#C4956A] group-hover:text-white group-hover:border-[#C4956A] group-hover:scale-110 cursor-pointer whitespace-nowrap uppercase tracking-widest">
+            <span className="text-[10px] md:text-sm font-medium px-4 py-2 md:px-6 md:py-2.5 rounded-none border border-[#e0e0e0] bg-white text-[#999] transition-all duration-300 group-hover:bg-[#f0f0f0] group-hover:text-[#333] group-hover:border-[#ccc] group-hover:scale-105 cursor-pointer whitespace-nowrap uppercase tracking-widest">
               {brand.name}
             </span>
           </div>

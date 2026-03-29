@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { CheckCircle, ShoppingBag, ArrowLeft, Package } from 'lucide-react';
+import { CheckCircle, ShoppingBag, ArrowLeft, Package, Gift } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface OrderData {
@@ -16,32 +16,56 @@ interface OrderData {
         quantity: number;
         unit_price: number;
         size: string;
+        type?: string;
+        product_type?: string;
     }>;
+}
+
+interface GiftCardPurchase {
+    status: string;
+    public_code: string | null;
+    card_url: string | null;
+    amount: number;
+    recipient_name: string | null;
+    recipient_phone: string | null;
 }
 
 const OrderSuccess: React.FC = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const orderId = searchParams.get('oid');
-    const mpStatus = searchParams.get('status'); // 'approved' from MP redirect
+    const mpStatus = searchParams.get('status');
     const [order, setOrder] = useState<OrderData | null>(null);
+    const [gcPurchase, setGcPurchase] = useState<GiftCardPurchase | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!orderId) {
-            setLoading(false);
-            return;
-        }
+        if (!orderId) { setLoading(false); return; }
 
         const fetchOrder = async () => {
             try {
                 const { data } = await supabase
                     .from('orders')
-                    .select('order_number, total, payment_status, shipping_method, customer_first_name, customer_last_name, customer_email, items:order_items(product_name, quantity, unit_price, size)')
+                    .select('order_number, total, payment_status, shipping_method, customer_first_name, customer_last_name, customer_email, items:order_items(product_name, quantity, unit_price, size, type, product_type)')
                     .eq('id', orderId)
                     .single();
 
-                if (data) setOrder(data as OrderData);
+                if (data) {
+                    setOrder(data as OrderData);
+
+                    // Si es orden de gift card, buscar el purchase
+                    const isGcOrder = (data as any).items?.some(
+                        (i: any) => i.type === 'gift_card' || i.product_type === 'gift_card'
+                    );
+                    if (isGcOrder) {
+                        const { data: gc } = await supabase
+                            .from('gift_card_purchases')
+                            .select('status, public_code, card_url, amount, recipient_name, recipient_phone')
+                            .eq('order_id', orderId)
+                            .single();
+                        if (gc) setGcPurchase(gc as GiftCardPurchase);
+                    }
+                }
             } catch (err) {
                 console.error('Error cargando pedido:', err);
             } finally {
@@ -53,127 +77,156 @@ const OrderSuccess: React.FC = () => {
     }, [orderId]);
 
     const isPaid = mpStatus === 'approved' || order?.payment_status === 'paid';
+    const isGiftCardOrder = order?.items?.some(i => i.type === 'gift_card' || i.product_type === 'gift_card');
 
     return (
-        <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text)] flex flex-col">
+        <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', color: '#000', display: 'flex', flexDirection: 'column' }}>
             {/* Header */}
-            <div className="border-b border-[var(--color-border)] px-6 py-5 flex items-center gap-4 sticky top-0 bg-[var(--color-background)]/95 backdrop-blur-sm z-50">
+            <div style={{ borderBottom: '1px solid #e5e5e5', padding: '20px 24px', display: 'flex', alignItems: 'center', gap: '16px', position: 'sticky', top: 0, backgroundColor: '#ffffff', zIndex: 50 }}>
                 <button
                     onClick={() => navigate('/')}
-                    className="flex items-center gap-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors text-xs font-black tracking-widest uppercase"
+                    className="flex items-center gap-2 transition-colors text-xs font-black tracking-widest uppercase"
+                    style={{ color: '#666', background: 'none', border: 'none', cursor: 'pointer' }}
                 >
                     <ArrowLeft size={16} />
                     Volver a la tienda
                 </button>
-                <span className="text-[var(--color-text)]/20">|</span>
-                <span className="text-[10px] font-black tracking-[0.4em] text-black uppercase">
-                    Shams — Rosario
-                </span>
+                <span style={{ color: '#ccc' }}>|</span>
+                <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#000', textTransform: 'uppercase' }}>Shams — Rosario</span>
             </div>
 
             {/* Content */}
-            <div className="flex-1 flex items-center justify-center p-6">
-                <div className="max-w-md w-full space-y-8">
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+                <div style={{ maxWidth: '448px', width: '100%', display: 'flex', flexDirection: 'column', gap: '24px' }}>
                     {loading ? (
-                        <div className="text-center">
-                            <div className="w-10 h-10 border-2 border-white/20 border-t-[#C4956A] rounded-full animate-spin mx-auto mb-4" />
-                            <p className="text-[var(--color-text-muted)] text-sm">Cargando tu pedido...</p>
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ width: '40px', height: '40px', border: '2px solid #e0e0e0', borderTopColor: '#000', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
+                            <p style={{ color: '#666', fontSize: '14px' }}>Cargando tu pedido...</p>
                         </div>
                     ) : (
                         <>
                             {/* Icono de éxito */}
-                            <div className="text-center">
-                                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-[#C4956A]/10 border border-[#C4956A]/30 mb-6">
-                                    <CheckCircle size={40} className="text-black" />
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '80px', height: '80px', backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', marginBottom: '24px' }}>
+                                    {isGiftCardOrder ? <Gift size={40} color="#000" /> : <CheckCircle size={40} color="#000" />}
                                 </div>
-                                <h1 className="text-3xl font-black uppercase tracking-widest mb-2">
-                                    {isPaid ? '¡Pago exitoso!' : '¡Pedido recibido!'}
+                                <h1 style={{ fontSize: '28px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                                    {isGiftCardOrder ? '¡Gift Card enviada!' : isPaid ? '¡Pago exitoso!' : '¡Pedido recibido!'}
                                 </h1>
-                                <p className="text-[var(--color-text-muted)] text-sm leading-relaxed">
-                                    {isPaid
-                                        ? 'Tu pago fue procesado correctamente. Ya estamos preparando tu pedido.'
-                                        : 'Tu pedido fue registrado. Te contactaremos para confirmar el pago.'}
+                                <p style={{ color: '#666', fontSize: '14px', lineHeight: 1.6 }}>
+                                    {isGiftCardOrder
+                                        ? 'El destinatario recibirá la gift card por WhatsApp en los próximos minutos.'
+                                        : isPaid
+                                            ? 'Tu pago fue procesado correctamente. Ya estamos preparando tu pedido.'
+                                            : 'Tu pedido fue registrado. Te contactaremos para confirmar el pago.'}
                                 </p>
                             </div>
 
-                            {/* Detalles del pedido */}
-                            {order && (
-                                <div className="bg-white/5 border border-[var(--color-border)] rounded-2xl p-6 space-y-4">
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <Package size={18} className="text-black" />
-                                        <h2 className="text-sm font-black uppercase tracking-widest">
+                            {/* Estado de gift card */}
+                            {isGiftCardOrder && (
+                                <div style={{ padding: '24px', border: '1px solid #e0e0e0', backgroundColor: '#fafafa' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                                        <Gift size={16} color="#000" />
+                                        <span style={{ fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em' }}>Estado de la Gift Card</span>
+                                    </div>
+                                    {!gcPurchase || gcPurchase.status === 'pending' ? (
+                                        <p style={{ fontSize: '13px', color: '#666' }}>Procesando la emisión... Se enviará por WhatsApp en los próximos minutos.</p>
+                                    ) : gcPurchase.status === 'issued' ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            <p style={{ fontSize: '13px', color: '#000', fontWeight: 700 }}>
+                                                Gift Card emitida: <span style={{ letterSpacing: '0.1em' }}>{gcPurchase.public_code}</span>
+                                            </p>
+                                            {gcPurchase.recipient_name && (
+                                                <p style={{ fontSize: '12px', color: '#666' }}>Destinatario: {gcPurchase.recipient_name}</p>
+                                            )}
+                                            {gcPurchase.recipient_phone && (
+                                                <p style={{ fontSize: '12px', color: '#666' }}>Enviada por WhatsApp a: {gcPurchase.recipient_phone}</p>
+                                            )}
+                                            {gcPurchase.card_url && (
+                                                <a href={gcPurchase.card_url} target="_blank" rel="noopener noreferrer"
+                                                    style={{ display: 'inline-block', marginTop: '8px', padding: '10px 20px', backgroundColor: '#000', color: '#fff', fontSize: '10px', fontWeight: 900, letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none' }}>
+                                                    VER GIFT CARD
+                                                </a>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <p style={{ fontSize: '13px', color: '#c00' }}>Hubo un error al emitir la gift card. Nos comunicaremos contigo a la brevedad.</p>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Detalles del pedido (no gift card) */}
+                            {order && !isGiftCardOrder && (
+                                <div style={{ padding: '24px', border: '1px solid #e0e0e0', backgroundColor: '#fafafa' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                                        <Package size={16} color="#000" />
+                                        <span style={{ fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em' }}>
                                             Pedido {order.order_number}
-                                        </h2>
-                                        <span className={`ml-auto text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${
-                                            order.payment_status === 'paid' || isPaid
-                                                ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400'
-                                                : 'border-yellow-500/40 bg-yellow-500/10 text-yellow-400'
-                                        }`}>
-                                            {order.payment_status === 'paid' || isPaid ? 'Pagado' : 'Pendiente'}
+                                        </span>
+                                        <span style={{
+                                            marginLeft: 'auto',
+                                            fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em',
+                                            padding: '4px 10px',
+                                            backgroundColor: isPaid || order.payment_status === 'paid' ? '#f0f0f0' : '#fffbe6',
+                                            border: `1px solid ${isPaid || order.payment_status === 'paid' ? '#e0e0e0' : '#fbbf24'}`,
+                                            color: isPaid || order.payment_status === 'paid' ? '#000' : '#b45309',
+                                        }}>
+                                            {isPaid || order.payment_status === 'paid' ? 'Pagado' : 'Pendiente'}
                                         </span>
                                     </div>
 
-                                    {/* Items */}
                                     {order.items && order.items.length > 0 && (
-                                        <div className="space-y-2 pt-2 border-t border-[var(--color-border)]">
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '12px', borderTop: '1px solid #e5e5e5' }}>
                                             {order.items.map((item, i) => (
-                                                <div key={i} className="flex justify-between items-center text-sm">
+                                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
                                                     <div>
-                                                        <span className="text-[var(--color-text)]">{item.product_name}</span>
-                                                        <span className="text-[var(--color-text-muted)] text-xs ml-2">
-                                                            T:{item.size} × {item.quantity}
-                                                        </span>
+                                                        <span style={{ color: '#000' }}>{item.product_name}</span>
+                                                        <span style={{ color: '#999', fontSize: '11px', marginLeft: '8px' }}>T:{item.size} × {item.quantity}</span>
                                                     </div>
-                                                    <span className="text-zinc-300">
-                                                        ${(item.unit_price * item.quantity).toLocaleString()}
-                                                    </span>
+                                                    <span style={{ color: '#000' }}>${(item.unit_price * item.quantity).toLocaleString()}</span>
                                                 </div>
                                             ))}
                                         </div>
                                     )}
 
-                                    {/* Total */}
-                                    <div className="flex justify-between items-center pt-3 border-t border-[var(--color-border)]">
-                                        <span className="text-xs font-black uppercase tracking-widest text-[var(--color-text-muted)]">Total</span>
-                                        <span className="text-xl font-black text-black">
-                                            ${order.total.toLocaleString()}
-                                        </span>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', marginTop: '8px', borderTop: '1px solid #e5e5e5' }}>
+                                        <span style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#666' }}>Total</span>
+                                        <span style={{ fontSize: '22px', fontWeight: 900, color: '#000' }}>${order.total.toLocaleString()}</span>
                                     </div>
 
-                                    {/* Envío */}
-                                    <div className="text-xs text-[var(--color-text-muted)] flex items-center gap-2">
-                                        <span>{order.shipping_method === 'retiro' ? '🏪 Retiro en local' : '📦 Envío a domicilio (Correo Argentino)'}</span>
+                                    <p style={{ fontSize: '11px', color: '#666', marginTop: '8px' }}>
+                                        {order.shipping_method === 'retiro' ? '🏪 Retiro en local' : '📦 Envío a domicilio (Correo Argentino)'}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Próximos pasos (no gift card) */}
+                            {!isGiftCardOrder && (
+                                <div style={{ padding: '20px', border: '1px solid #e0e0e0', backgroundColor: '#fafafa' }}>
+                                    <p style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em', color: '#999', marginBottom: '12px' }}>¿Qué pasa ahora?</p>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#444' }}>
+                                        <div style={{ display: 'flex', gap: '12px' }}>
+                                            <span style={{ color: '#000', fontWeight: 900 }}>1.</span>
+                                            <span>Te contactaremos por WhatsApp para coordinar los detalles.</span>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '12px' }}>
+                                            <span style={{ color: '#000', fontWeight: 900 }}>2.</span>
+                                            <span>{order?.shipping_method === 'retiro'
+                                                ? 'Cuando tu pedido esté listo, te avisamos para que pases a buscarlo.'
+                                                : 'Preparamos y despachamos tu pedido por Correo Argentino.'}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '12px' }}>
+                                            <span style={{ color: '#000', fontWeight: 900 }}>3.</span>
+                                            <span>Te enviamos el número de seguimiento cuando salga tu pedido.</span>
+                                        </div>
                                     </div>
                                 </div>
                             )}
 
-                            {/* Próximos pasos */}
-                            <div className="bg-white/5 border border-[var(--color-border)] rounded-2xl p-5 space-y-3">
-                                <h3 className="text-xs font-black uppercase tracking-widest text-[var(--color-text-muted)] mb-3">¿Qué pasa ahora?</h3>
-                                <div className="space-y-2 text-sm text-zinc-300">
-                                    <div className="flex items-start gap-3">
-                                        <span className="text-black font-black mt-0.5">1.</span>
-                                        <span>Te contactaremos por WhatsApp para coordinar los detalles.</span>
-                                    </div>
-                                    <div className="flex items-start gap-3">
-                                        <span className="text-black font-black mt-0.5">2.</span>
-                                        <span>
-                                            {order?.shipping_method === 'retiro'
-                                                ? 'Cuando tu pedido esté listo, te avisamos para que pases a buscarlo.'
-                                                : 'Preparamos y despachamos tu pedido por Correo Argentino.'}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-start gap-3">
-                                        <span className="text-black font-black mt-0.5">3.</span>
-                                        <span>Te enviamos el número de seguimiento cuando salga tu pedido.</span>
-                                    </div>
-                                </div>
-                            </div>
-
                             {/* Botón volver */}
                             <button
                                 onClick={() => navigate('/')}
-                                className="w-full bg-[#C4956A] text-black font-black uppercase tracking-widest py-4 rounded-full hover:brightness-110 transition-all flex items-center justify-center gap-2"
+                                style={{ width: '100%', backgroundColor: '#000', color: '#fff', border: 'none', padding: '16px', fontWeight: 900, fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                             >
                                 <ShoppingBag size={18} />
                                 Seguir comprando

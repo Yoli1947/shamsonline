@@ -110,7 +110,7 @@ export default function Promotions() {
         <div className="promotions">
             <div className="promotions__header">
                 <div className="promotions__title-area">
-                    <Percent className="text-[#C4956A]" size={32} />
+                    <Percent className="text-[#DCDCDC]" size={32} />
                     <div>
                         <h1>Actualización Masiva</h1>
                         <p>Modifica precios u ofertas por porcentaje de forma profesional.</p>

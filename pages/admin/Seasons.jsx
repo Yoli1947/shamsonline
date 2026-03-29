@@ -67,7 +67,7 @@ export default function Seasons() {
 
             {/* Crear Nueva */}
             <div className="admin-card">
-                <h3 style={{ fontFamily: 'Syncopate, sans-serif', fontSize: '1rem', fontWeight: 700, marginBottom: '1.5rem', marginTop: 0, color: '#C4956A' }}>Nueva Temporada</h3>
+                <h3 style={{ fontFamily: 'Syncopate, sans-serif', fontSize: '1rem', fontWeight: 700, marginBottom: '1.5rem', marginTop: 0, color: '#DCDCDC' }}>Nueva Temporada</h3>
                 <form onSubmit={handleCreate} style={{ display: 'flex', gap: '1rem', alignItems: 'end' }}>
                     <div className="form-group" style={{ flex: 1 }}>
                         <label style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', display: 'block', color: '#999' }}>Nombre de la Temporada</label>

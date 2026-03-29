@@ -743,7 +743,7 @@ const Store: React.FC = () => {
                     </p>
                     <button
                         onClick={() => window.location.reload()}
-                        className="bg-white text-black px-8 py-3 rounded-none font-black uppercase tracking-widest text-xs hover:bg-[#C4956A] transition-all"
+                        className="bg-white text-black px-8 py-3 rounded-none font-black uppercase tracking-widest text-xs hover:bg-[#e0e0e0] transition-all"
                     >
                         Reintentar
                     </button>
@@ -753,21 +753,7 @@ const Store: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen relative selection:bg-[#2C1810] selection:text-white bg-[var(--color-background)] text-[var(--color-text)]">
-            {/* QR ARCA — fijo en costado derecho */}
-            <a
-                href="https://qr.afip.gob.ar/?qr=27057840655"
-                target="_F960AFIPInfo"
-                rel="noopener noreferrer"
-                title="Datos Fiscales — ARCA"
-                className="fixed right-2 bottom-24 z-50 opacity-40 hover:opacity-90 transition-opacity"
-            >
-                <img
-                    src="https://www.afip.gob.ar/images/f960/DATAWEB.jpg"
-                    alt="QR ARCA"
-                    className="w-8 h-8"
-                />
-            </a>
+        <div className="min-h-screen relative selection:bg-black selection:text-white bg-[var(--color-background)] text-[var(--color-text)]">
             <Navbar
                 cartCount={cart.reduce((s, i) => s + i.quantity, 0)}
                 onOpenCart={() => setIsCartOpen(true)}
@@ -791,7 +777,7 @@ const Store: React.FC = () => {
                         {brandDiscounts.length > 0 && (
                             <section className="py-10 px-4 md:px-12 max-w-screen-2xl mx-auto">
                                 <div className="mb-6 px-1">
-                                    <span className="text-[#C4956A] uppercase tracking-[0.4em] text-[10px] block mb-2 font-bold opacity-80">DESCUENTOS ACTIVOS</span>
+                                    <span className="text-[#999] uppercase tracking-[0.4em] text-[10px] block mb-2 font-bold">DESCUENTOS ACTIVOS</span>
                                     <h2 className="font-heading text-2xl md:text-4xl font-bold tracking-tighter text-[var(--color-text)]">
                                         MODELOS MÁS PEDIDOS <span className="text-[var(--color-text)] italic">ESTA SEMANA</span>
                                     </h2>
@@ -832,7 +818,7 @@ const Store: React.FC = () => {
                                             <button
                                                 key={brand}
                                                 onClick={() => navigate(`/?${params.toString()}`, { replace: true, preventScrollReset: true })}
-                                                className="shrink-0 relative group w-36 md:w-48 rounded-none overflow-hidden border border-[var(--color-text)]/10 hover:border-[#C4956A]/60 transition-all duration-300 hover:scale-[1.02]"
+                                                className="shrink-0 relative group w-36 md:w-48 rounded-none overflow-hidden border border-[var(--color-text)]/10 hover:border-black/40 transition-all duration-300 hover:scale-[1.02]"
                                             >
                                                 <div className="aspect-[3/4] relative">
                                                     <img
@@ -841,7 +827,7 @@ const Store: React.FC = () => {
                                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                                         loading="lazy"
                                                     />
-                                                    <div className="absolute inset-0 bg-gradient-to-t from-[#2C1810]/70 via-[#2C1810]/20 to-transparent" />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
                                                     <div className="absolute bottom-0 left-0 right-0 p-3 text-left">
                                                         <p className="text-white font-black text-xs md:text-sm uppercase tracking-widest truncate leading-tight">{brand}</p>
                                                     </div>
@@ -860,12 +846,12 @@ const Store: React.FC = () => {
                 <section className={`pb-32 px-0.5 md:px-12 max-w-screen-2xl mx-auto ${(selectedBrand || selectedGender) ? 'pt-24 md:pt-32' : 'pt-4'}`} id="new">
                     <div className="flex flex-col md:flex-row md:items-start justify-between mb-6 px-1.5 md:px-0 gap-6 md:gap-10">
                         <div className="pt-0">
-                            <span className="text-[#C4956A] uppercase tracking-[0.4em] text-[10px] block mb-2 font-bold opacity-80">
+                            <span className="text-[#999] uppercase tracking-[0.4em] text-[10px] block mb-2 font-bold">
                                 {selectedBrand === 'PERRAMUS' ? (
                                     <span className="flex items-center gap-2">
-                                        <span className="w-8 h-[1px] bg-[#C4956A]/30"></span>
+                                        <span className="w-8 h-[1px] bg-[#ccc]"></span>
                                         OPORTUNIDAD ÚNICA
-                                        <span className="w-8 h-[1px] bg-[#C4956A]/30"></span>
+                                        <span className="w-8 h-[1px] bg-[#ccc]"></span>
                                     </span>
                                 ) : (selectedBrand || isBrandFilterOpen ? 'COLECCIÓN EXCLUSIVA' : '')}
                             </span>
@@ -887,7 +873,7 @@ const Store: React.FC = () => {
                     <div className="sticky top-[50px] md:top-[60px] z-[90] w-full bg-white py-3 px-3 md:px-6 mb-6 md:mb-8 rounded-none md:rounded-none border border-[var(--color-text)]/10 shadow-[0_15px_40px_rgba(0,0,0,0.05)] relative">
                         <div className="flex flex-col gap-2 md:gap-3">
                             {selectedGender && (
-                                <span className="text-[9px] md:text-xs font-black tracking-[0.2em] text-[#C4956A] uppercase whitespace-nowrap opacity-80 md:text-right w-full">
+                                <span className="text-[9px] md:text-xs font-black tracking-[0.2em] text-[#999] uppercase whitespace-nowrap md:text-right w-full">
                                     FILTRAR POR:
                                 </span>
                             )}
@@ -898,10 +884,10 @@ const Store: React.FC = () => {
                                         onClick={() => { setIsBrandFilterOpen(!isBrandFilterOpen); setIsCategoryFilterOpen(false); setIsSizeFilterOpen(false); setIsGenderFilterOpen(false); setIsOrderFilterOpen(false); }}
                                         className={`flex items-center gap-1.5 px-2.5 py-1.5 md:px-4 md:py-2 rounded-none border transition-all text-[8px] md:text-xs font-black tracking-[0.1em] md:tracking-[0.15em] uppercase whitespace-nowrap shrink-0 ${isBrandFilterOpen || selectedBrand
                                             ? 'filter-btn-active scale-105'
-                                            : 'border-[var(--color-text)]/10 text-[var(--color-text)] hover:border-[#C4956A]/50 hover:bg-[#2C1810]/5'
+                                            : 'border-[var(--color-text)]/10 text-[var(--color-text)] hover:border-black/30 hover:bg-black/5'
                                             }`}
                                     >
-                                        <Tag size={10} className={isBrandFilterOpen || selectedBrand ? 'text-[#C4956A]' : ''} />
+                                        <Tag size={10} className={isBrandFilterOpen || selectedBrand ? 'text-white' : ''} />
                                         <span>{selectedBrand || 'MARCA'}</span>
                                     </button>
 
@@ -910,10 +896,10 @@ const Store: React.FC = () => {
                                         onClick={() => { setIsCategoryFilterOpen(!isCategoryFilterOpen); setIsBrandFilterOpen(false); setIsSizeFilterOpen(false); setIsGenderFilterOpen(false); setIsOrderFilterOpen(false); }}
                                         className={`flex items-center gap-1.5 px-2.5 py-1.5 md:px-4 md:py-2 rounded-none border transition-all text-[8px] md:text-xs font-black tracking-[0.1em] md:tracking-[0.15em] uppercase whitespace-nowrap shrink-0 ${isCategoryFilterOpen || selectedCategory
                                             ? 'filter-btn-active scale-105'
-                                            : 'border-[var(--color-text)]/10 text-[var(--color-text)] hover:border-[#C4956A]/50 hover:bg-[#2C1810]/5'
+                                            : 'border-[var(--color-text)]/10 text-[var(--color-text)] hover:border-black/30 hover:bg-black/5'
                                             }`}
                                     >
-                                        <Filter size={10} className={isCategoryFilterOpen || selectedCategory ? 'text-[#C4956A]' : ''} />
+                                        <Filter size={10} className={isCategoryFilterOpen || selectedCategory ? 'text-white' : ''} />
                                         <span>{selectedCategory || 'CATEGORÍA'}</span>
                                     </button>
 
@@ -922,10 +908,10 @@ const Store: React.FC = () => {
                                         onClick={() => { setIsGenderFilterOpen(!isGenderFilterOpen); setIsBrandFilterOpen(false); setIsCategoryFilterOpen(false); setIsSizeFilterOpen(false); setIsOrderFilterOpen(false); }}
                                         className={`flex items-center gap-1.5 px-2.5 py-1.5 md:px-4 md:py-2 rounded-none border transition-all text-[8px] md:text-xs font-black tracking-[0.1em] md:tracking-[0.15em] uppercase whitespace-nowrap shrink-0 ${isGenderFilterOpen || selectedGender
                                             ? 'filter-btn-active scale-105'
-                                            : 'border-[var(--color-text)]/10 text-[var(--color-text)] hover:border-[#C4956A]/50 hover:bg-[#2C1810]/5'
+                                            : 'border-[var(--color-text)]/10 text-[var(--color-text)] hover:border-black/30 hover:bg-black/5'
                                             }`}
                                     >
-                                        <Users size={10} className={isGenderFilterOpen || selectedGender ? 'text-[#C4956A]' : ''} />
+                                        <Users size={10} className={isGenderFilterOpen || selectedGender ? 'text-white' : ''} />
                                         <span>{selectedGender || 'GÉNERO'}</span>
                                     </button>
 
@@ -934,12 +920,12 @@ const Store: React.FC = () => {
                                         onClick={() => { setIsSizeFilterOpen(!isSizeFilterOpen); setIsBrandFilterOpen(false); setIsCategoryFilterOpen(false); setIsGenderFilterOpen(false); setIsOrderFilterOpen(false); }}
                                         className={`flex items-center gap-1.5 px-2.5 py-1.5 md:px-4 md:py-2 rounded-none border transition-all text-[8px] md:text-xs font-black tracking-[0.1em] md:tracking-[0.15em] uppercase whitespace-nowrap shrink-0 ${isSizeFilterOpen || selectedSize
                                             ? 'filter-btn-active scale-105'
-                                            : 'border-[#C4956A]/40 text-[var(--color-text)] bg-[#C4956A]/5 hover:border-[#C4956A] hover:bg-[#C4956A]/10'
+                                            : 'border-black/20 text-[var(--color-text)] bg-black/5 hover:border-black/40 hover:bg-black/10'
                                             }`}
                                     >
-                                        <Ruler size={10} className={isSizeFilterOpen || selectedSize ? 'text-[#C4956A]' : 'text-[#C4956A]'} />
-                                        <span className={!selectedSize ? 'text-[#C4956A] font-bold' : ''}>
-                                            {selectedSize ? `TALLE: ${selectedSize}` : 'TALLE ✨'}
+                                        <Ruler size={10} className={isSizeFilterOpen || selectedSize ? 'text-white' : 'text-[#666]'} />
+                                        <span className={!selectedSize ? 'text-[#666] font-bold' : ''}>
+                                            {selectedSize ? `TALLE: ${selectedSize}` : 'TALLE'}
                                         </span>
                                     </button>
 
@@ -948,10 +934,10 @@ const Store: React.FC = () => {
                                         onClick={() => { setIsOrderFilterOpen(!isOrderFilterOpen); setIsBrandFilterOpen(false); setIsCategoryFilterOpen(false); setIsGenderFilterOpen(false); setIsSizeFilterOpen(false); }}
                                         className={`flex items-center gap-1.5 px-2.5 py-1.5 md:px-4 md:py-2 rounded-none border transition-all text-[8px] md:text-xs font-black tracking-[0.1em] md:tracking-[0.15em] uppercase whitespace-nowrap shrink-0 ${isOrderFilterOpen || selectedOrder
                                             ? 'filter-btn-active scale-105'
-                                            : 'border-[var(--color-text)]/10 text-[var(--color-text)] hover:border-[#C4956A]/50 hover:bg-[#2C1810]/5'
+                                            : 'border-[var(--color-text)]/10 text-[var(--color-text)] hover:border-black/30 hover:bg-black/5'
                                             }`}
                                     >
-                                        <Tag size={10} className={isOrderFilterOpen || selectedOrder ? 'text-[#C4956A]' : ''} />
+                                        <Tag size={10} className={isOrderFilterOpen || selectedOrder ? 'text-white' : ''} />
                                         <span>{selectedOrder === 'descuento-mayor' ? '% MAYOR OFF' : selectedOrder === 'descuento-menor' ? '% MENOR OFF' : 'ORDENAR'}</span>
                                     </button>
 
@@ -983,9 +969,9 @@ const Store: React.FC = () => {
 
                                 {/* Expandable Gender Filter Panel */}
                                 {isGenderFilterOpen && (
-                                    <div className="absolute top-[110%] left-0 right-0 p-6 bg-white border-2 border-[#C4956A]/30 rounded-none w-full xl:w-[550px] z-[50] shadow-[0_20px_80px_rgba(0,0,0,0.1)] animate-in fade-in slide-in-from-top-4 duration-300 xl:left-auto xl:right-0">
+                                    <div className="absolute top-[110%] left-0 right-0 p-6 bg-white border-2 border-[#e0e0e0] rounded-none w-full xl:w-[550px] z-[50] shadow-[0_20px_80px_rgba(0,0,0,0.1)] animate-in fade-in slide-in-from-top-4 duration-300 xl:left-auto xl:right-0">
                                         <div className="flex justify-between items-center mb-6">
-                                            <h4 className="text-[10px] font-black tracking-[0.3em] text-[#C4956A] uppercase">SELECCIONAR GÉNERO</h4>
+                                            <h4 className="text-[10px] font-black tracking-[0.3em] text-[#999] uppercase">SELECCIONAR GÉNERO</h4>
                                             {selectedGender && (
                                                 <button
                                                     onClick={() => {
@@ -1013,8 +999,8 @@ const Store: React.FC = () => {
                                                         setIsGenderFilterOpen(false);
                                                     }}
                                                     className={`w-full text-left px-4 py-3 rounded-none border transition-all text-[11px] font-black tracking-[0.2em] uppercase ${selectedGender === gender
-                                                        ? 'bg-[#C4956A] text-white border-[#C4956A]'
-                                                        : 'border-[var(--color-text)]/5 text-[var(--color-text)] hover:bg-[#2C1810]/5 hover:border-[var(--color-text)]/20 hover:pl-6'
+                                                        ? 'bg-black text-white border-black'
+                                                        : 'border-[var(--color-text)]/5 text-[var(--color-text)] hover:bg-black/5 hover:border-[var(--color-text)]/20 hover:pl-6'
                                                         }`}
                                                 >
                                                     {gender}
@@ -1026,9 +1012,9 @@ const Store: React.FC = () => {
 
                                 {/* Expandable Brand Filter Panel */}
                                 {isBrandFilterOpen && (
-                                    <div className="absolute top-[110%] left-0 right-0 p-6 bg-white border-2 border-[#C4956A]/30 rounded-none w-full xl:w-[550px] z-[50] shadow-[0_20px_80px_rgba(0,0,0,0.1)] animate-in fade-in slide-in-from-top-4 duration-300 xl:left-auto xl:right-0">
+                                    <div className="absolute top-[110%] left-0 right-0 p-6 bg-white border-2 border-[#e0e0e0] rounded-none w-full xl:w-[550px] z-[50] shadow-[0_20px_80px_rgba(0,0,0,0.1)] animate-in fade-in slide-in-from-top-4 duration-300 xl:left-auto xl:right-0">
                                         <div className="flex justify-between items-center mb-6">
-                                            <h4 className="text-[10px] font-black tracking-[0.3em] text-[#C4956A] uppercase">SELECCIONAR MARCA</h4>
+                                            <h4 className="text-[10px] font-black tracking-[0.3em] text-[#999] uppercase">SELECCIONAR MARCA</h4>
                                             {selectedBrand && (
                                                 <button
                                                     onClick={() => {
@@ -1064,8 +1050,8 @@ const Store: React.FC = () => {
                                                             setIsBrandFilterOpen(false);
                                                         }}
                                                         className={`w-full px-4 py-3 flex items-center justify-between rounded-none text-left border transition-all uppercase group ${selectedBrand === brand.name
-                                                            ? 'bg-[#C4956A] text-white border-[#C4956A] shadow-[0_0_15px_rgba(196,149,106,0.4)]'
-                                                            : 'bg-[#2C1810]/5 text-[var(--color-text)] border-[var(--color-text)]/10 hover:border-[#C4956A]/50 hover:bg-[#C4956A]/5'
+                                                            ? 'bg-black text-white border-black'
+                                                            : 'bg-black/5 text-[var(--color-text)] border-[var(--color-text)]/10 hover:border-black/30 hover:bg-black/10'
                                                             }`}
                                                         title={brand.name}
                                                     >
@@ -1080,7 +1066,7 @@ const Store: React.FC = () => {
                                                         {selectedBrand === brand.name ? (
                                                             <X size={12} className="shrink-0" />
                                                         ) : (
-                                                            <div className="w-1.5 h-1.5 shrink-0 rounded-none bg-[#C4956A] opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                            <div className="w-1.5 h-1.5 shrink-0 rounded-none bg-black opacity-0 group-hover:opacity-100 transition-opacity" />
                                                         )}
                                                     </button>
                                                 ))}
@@ -1090,9 +1076,9 @@ const Store: React.FC = () => {
 
                                 {/* Size Filter Panel */}
                                 {isSizeFilterOpen && (
-                                    <div className="absolute top-[110%] left-0 right-0 p-6 bg-white border-2 border-[#C4956A]/30 rounded-none w-full xl:w-[450px] z-[50] shadow-[0_20px_80px_rgba(0,0,0,0.1)] animate-in fade-in slide-in-from-top-4 duration-300 xl:left-auto xl:right-0">
+                                    <div className="absolute top-[110%] left-0 right-0 p-6 bg-white border-2 border-[#e0e0e0] rounded-none w-full xl:w-[450px] z-[50] shadow-[0_20px_80px_rgba(0,0,0,0.1)] animate-in fade-in slide-in-from-top-4 duration-300 xl:left-auto xl:right-0">
                                         <div className="flex justify-between items-center mb-6">
-                                            <h4 className="text-[10px] font-black tracking-[0.3em] text-[#C4956A] uppercase">SELECCIONAR TALLE</h4>
+                                            <h4 className="text-[10px] font-black tracking-[0.3em] text-[#999] uppercase">SELECCIONAR TALLE</h4>
                                             {selectedSize && (
                                                 <button
                                                     onClick={() => { setSelectedSize(null); setIsSizeFilterOpen(false); }}
@@ -1108,8 +1094,8 @@ const Store: React.FC = () => {
                                                     key={size}
                                                     onClick={() => { setSelectedSize(selectedSize === size ? null : size); setIsSizeFilterOpen(false); }}
                                                     className={`min-w-[45px] h-10 flex items-center justify-center rounded-none text-[10px] font-black border transition-all ${selectedSize === size
-                                                        ? 'bg-[#C4956A] text-white border-[#C4956A] shadow-[0_0_15px_rgba(196,149,106,0.4)]'
-                                                        : 'bg-[#2C1810]/5 text-[var(--color-text)] border-[var(--color-text)]/10 hover:border-[#C4956A]/50 hover:bg-[#C4956A]/5'
+                                                        ? 'bg-black text-white border-black'
+                                                        : 'bg-black/5 text-[var(--color-text)] border-[var(--color-text)]/10 hover:border-black/30 hover:bg-black/10'
                                                         }`}
                                                 >
                                                     {size}
@@ -1121,9 +1107,9 @@ const Store: React.FC = () => {
 
                                 {/* Category Filter Panel */}
                                 {isCategoryFilterOpen && (
-                                    <div className="absolute top-[110%] left-0 right-0 p-6 bg-white border-2 border-[#C4956A]/30 rounded-none w-full xl:w-[550px] z-[50] shadow-[0_20px_80px_rgba(0,0,0,0.1)] animate-in fade-in slide-in-from-top-4 duration-300 xl:left-auto xl:right-0">
+                                    <div className="absolute top-[110%] left-0 right-0 p-6 bg-white border-2 border-[#e0e0e0] rounded-none w-full xl:w-[550px] z-[50] shadow-[0_20px_80px_rgba(0,0,0,0.1)] animate-in fade-in slide-in-from-top-4 duration-300 xl:left-auto xl:right-0">
                                         <div className="flex justify-between items-center mb-6">
-                                            <h4 className="text-[10px] font-black tracking-[0.3em] text-[#C4956A] uppercase">SELECCIONAR CATEGORÍA</h4>
+                                            <h4 className="text-[10px] font-black tracking-[0.3em] text-[#999] uppercase">SELECCIONAR CATEGORÍA</h4>
                                             {selectedCategory && (
                                                 <button
                                                     onClick={() => {
@@ -1156,14 +1142,14 @@ const Store: React.FC = () => {
                                                         setIsCategoryFilterOpen(false);
                                                     }}
                                                     className={`w-full px-4 py-2.5 flex items-center justify-between rounded-none text-[10px] font-black border transition-all uppercase tracking-[0.15em] group ${selectedCategory === category
-                                                        ? 'bg-[#C4956A] text-white border-[#C4956A] shadow-[0_0_15px_rgba(196,149,106,0.4)]'
-                                                        : 'bg-[#2C1810]/5 text-[var(--color-text)] border-[var(--color-text)]/10 hover:border-[#C4956A]/50 hover:bg-[#C4956A]/5'
+                                                        ? 'bg-black text-white border-black'
+                                                        : 'bg-black/5 text-[var(--color-text)] border-[var(--color-text)]/10 hover:border-black/30 hover:bg-black/10'
                                                         }`}
                                                 >
                                                     <span>{category}</span>
                                                     {selectedCategory === category && <X size={12} />}
                                                     {selectedCategory !== category && (
-                                                        <div className="w-1.5 h-1.5 rounded-none bg-[#C4956A] opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                        <div className="w-1.5 h-1.5 rounded-none bg-black opacity-0 group-hover:opacity-100 transition-opacity" />
                                                     )}
                                                 </button>
                                             ))}
@@ -1173,9 +1159,9 @@ const Store: React.FC = () => {
 
                                 {/* Sort Order Filter Panel */}
                                 {isOrderFilterOpen && (
-                                    <div className="absolute top-[110%] left-0 right-0 p-4 bg-white border border-[#C4956A]/30 rounded-none w-full xl:w-[350px] z-[50] shadow-[0_20px_80px_rgba(0,0,0,0.1)] animate-in fade-in slide-in-from-top-4 duration-300 xl:left-auto xl:right-0">
+                                    <div className="absolute top-[110%] left-0 right-0 p-4 bg-white border border-[#e0e0e0] rounded-none w-full xl:w-[350px] z-[50] shadow-[0_20px_80px_rgba(0,0,0,0.1)] animate-in fade-in slide-in-from-top-4 duration-300 xl:left-auto xl:right-0">
                                         <div className="flex justify-between items-center mb-4">
-                                            <h4 className="text-[9px] font-black tracking-[0.2em] text-[#C4956A] uppercase">ORDENAR POR</h4>
+                                            <h4 className="text-[9px] font-black tracking-[0.2em] text-[#999] uppercase">ORDENAR POR</h4>
                                             {selectedOrder && (
                                                 <button
                                                     onClick={() => {
@@ -1221,8 +1207,8 @@ const Store: React.FC = () => {
 
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-20 min-h-[50vh]">
-                            <Loader className="animate-spin text-[#C4956A] mb-4" size={48} />
-                            <span className="text-[10px] font-black tracking-[0.5em] text-[#C4956A] uppercase animate-pulse">
+                            <Loader className="animate-spin text-black mb-4" size={48} />
+                            <span className="text-[10px] font-black tracking-[0.5em] text-[#999] uppercase animate-pulse">
                                 Sincronizando Inventario...
                             </span>
                         </div>
@@ -1289,16 +1275,16 @@ const Store: React.FC = () => {
 
                 {/* Footer */}
                 <footer className="py-24 px-6 bg-[var(--color-background-alt)] relative overflow-hidden text-[var(--color-text)] border-t border-[var(--color-border)]">
-                    <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#C4956A]/10 blur-[120px] rounded-none" />
+                    <div className="absolute top-0 right-1/4 w-96 h-96 bg-black/5 blur-[120px] rounded-none" />
                     <div className="max-w-screen-2xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-20 relative z-10">
                         <div>
                             <h1 className="font-heading text-3xl font-black tracking-[0.6em] mb-12 uppercase">SHAMS</h1>
 
                             <div className="space-y-6">
-                                <h5 className="text-[11px] font-semibold tracking-[0.5em] text-[#C4956A] mb-6 uppercase">Contacto</h5>
+                                <h5 className="text-[11px] font-semibold tracking-[0.5em] text-[#999] mb-6 uppercase">Contacto</h5>
                                 <div className="space-y-5">
                                     <a href="mailto:admteruzyolanda@gmail.com" className="flex items-center gap-4 group">
-                                        <Mail size={16} strokeWidth={1.5} className="text-[var(--color-text-muted)] group-hover:text-[#C4956A] transition-colors" />
+                                        <Mail size={16} strokeWidth={1.5} className="text-[var(--color-text-muted)] group-hover:text-black transition-colors" />
                                         <span className="text-[10px] font-medium tracking-[0.2em] text-[var(--color-text-muted)] group-hover:text-[var(--color-text)] transition-colors uppercase">admteruzyolanda@gmail.com</span>
                                     </a>
                                     <a href="https://wa.me/5493412175258" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group">
@@ -1309,7 +1295,7 @@ const Store: React.FC = () => {
                                         onClick={() => setIsLocationsOpen(true)}
                                         className="flex items-center gap-4 group w-full text-left"
                                     >
-                                        <MapPin size={16} strokeWidth={1.5} className="text-[var(--color-text-muted)] group-hover:text-[#C4956A] transition-colors" />
+                                        <MapPin size={16} strokeWidth={1.5} className="text-[var(--color-text-muted)] group-hover:text-black transition-colors" />
                                         <span className="text-[10px] font-medium tracking-[0.2em] text-[var(--color-text-muted)] group-hover:text-[var(--color-text)] transition-colors uppercase">Locales</span>
                                     </button>
 
@@ -1322,7 +1308,7 @@ const Store: React.FC = () => {
                         </div>
 
                         <div>
-                            <h5 className="text-[11px] font-semibold tracking-[0.5em] text-[#C4956A] mb-10 uppercase">POLÍTICAS</h5>
+                            <h5 className="text-[11px] font-semibold tracking-[0.5em] text-[#999] mb-10 uppercase">POLÍTICAS</h5>
                             <ul className="space-y-6 text-[10px] font-medium tracking-[0.3em] text-[var(--color-text-muted)] uppercase">
                                 <li><Link to="/como-comprar" className="hover:text-[var(--color-text)] transition-colors">CÓMO COMPRAR</Link></li>
                                 <li><Link to="/envios" className="hover:text-[var(--color-text)] transition-colors">ENVÍOS Y SEGUIMIENTO</Link></li>
@@ -1334,15 +1320,15 @@ const Store: React.FC = () => {
                         </div>
 
                         <div>
-                            <h5 className="text-[11px] font-semibold tracking-[0.5em] text-[#C4956A] mb-10 uppercase">COMUNIDAD</h5>
+                            <h5 className="text-[11px] font-semibold tracking-[0.5em] text-[#999] mb-10 uppercase">COMUNIDAD</h5>
                             <p className="text-[11px] text-[var(--color-text-muted)] mb-8 tracking-[0.2em] font-medium uppercase">Sé el primero en acceder a los "Drops" exclusivos.</p>
                             {footerSubStatus === 'success' ? (
-                                <div className="flex items-center gap-3 py-4 border-b border-[#C4956A]/30">
-                                    <span className="text-[#C4956A] text-lg">✓</span>
-                                    <span className="text-[10px] font-semibold tracking-[0.3em] text-[#C4956A] uppercase">¡Bienvenido! 10% OFF en tu primera compra</span>
+                                <div className="flex items-center gap-3 py-4 border-b border-[#e0e0e0]">
+                                    <span className="text-black text-lg">✓</span>
+                                    <span className="text-[10px] font-semibold tracking-[0.3em] text-black uppercase">¡Bienvenido! 10% OFF en tu primera compra</span>
                                 </div>
                             ) : (
-                                <form onSubmit={handleFooterSubscribe} className="flex border-b border-[var(--color-border)] pb-4 group focus-within:border-[#C4956A]/60 transition-colors">
+                                <form onSubmit={handleFooterSubscribe} className="flex border-b border-[var(--color-border)] pb-4 group focus-within:border-black/40 transition-colors">
                                     <input
                                         type="email"
                                         value={footerEmail}
@@ -1354,7 +1340,7 @@ const Store: React.FC = () => {
                                     <button
                                         type="submit"
                                         disabled={footerSubStatus === 'loading'}
-                                        className="text-[10px] font-semibold tracking-[0.4em] text-[#C4956A] hover:text-[var(--color-text)] transition-colors disabled:opacity-50 whitespace-nowrap"
+                                        className="text-[10px] font-semibold tracking-[0.4em] text-[#999] hover:text-[var(--color-text)] transition-colors disabled:opacity-50 whitespace-nowrap"
                                     >
                                         {footerSubStatus === 'loading' ? '...' : 'UNIRSE'}
                                     </button>
@@ -1375,11 +1361,27 @@ const Store: React.FC = () => {
                             href="https://www.argentina.gob.ar/produccion/defensadelconsumidor/formulario"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-block text-[8px] text-[var(--color-text-muted)] hover:text-[#C4956A] tracking-[0.2em] font-medium uppercase transition-colors"
+                            className="inline-block text-[8px] text-[var(--color-text-muted)] hover:text-black tracking-[0.2em] font-medium uppercase transition-colors"
                         >
                             Defensa del Consumidor
                         </a>
-                        <p className="text-[8px] text-[#C4956A] tracking-[0.2em] font-medium">Diseño web Vince</p>
+                        <p className="text-[8px] text-[#999] tracking-[0.2em] font-medium mb-4">Diseño web Vince</p>
+                        
+                        <div className="flex justify-center pt-2">
+                             <a
+                                href="https://qr.afip.gob.ar/?qr=27057840655"
+                                target="_F960AFIPInfo"
+                                rel="noopener noreferrer"
+                                title="Datos Fiscales — ARCA"
+                                className="opacity-40 hover:opacity-100 transition-opacity"
+                            >
+                                <img
+                                    src="https://www.afip.gob.ar/images/f960/DATAWEB.jpg"
+                                    alt="QR ARCA"
+                                    className="w-7 h-7 mx-auto"
+                                />
+                            </a>
+                        </div>
                     </div>
                 </footer>
             </main>

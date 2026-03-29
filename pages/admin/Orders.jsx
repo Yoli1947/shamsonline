@@ -78,7 +78,7 @@ function OrderRow({ order, onStatusChange, onCancel }) {
                 onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
-                <td style={{ padding: '14px 16px', fontWeight: 700, color: '#C4956A', fontSize: 13 }}>
+                <td style={{ padding: '14px 16px', fontWeight: 700, color: '#DCDCDC', fontSize: 13 }}>
                     {order.order_number}
                 </td>
                 <td style={{ padding: '14px 16px', fontSize: 13 }}>

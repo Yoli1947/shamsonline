@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Search, Menu, User, X, Heart, Settings } from 'lucide-react';
+import ReactDOM from 'react-dom';
+import { ShoppingBag, Search, Menu, User, X, Heart, Settings, Gift } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -39,6 +40,7 @@ const Navbar: React.FC<NavbarProps> = ({
   const isAdmin = user?.role === 'admin';
 
   return (
+    <>
     <nav
       className="fixed top-0 left-0 right-0 z-[100] backdrop-blur-md border-b border-[var(--color-border)] px-4 md:px-8 py-4 shadow-sm"
       style={{ backgroundColor: 'var(--color-background)', opacity: 1 }}
@@ -80,13 +82,6 @@ const Navbar: React.FC<NavbarProps> = ({
             <button
               className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5"
               style={{ color: '#666666' }}
-              onClick={() => navigate('/marcas')}
-            >
-              MARCAS
-            </button>
-            <button
-              className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5"
-              style={{ color: '#666666' }}
               onClick={() => navigate('/?genero=Mujer#new')}
             >
               MUJER
@@ -105,15 +100,28 @@ const Navbar: React.FC<NavbarProps> = ({
             >
               ACCESORIOS
             </button>
-            <a
-              href="https://www.shamsoutlet.com"
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
               className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5"
               style={{ color: '#666666' }}
+              onClick={() => navigate('/marcas')}
+            >
+              MARCAS
+            </button>
+            <button
+              className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5 flex items-center gap-1"
+              style={{ color: '#666666' }}
+              onClick={() => navigate('/gift-cards')}
+            >
+              <Gift size={12} />
+              GIFT CARDS
+            </button>
+            <button
+              className="hover:text-red-600 transition-all uppercase text-[10px] lg:text-[12px] font-bold tracking-[0.12em] border-b border-transparent hover:border-red-600/10 pb-0.5"
+              style={{ color: '#d32f2f' }}
+              onClick={() => window.open('https://shamsoutlet.com', '_blank')}
             >
               OUTLET
-            </a>
+            </button>
             {isAdmin && (
               <button
                 className="flex items-center gap-2 hover:text-black transition-all font-normal uppercase text-[10px] lg:text-[12px] border-l border-zinc-200 pl-8 ml-4 tracking-[0.12em]"
@@ -137,6 +145,11 @@ const Navbar: React.FC<NavbarProps> = ({
                   type="text"
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      document.getElementById('new')?.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
                   placeholder="BUSCAR..."
                   className="bg-transparent border-b border-[var(--color-border)] text-[10px] uppercase font-bold tracking-widest focus:outline-none w-full pb-1"
                   style={{ color: 'var(--color-text)' }}
@@ -145,7 +158,7 @@ const Navbar: React.FC<NavbarProps> = ({
               </div>
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
-                className={`hover:text-[#C4956A] transition-colors p-2 ${isSearchOpen ? 'text-[#C4956A]' : ''}`}
+                className={`hover:text-black transition-colors p-2 ${isSearchOpen ? 'text-black' : ''}`}
                 style={{ color: 'var(--color-text)' }}
               >
                 <Search size={20} />
@@ -155,7 +168,7 @@ const Navbar: React.FC<NavbarProps> = ({
             {/* Auth */}
             <button
               onClick={onOpenAuth}
-              className="hover:text-[#C4956A] transition-colors"
+              className="hover:text-black transition-colors"
               style={{ color: 'var(--color-text)' }}
               title={customerName ? `Hola, ${customerName}` : 'Cuenta'}
             >
@@ -179,12 +192,12 @@ const Navbar: React.FC<NavbarProps> = ({
             {/* Cart */}
             <button
               onClick={onOpenCart}
-              className="relative hover:text-[#C4956A] transition-colors p-2"
+              className="relative hover:text-black transition-colors p-2"
               style={{ color: 'var(--color-text)' }}
             >
               <ShoppingBag size={20} />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#C4956A] text-white text-[8px] font-black h-4 w-4 flex items-center justify-center rounded-none font-sans">
+                <span className="absolute -top-1 -right-1 bg-black text-white text-[8px] font-black h-4 w-4 flex items-center justify-center rounded-none font-sans">
                   {cartCount}
                 </span>
               )}
@@ -194,91 +207,63 @@ const Navbar: React.FC<NavbarProps> = ({
       </div>
 
 
-      {/* Mobile Drawer */}
-      <div
-        className={`fixed inset-0 bg-[#2C1810]/40 backdrop-blur-sm z-[110] transition-opacity duration-300 md:hidden ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-        onClick={() => setIsMobileMenuOpen(false)}
-      >
-        <div
-          className={`fixed top-0 left-0 bottom-0 w-[65vw] max-w-sm border-r border-[var(--color-border)] p-6 transform transition-transform duration-300 ease-in-out flex flex-col shadow-2xl ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
-          style={{ backgroundColor: 'var(--color-background)' }}
-          onClick={e => e.stopPropagation()}
-          onTouchStart={e => {
-            (e.currentTarget as any).touchStartX = e.touches[0].clientX;
-          }}
-          onTouchEnd={e => {
-            const startX = (e.currentTarget as any).touchStartX;
-            if (!startX) return;
-            const endX = e.changedTouches[0].clientX;
-            if (startX - endX > 50) setIsMobileMenuOpen(false);
-          }}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between mb-12 pb-6 border-b border-[var(--color-border)]" style={{ color: 'var(--color-text)' }}>
-            <h2 className="font-heading text-xl font-bold tracking-[0.3em] text-[var(--color-text)]">MENÚ</h2>
-            <button
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="min-h-screen flex items-center justify-center rounded-none border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-border)] transition-colors"
-              style={{ backgroundColor: 'var(--color-background)' }}
-            >
-              <X size={24} />
-            </button>
-          </div>
-
-          {/* Links */}
-          <div className="grid grid-cols-2 gap-4">
-            {[
-              { label: 'INICIO', action: () => navigate('/') },
-              { label: 'MARCAS', action: () => navigate('/marcas') },
-              { label: 'MUJER', action: () => navigate('/?genero=Mujer#new') },
-              { label: 'HOMBRE', action: () => navigate('/?genero=Hombre#new') },
-              { label: 'ACCESORIOS', action: () => navigate('/?categoria=Accesorios#new') },
-            ].map((item, index) => (
-              <button
-                key={index}
-                className="group relative flex items-center justify-between w-full text-left py-2 font-medium tracking-[0.2em] uppercase text-xl hover:text-[var(--color-text)] transition-all"
-                style={{ color: 'var(--color-text)' }}
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  item.action();
-                }}
-              >
-                <span>{item.label}</span>
-                <span className="mb-8 h-[2px] bg-[#C4956A] transform origin-right scale-x-0 transition-transform group-hover:scale-x-100" style={{ color: 'var(--color-text)' }} />
-              </button>
-            ))}
-            <a
-              href="https://www.shamsoutlet.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative flex items-center justify-between w-full text-left py-2 font-medium tracking-[0.2em] uppercase text-xl hover:text-[#C4956A] transition-all"
-              style={{ color: 'var(--color-text)' }}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <span>OUTLET</span>
-            </a>
-
-            {isAdmin && (
-              <button
-                className="group relative flex items-center justify-between w-full text-left py-4 font-medium tracking-[0.2em] uppercase text-xl border-t border-[var(--color-border)] mt-4"
-                style={{ color: 'var(--color-accent)' }}
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  navigate('/admin/login');
-                }}
-              >
-                <span>PANEL DE CONTROL</span>
-                <Settings size={20} />
-              </button>
-            )}
-          </div>
-
-          <div className="mt-auto pt-8 border-t border-[#E5D5C5] text-center" style={{ color: 'var(--color-text-muted)' }}>
-            <p className="text-[12px] font-black tracking-[0.6em]" style={{ color: 'var(--color-text)' }}>SHAMS</p>
-          </div>
-        </div>
-      </div>
     </nav>
+
+    {isMobileMenuOpen && ReactDOM.createPortal(
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        background: '#ffffff',
+        zIndex: 99999,
+        overflowY: 'auto',
+        padding: '20px 24px',
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '20px', borderBottom: '1px solid #e0e0e0', marginBottom: '8px' }}>
+          <span style={{ fontSize: '20px', fontWeight: 800, letterSpacing: '0.3em', color: '#000' }}>MENÚ</span>
+          <button onClick={() => setIsMobileMenuOpen(false)}
+            style={{ padding: '8px 12px', fontSize: '20px', color: '#000', background: '#f5f5f5', border: 'none', cursor: 'pointer', fontWeight: 700 }}>
+            ✕
+          </button>
+        </div>
+
+        {/* Links */}
+        {[
+          { label: 'INICIO', action: () => navigate('/') },
+          { label: 'MUJER', action: () => navigate('/?genero=Mujer#new') },
+          { label: 'HOMBRE', action: () => navigate('/?genero=Hombre#new') },
+          { label: 'ACCESORIOS', action: () => navigate('/?categoria=Accesorios#new') },
+          { label: 'MARCAS', action: () => navigate('/marcas') },
+        ].map((item, index) => (
+          <button key={index} onClick={() => { setIsMobileMenuOpen(false); item.action(); }}
+            style={{ display: 'block', width: '100%', textAlign: 'left', padding: '18px 0', fontSize: '18px', fontWeight: 700, letterSpacing: '0.1em', color: '#000', background: 'none', border: 'none', borderBottom: '1px solid #eee', cursor: 'pointer' }}>
+            {item.label}
+          </button>
+        ))}
+        <button onClick={() => { setIsMobileMenuOpen(false); navigate('/gift-cards'); }}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '18px 0', fontSize: '18px', fontWeight: 700, letterSpacing: '0.1em', color: '#000', background: 'none', border: 'none', borderBottom: '1px solid #eee', cursor: 'pointer' }}>
+          <Gift size={18} />
+          GIFT CARDS
+        </button>
+        <button onClick={() => { setIsMobileMenuOpen(false); window.open('https://shamsoutlet.com', '_blank'); }}
+          style={{ display: 'block', width: '100%', textAlign: 'left', padding: '18px 0', fontSize: '18px', fontWeight: 700, letterSpacing: '0.1em', color: '#d32f2f', background: 'none', border: 'none', borderBottom: '1px solid #eee', cursor: 'pointer' }}>
+          OUTLET
+        </button>
+        {isAdmin && (
+          <button onClick={() => { setIsMobileMenuOpen(false); navigate('/admin/login'); }}
+            style={{ display: 'block', width: '100%', textAlign: 'left', padding: '18px 0', fontSize: '18px', fontWeight: 700, letterSpacing: '0.1em', color: '#888', background: 'none', border: 'none', borderBottom: '1px solid #eee', cursor: 'pointer' }}>
+            PANEL DE CONTROL
+          </button>
+        )}
+
+        <div style={{ marginTop: 'auto', paddingTop: '32px', textAlign: 'center' }}>
+          <span style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '0.5em', color: '#000' }}>SHAMS</span>
+        </div>
+      </div>,
+      document.body
+    )}
+    </>
   );
 };
 

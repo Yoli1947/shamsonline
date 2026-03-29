@@ -39,7 +39,7 @@ const SortableCard = ({ product, isSearchActive }) => {
             ref={setNodeRef}
             style={style}
             className={`relative bg-white border rounded-xl overflow-hidden group transition-all ${
-                isDragging ? 'border-[#C4956A] shadow-[0_0_20px_rgba(196,149,106,0.3)]' : 'border-[var(--color-border)] hover:border-white/20'
+                isDragging ? 'border-[#DCDCDC] shadow-[0_0_20px_rgba(196,149,106,0.3)]' : 'border-[var(--color-border)] hover:border-white/20'
             }`}
         >
             {/* Drag handle */}
@@ -214,7 +214,7 @@ export default function ProductOrder() {
                         disabled={saving || !hasChanges}
                         className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
                             hasChanges
-                                ? 'bg-[#C4956A] text-black hover:bg-white'
+                                ? 'bg-[#DCDCDC] text-black hover:bg-white'
                                 : 'bg-white text-[var(--color-text-muted)] cursor-not-allowed'
                         }`}
                     >
@@ -234,7 +234,7 @@ export default function ProductOrder() {
                         placeholder="Buscar producto..."
                         value={search}
                         onChange={e => setSearch(e.target.value)}
-                        className="w-full bg-white border border-[var(--color-border)] rounded-xl py-2.5 pl-9 pr-9 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[#C4956A] transition-all"
+                        className="w-full bg-white border border-[var(--color-border)] rounded-xl py-2.5 pl-9 pr-9 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[#DCDCDC] transition-all"
                     />
                     {search && (
                         <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
@@ -248,7 +248,7 @@ export default function ProductOrder() {
                     <select
                         value={selectedBrand}
                         onChange={e => setSelectedBrand(e.target.value)}
-                        className="appearance-none bg-white border border-[var(--color-border)] rounded-xl py-2.5 pl-4 pr-10 text-sm text-[var(--color-text)] focus:outline-none focus:border-[#C4956A] transition-all cursor-pointer min-w-[180px] [color-scheme:dark]"
+                        className="appearance-none bg-white border border-[var(--color-border)] rounded-xl py-2.5 pl-4 pr-10 text-sm text-[var(--color-text)] focus:outline-none focus:border-[#DCDCDC] transition-all cursor-pointer min-w-[180px] [color-scheme:dark]"
                     >
                         <option value="">Todas las marcas ({products.length})</option>
                         {brands.map(brand => {
@@ -270,7 +270,7 @@ export default function ProductOrder() {
                     <select
                         value={photoFilter}
                         onChange={e => setPhotoFilter(e.target.value)}
-                        className="appearance-none bg-white border border-[var(--color-border)] rounded-xl py-2.5 pl-4 pr-10 text-sm text-[var(--color-text)] focus:outline-none focus:border-[#C4956A] transition-all cursor-pointer min-w-[160px] [color-scheme:dark]"
+                        className="appearance-none bg-white border border-[var(--color-border)] rounded-xl py-2.5 pl-4 pr-10 text-sm text-[var(--color-text)] focus:outline-none focus:border-[#DCDCDC] transition-all cursor-pointer min-w-[160px] [color-scheme:dark]"
                     >
                         <option value="todas">Todas las fotos</option>
                         <option value="con">Con foto</option>
@@ -288,7 +288,7 @@ export default function ProductOrder() {
                 </div>
             )}
             {!isDragDisabled && isFiltered && (
-                <div className="mb-4 px-3 py-2 bg-[#C4956A]/10 border border-[#C4956A]/20 rounded-xl text-[#C4956A] text-xs">
+                <div className="mb-4 px-3 py-2 bg-[#DCDCDC]/10 border border-[#DCDCDC]/20 rounded-xl text-[#DCDCDC] text-xs">
                     Podés arrastrar para reordenar dentro del filtro seleccionado.
                 </div>
             )}
@@ -296,7 +296,7 @@ export default function ProductOrder() {
             {/* Grid */}
             {loading ? (
                 <div className="flex items-center justify-center py-24">
-                    <Loader size={32} className="animate-spin text-[#C4956A]" />
+                    <Loader size={32} className="animate-spin text-[#DCDCDC]" />
                 </div>
             ) : (
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>

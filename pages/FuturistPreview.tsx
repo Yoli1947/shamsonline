@@ -83,16 +83,16 @@ const FuturistPreview: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen relative selection:bg-[#C4956A] selection:text-white bg-[#080808] text-white overflow-x-hidden">
+        <div className="min-h-screen relative selection:bg-[#DCDCDC] selection:text-white bg-[#080808] text-white overflow-x-hidden">
             {/* Professional CSS Overrides */}
             <style>{`
                 @font-face { font-family: 'Syncopate'; src: url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&display=swap'); }
                 .font-heading { font-family: 'Syncopate', sans-serif; }
                 .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
-                .bg-vibrant-gradient { background: linear-gradient(135deg, #C4956A 0%, #E5D5C5 100%); }
-                .text-vibrant { background: linear-gradient(135deg, #C4956A 0%, #E5D5C5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+                .bg-vibrant-gradient { background: linear-gradient(135deg, #DCDCDC 0%, #E5D5C5 100%); }
+                .text-vibrant { background: linear-gradient(135deg, #DCDCDC 0%, #E5D5C5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
                 .bg-blob { position: fixed; width: 800px; height: 800px; border-radius: 50%; filter: blur(140px); z-index: -2; opacity: 0.25; pointer-events: none; animation: drift 20s infinite alternate; }
-                .blob-1 { top: -200px; right: -100px; background: #C4956A; animation-delay: 0s; }
+                .blob-1 { top: -200px; right: -100px; background: #DCDCDC; animation-delay: 0s; }
                 .blob-2 { bottom: -200px; left: -100px; background: #E5D5C5; animation-delay: -5s; }
                 .noise { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://grainy-gradients.vercel.app/noise.svg'); opacity: 0.01; pointer-events: none; z-index: 9999; }
                 .outline-text { -webkit-text-stroke: 1px rgba(255,255,255,0.05); color: transparent; }
@@ -124,20 +124,20 @@ const FuturistPreview: React.FC = () => {
                             alt="Fashion District"
                             className="w-full h-full object-cover transition-all duration-1000 scale-105"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-tr from-[#080808] via-transparent to-[#C4956A]/30" />
+                        <div className="absolute inset-0 bg-gradient-to-tr from-[#080808] via-transparent to-[#DCDCDC]/30" />
                         <div className="absolute inset-0 bg-black/40" />
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
                             <span className="font-heading text-[20vw] font-black text-white/[0.03] leading-none tracking-tighter outline-text">
                                 ROSARIO
                             </span>
                         </div>
-                        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#C4956A] to-transparent opacity-50" />
+                        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#DCDCDC] to-transparent opacity-50" />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-transparent to-transparent" />
                     </div>
 
                     <div className="relative z-10 text-center px-6 max-w-5xl mt-20">
-                        <div className="inline-block px-5 py-2 border border-[#C4956A]/50 rounded-full mb-8 backdrop-blur-3xl bg-white/5 group overflow-hidden">
-                            <span className="text-[10px] tracking-[0.6em] uppercase text-[#C4956A] font-black flex items-center gap-3">
+                        <div className="inline-block px-5 py-2 border border-[#DCDCDC]/50 rounded-full mb-8 backdrop-blur-3xl bg-white/5 group overflow-hidden">
+                            <span className="text-[10px] tracking-[0.6em] uppercase text-[#DCDCDC] font-black flex items-center gap-3">
                                 <span className="h-1 w-1 rounded-full bg-[#E5D5C5] animate-pulse" />
                                 DIRECTO DESDE ROSARIO (PREVIEW)
                             </span>
@@ -160,7 +160,7 @@ const FuturistPreview: React.FC = () => {
                     </div>
                     <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
                         <div className="w-[1.5px] h-14 bg-zinc-800 relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-full h-full bg-[#C4956A] -translate-y-full animate-[scroll-anim_2s_infinite]" />
+                            <div className="absolute top-0 left-0 w-full h-full bg-[#DCDCDC] -translate-y-full animate-[scroll-anim_2s_infinite]" />
                         </div>
                     </div>
                 </div>
@@ -170,7 +170,7 @@ const FuturistPreview: React.FC = () => {
                 <section className="py-40 px-6 md:px-12 max-w-screen-2xl mx-auto" id="new">
                     <div className="flex flex-col md:flex-row md:items-end justify-between mb-24 gap-8">
                         <div>
-                            <span className="text-[#C4956A] uppercase tracking-[0.6em] text-[10px] block mb-4 font-black">CURATED IN ROSARIO</span>
+                            <span className="text-[#DCDCDC] uppercase tracking-[0.6em] text-[10px] block mb-4 font-black">CURATED IN ROSARIO</span>
                             <h2 className="font-heading text-5xl md:text-8xl font-bold tracking-tighter text-white">LÍNEA <span className="text-vibrant italic">EXCLUSIVA</span></h2>
                         </div>
                         <div className="flex flex-wrap items-center gap-3">
@@ -178,7 +178,7 @@ const FuturistPreview: React.FC = () => {
                                 <Filter size={14} />
                                 <span>FILTRO:</span>
                             </div>
-                            <button className="px-8 py-3 rounded-full text-[9px] font-black tracking-[0.3em] uppercase bg-[#C4956A] text-white shadow-[0_10px_25px_rgba(46,91,255,0.4)]">TODOS</button>
+                            <button className="px-8 py-3 rounded-full text-[9px] font-black tracking-[0.3em] uppercase bg-[#DCDCDC] text-white shadow-[0_10px_25px_rgba(46,91,255,0.4)]">TODOS</button>
                         </div>
                     </div>
 
@@ -198,11 +198,11 @@ const FuturistPreview: React.FC = () => {
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[url('https://images.unsplash.com/photo-1610450949065-1f2809da7f81?q=80&w=2000&auto=format&fit=crop')] opacity-5 bg-fixed bg-cover" />
                     <div className="max-w-6xl mx-auto text-center relative z-10">
                         <h3 className="font-heading text-4xl md:text-6xl font-bold mb-32 tracking-tighter text-white uppercase italic">
-                            EL MANIFIESTO <span className="text-[#C4956A]">SHAMS</span>
+                            EL MANIFIESTO <span className="text-[#DCDCDC]">SHAMS</span>
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-left">
                             {[
-                                { title: 'ORIGEN GARANTIZADO', desc: 'Curaduría directa desde los distritos de moda más prestigiosos.', color: '#C4956A' },
+                                { title: 'ORIGEN GARANTIZADO', desc: 'Curaduría directa desde los distritos de moda más prestigiosos.', color: '#DCDCDC' },
                                 { title: 'PRECIOS DE ARCHIVO', desc: 'Acceso exclusivo a piezas de colección con valor increíble.', color: '#FF4D00' },
                                 { title: 'IA VANGUARDISTA', desc: 'Estilismo predictivo alimentado por tendencias globales.', color: '#E5D5C5' }
                             ].map((item, i) => (

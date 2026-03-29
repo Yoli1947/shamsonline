@@ -10,6 +10,24 @@ const slides = [
     objectPosition: "center"
   },
   {
+    image: "/armesto banner.jpg",
+    title: "SHAMS / ARMESTO",
+    subtitle: "ALTA SASTRERÍA",
+    description: "Experimentá el arte de la sastrería a medida. Estilo impecable y elegancia contemporánea.",
+    objectPosition: "50% 20%",
+    objectFit: "cover",
+    imageScale: 1.1
+  },
+  {
+    image: "/maxg/maxg banner.jpg",
+    title: "SHAMS / MAXG",
+    subtitle: "COLECCIÓN FW26",
+    description: "Inspiración urbana y tecnológica. La colección de MAXG redefine el abrigo contemporáneo con un diseño audaz y exclusivo.",
+    objectPosition: "center",
+    objectFit: "contain",
+    bgColor: "bg-[#f2f2f2]"
+  },
+  {
     image: "/hero-banner-cibeles.jpg",
     title: "SHAMS / CIBELES",
     subtitle: "NUEVA TEMPORADA",
@@ -50,12 +68,14 @@ const Hero: React.FC = () => {
           key={index}
           className={`absolute inset-0 transition-all duration-[1500ms] ease-in-out ${
             index === currentSlide ? 'opacity-100 z-10 scale-100' : 'opacity-0 z-0 scale-105'
-          }`}
+          } ${(slide as any).bgColor || 'bg-black'}`}
         >
           <img
             src={slide.image}
             alt={slide.title}
-            className="w-full h-full object-cover transition-all duration-1000"
+            className={`w-full h-full transition-all duration-1000 ${
+              (slide as any).objectFit === 'contain' ? 'object-contain' : 'object-cover'
+            }`}
             style={{
               objectPosition: slide.objectPosition,
               filter: `contrast(1.08) brightness(1.05) saturate(1.02)`,

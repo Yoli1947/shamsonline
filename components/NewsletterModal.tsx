@@ -36,7 +36,6 @@ const NewsletterModal: React.FC = () => {
         if (!email) return;
 
         setStatus('loading');
-        // Convertir DD/MM/AAAA → AAAA-MM-DD para la DB
         const birthdayISO = birthday.length === 10
             ? birthday.split('/').reverse().join('-')
             : birthday || null;
@@ -45,8 +44,6 @@ const NewsletterModal: React.FC = () => {
                 email,
                 birthday: birthdayISO,
             });
-
-            // Enviar email de bienvenida
             await supabase.functions.invoke('send-welcome-email', {
                 body: { email }
             });
@@ -65,7 +62,7 @@ const NewsletterModal: React.FC = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[300] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-md"
+                    style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(6px)' }}
                     onClick={handleClose}
                 >
                     <motion.div
@@ -73,71 +70,71 @@ const NewsletterModal: React.FC = () => {
                         animate={{ scale: 1, y: 0, opacity: 1 }}
                         exit={{ scale: 0.9, y: 20, opacity: 0 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="relative w-full max-w-2xl bg-[#050505] border border-white/10 rounded-[2rem] overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.8)] flex flex-col md:flex-row min-h-[420px]"
+                        style={{ position: 'relative', width: '100%', maxWidth: '672px', backgroundColor: '#ffffff', border: '1px solid #e0e0e0', overflow: 'hidden', boxShadow: '0 25px 60px rgba(0,0,0,0.2)', display: 'flex', flexDirection: 'row', minHeight: '420px' }}
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Close Button */}
                         <button
                             onClick={handleClose}
-                            className="absolute top-4 right-4 z-40 w-8 h-8 flex items-center justify-center rounded-none bg-black/60 text-white hover:bg-[#C4956A] transition-all border border-white/10 shadow-lg"
+                            style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 40, width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', border: '1px solid #e0e0e0', cursor: 'pointer', color: '#000' }}
                         >
                             <X size={16} />
                         </button>
 
-                        {/* Visual Side */}
-                        <div className="w-full md:w-5/12 relative bg-[#111] h-64 md:h-full flex flex-col shrink-0">
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 z-10" />
+                        {/* Visual Side - imagen con overlay oscuro (intencional) */}
+                        <div style={{ width: '42%', position: 'relative', backgroundColor: '#111', flexShrink: 0 }} className="hidden md:block">
+                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent, rgba(0,0,0,0.3))', zIndex: 10 }} />
                             <img
                                 src="/newsletter_shams.png"
-                                alt="Shams Couple"
-                                className="absolute inset-0 w-full h-full object-cover object-top transition-all duration-700 z-0"
+                                alt="Shams"
+                                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }}
                             />
-                            <div className="relative z-20 p-6 md:p-8 flex flex-col justify-end h-full">
-                                <span className="text-[#C4956A] text-[8px] md:text-[10px] font-black tracking-[0.4em] uppercase mb-1 md:mb-2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">CLUB SHAMS</span>
-                                <h2 className="text-2xl md:text-4xl font-black text-white tracking-tighter leading-[0.9] uppercase italic drop-shadow-[0_4px_10px_rgba(0,0,0,0.9)]">
-                                    VESTÍ EL <br /> <span className="text-[#C4956A] drop-shadow-[0_0_15px_rgba(196,149,106,0.8)] brightness-125">ÉXITO</span>
+                            <div style={{ position: 'relative', zIndex: 20, padding: '32px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '100%' }}>
+                                <span style={{ color: '#fff', fontSize: '9px', fontWeight: 900, letterSpacing: '0.4em', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>CLUB SHAMS</span>
+                                <h2 style={{ color: '#fff', fontSize: '32px', fontWeight: 900, letterSpacing: '-0.02em', textTransform: 'uppercase', fontStyle: 'italic', lineHeight: 0.9 }}>
+                                    VESTÍ EL <br /> ÉXITO
                                 </h2>
                             </div>
                         </div>
 
                         {/* Content Side */}
-                        <div className="w-full md:w-7/12 p-8 md:p-12 flex flex-col justify-center relative overflow-hidden bg-[#050505]">
+                        <div style={{ flex: 1, padding: '40px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', overflow: 'hidden', backgroundColor: '#ffffff' }}>
                             {/* Success Overlay */}
                             <AnimatePresence>
                                 {status === 'success' && (
                                     <motion.div
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        className="absolute inset-0 z-20 bg-[#050505] flex flex-col items-center justify-center text-center p-8"
+                                        style={{ position: 'absolute', inset: 0, zIndex: 20, backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '32px' }}
                                     >
-                                        <div className="w-16 h-16 rounded-none bg-[#C4956A]/20 flex items-center justify-center mb-4 border border-[#C4956A]/40">
-                                            <CheckCircle2 size={32} className="text-[#C4956A]" />
+                                        <div style={{ width: '64px', height: '64px', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', border: '1px solid #e0e0e0' }}>
+                                            <CheckCircle2 size={32} color="#000" />
                                         </div>
-                                        <h3 className="text-xl font-black text-white tracking-[0.1em] uppercase mb-2">¡EXCELENTE!</h3>
-                                        <p className="text-white/60 text-[10px] font-bold tracking-widest uppercase mb-6">
+                                        <h3 style={{ fontSize: '20px', fontWeight: 900, color: '#000', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>¡EXCELENTE!</h3>
+                                        <p style={{ color: '#666', fontSize: '10px', fontWeight: 700, letterSpacing: '0.3em', textTransform: 'uppercase' }}>
                                             Tu descuento ya está activo en tu carrito.
                                         </p>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
 
-                            <div className="relative z-10">
-                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#C4956A]/10 border border-[#C4956A]/20 rounded-none mb-6">
-                                    <Gift size={12} className="text-[#C4956A]" />
-                                    <span className="text-[#C4956A] text-[9px] font-black tracking-[0.2em] uppercase">10% OFF BIENVENIDA</span>
+                            <div style={{ position: 'relative', zIndex: 10 }}>
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 12px', backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', marginBottom: '20px' }}>
+                                    <Gift size={12} color="#000" />
+                                    <span style={{ color: '#000', fontSize: '9px', fontWeight: 900, letterSpacing: '0.2em', textTransform: 'uppercase' }}>10% OFF BIENVENIDA</span>
                                 </div>
 
-                                <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter mb-2 leading-tight">
-                                    UNITE AL <span className="text-[#C4956A] drop-shadow-[0_0_15px_rgba(196,149,106,0.4)]">PREMIUM</span>
+                                <h2 style={{ fontSize: '28px', fontWeight: 900, color: '#000', letterSpacing: '-0.02em', marginBottom: '8px', lineHeight: 1.1, textTransform: 'uppercase' }}>
+                                    UNITE AL CLUB
                                 </h2>
-                                <p className="text-white/40 text-[10px] md:text-xs font-medium tracking-widest uppercase mb-6 leading-relaxed max-w-xs">
+                                <p style={{ color: '#666', fontSize: '10px', fontWeight: 500, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '24px', lineHeight: 1.8 }}>
                                     Últimas tendencias y beneficios exclusivos directo a tu email.
                                 </p>
 
-                                <form onSubmit={handleSubmit} className="space-y-3">
+                                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                     {/* Email */}
-                                    <div className="relative group">
-                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#C4956A] transition-colors">
+                                    <div style={{ position: 'relative' }}>
+                                        <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, paddingLeft: '16px', display: 'flex', alignItems: 'center', pointerEvents: 'none', color: '#999' }}>
                                             <Mail size={16} />
                                         </div>
                                         <input
@@ -147,34 +144,34 @@ const NewsletterModal: React.FC = () => {
                                             placeholder="CORREO@EJEMPLO.COM"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
-                                            className="w-full bg-white/5 border border-white/10 rounded-none py-3 pl-12 pr-4 text-[10px] font-bold tracking-[0.2em] text-white placeholder:text-white/20 focus:outline-none focus:border-[#C4956A] focus:bg-white/10 transition-all uppercase"
+                                            style={{ width: '100%', backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', padding: '12px 16px 12px 48px', fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em', color: '#000', outline: 'none', textTransform: 'uppercase' as const }}
                                         />
                                     </div>
 
                                     {/* Cumpleaños */}
-                                    <div className="relative group">
-                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#C4956A] transition-colors">
+                                    <div style={{ position: 'relative' }}>
+                                        <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, paddingLeft: '16px', display: 'flex', alignItems: 'center', pointerEvents: 'none', color: '#999' }}>
                                             <Cake size={16} />
                                         </div>
                                         <input
                                             type="text"
                                             inputMode="numeric"
                                             autoComplete="bday"
-                                            placeholder="DD/MM/AAAA"
+                                            placeholder="DD/MM/AAAA (OPCIONAL)"
                                             value={birthday}
                                             onChange={handleBirthdayChange}
                                             maxLength={10}
-                                            className="w-full h-12 bg-white/5 border border-white/10 rounded-none pl-12 pr-4 text-sm font-bold text-white/60 placeholder:text-white/20 focus:outline-none focus:border-[#C4956A] focus:bg-white/10 transition-all"
+                                            style={{ width: '100%', height: '48px', backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', paddingLeft: '48px', paddingRight: '16px', fontSize: '11px', fontWeight: 700, color: '#000', outline: 'none' }}
                                         />
                                     </div>
 
                                     <button
                                         type="submit"
                                         disabled={status === 'loading'}
-                                        className="w-full bg-[#C4956A] text-black font-black py-4 rounded-none text-[10px] tracking-[0.3em] uppercase flex items-center justify-center gap-2 hover:bg-white hover:scale-[1.02] transition-all shadow-[0_10px_30px_rgba(196,149,106,0.2)]"
+                                        style={{ width: '100%', backgroundColor: '#000', color: '#fff', border: 'none', padding: '16px', fontSize: '10px', fontWeight: 900, letterSpacing: '0.3em', textTransform: 'uppercase' as const, cursor: status === 'loading' ? 'not-allowed' : 'pointer', opacity: status === 'loading' ? 0.6 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                                     >
                                         {status === 'loading' ? (
-                                            <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-none animate-spin" />
+                                            <div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
                                         ) : (
                                             'QUIERO MI BENEFICIO'
                                         )}
@@ -183,16 +180,12 @@ const NewsletterModal: React.FC = () => {
 
                                 <button
                                     onClick={handleClose}
-                                    className="w-full mt-4 text-white/20 hover:text-white text-[8px] font-black tracking-[0.4em] uppercase transition-colors"
+                                    style={{ width: '100%', marginTop: '16px', color: '#999', background: 'none', border: 'none', fontSize: '8px', fontWeight: 900, letterSpacing: '0.4em', textTransform: 'uppercase' as const, cursor: 'pointer' }}
                                 >
                                     Cerrar
                                 </button>
                             </div>
                         </div>
-
-                        {/* Background Decoration */}
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-[#C4956A]/5 blur-[100px] rounded-none -z-0 pointer-events-none" />
-                        <div className="absolute bottom-0 right-1/4 w-32 h-32 bg-[#C4956A]/10 blur-[60px] rounded-none -z-0 pointer-events-none animate-pulse" />
                     </motion.div>
                 </motion.div>
             )}

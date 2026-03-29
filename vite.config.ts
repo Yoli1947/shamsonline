@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig(() => {
   return {
-    base: '/shamsonline/',
+    base: '/',
     server: {
       port: 3002,
       host: '0.0.0.0',

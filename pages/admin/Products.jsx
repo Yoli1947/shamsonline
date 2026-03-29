@@ -414,7 +414,7 @@ export default function Products() {
                             height: '40px',
                             padding: '0 15px',
                             fontSize: '11px',
-                            background: isFullscreen ? '#C4956A' : 'rgba(255,255,255,0.05)',
+                            background: isFullscreen ? '#DCDCDC' : 'rgba(255,255,255,0.05)',
                             color: 'var(--color-text)',
                             border: isFullscreen ? 'none' : '1px solid rgba(255,255,255,0.1)',
                             fontWeight: '800'
@@ -458,15 +458,15 @@ export default function Products() {
                 <div className="admin-card" style={{
                     padding: '1rem 1.5rem',
                     marginBottom: '1rem',
-                    background: '#C4956A10',
-                    border: '1px solid #C4956A30',
+                    background: '#DCDCDC10',
+                    border: '1px solid #DCDCDC30',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     animation: 'fadeIn 0.3s ease'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <span style={{ fontSize: '13px', fontWeight: '800', color: '#C4956A' }}>
+                        <span style={{ fontSize: '13px', fontWeight: '800', color: '#DCDCDC' }}>
                             {selectedIds.size} SELECCIONADOS
                         </span>
                     </div>
@@ -486,7 +486,7 @@ export default function Products() {
                         <button
                             className="admin-btn"
                             onClick={applyBulkDiscount}
-                            style={{ background: '#C4956A', color: '#000', height: '36px' }}
+                            style={{ background: '#DCDCDC', color: '#000', height: '36px' }}
                         >
                             APLICAR A TODOS
                         </button>
@@ -531,7 +531,7 @@ export default function Products() {
                         onChange={(e) => setFilterPhoto(e.target.value)}
                         style={{
                             background: '#fff',
-                            border: '2px solid #C4956A',
+                            border: '2px solid #DCDCDC',
                             borderRadius: '8px',
                             padding: '4px 12px',
                             fontSize: '0.875rem',
@@ -554,7 +554,7 @@ export default function Products() {
                         onChange={(e) => setFilterVisibility(e.target.value)}
                         style={{
                             background: '#fff',
-                            border: '2px solid #C4956A',
+                            border: '2px solid #DCDCDC',
                             borderRadius: '8px',
                             padding: '4px 12px',
                             fontSize: '0.875rem',
@@ -640,9 +640,9 @@ export default function Products() {
                                     fontSize: '11px',
                                     fontWeight: '700',
                                     border: '1px solid',
-                                    borderColor: selectedSeasons.includes(s) ? '#C4956A' : 'rgba(255,255,255,0.1)',
-                                    background: selectedSeasons.includes(s) ? '#C4956A10' : 'transparent',
-                                    color: selectedSeasons.includes(s) ? '#C4956A' : '#666',
+                                    borderColor: selectedSeasons.includes(s) ? '#DCDCDC' : 'rgba(255,255,255,0.1)',
+                                    background: selectedSeasons.includes(s) ? '#DCDCDC10' : 'transparent',
+                                    color: selectedSeasons.includes(s) ? '#DCDCDC' : '#666',
                                     cursor: 'pointer',
                                     transition: 'all 0.2s',
                                     textTransform: 'uppercase',
@@ -779,7 +779,7 @@ export default function Products() {
                                 <td>
                                     <input
                                         className="inline-text-input"
-                                        style={{ color: '#C4956A', fontWeight: 'bold' }}
+                                        style={{ color: '#DCDCDC', fontWeight: 'bold' }}
                                         value={product.provider_sku || ''}
                                         onChange={(e) => handleInlineChange(product.id, 'provider_sku', e.target.value)}
                                         placeholder="Cód. Fab..."
@@ -978,6 +978,32 @@ export default function Products() {
                     </div>
                 </div>
             )}
+
+            {/* Botón volver arriba */}
+            <button
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                style={{
+                    position: 'fixed',
+                    bottom: '32px',
+                    right: '32px',
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '50%',
+                    background: '#111',
+                    color: '#fff',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                    zIndex: 9999,
+                }}
+                title="Volver arriba"
+            >
+                ↑
+            </button>
         </div>
     )
 }

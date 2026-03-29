@@ -803,7 +803,7 @@ export default function ProductForm({ product, onSuccess, onCancel }) {
                                         type="checkbox"
                                         checked={formData.isPublished}
                                         onChange={e => setFormData({ ...formData, isPublished: e.target.checked })}
-                                        style={{ width: '18px', height: '18px', accentColor: '#C4956A' }}
+                                        style={{ width: '18px', height: '18px', accentColor: '#DCDCDC' }}
                                     />
                                     Publicar en la tienda
                                 </label>
@@ -925,7 +925,7 @@ export default function ProductForm({ product, onSuccess, onCancel }) {
                                         }
                                     }}
                                     title="Aplicar primer color a todos"
-                                    style={{ background: 'none', border: 'none', color: '#C4956A', cursor: 'pointer', padding: 0, fontSize: '10px' }}
+                                    style={{ background: 'none', border: 'none', color: '#DCDCDC', cursor: 'pointer', padding: 0, fontSize: '10px' }}
                                 >
                                     (Copiar a todos)
                                 </button>

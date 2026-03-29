@@ -6,7 +6,7 @@ const faqs = [
     {
         category: 'Pagos',
         icon: CreditCard,
-        color: '#C4956A',
+        color: '#000000',
         questions: [
             {
                 q: '¿Qué medios de pago aceptan?',
@@ -25,7 +25,7 @@ const faqs = [
     {
         category: 'Envíos',
         icon: Truck,
-        color: '#a855f7',
+        color: '#000000',
         questions: [
             {
                 q: '¿Hacen envíos a todo el país?',
@@ -48,7 +48,7 @@ const faqs = [
     {
         category: 'Retiro en local',
         icon: MapPin,
-        color: '#f59e0b',
+        color: '#000000',
         questions: [
             {
                 q: '¿Puedo retirar en local?',
@@ -63,7 +63,7 @@ const faqs = [
     {
         category: 'Talles y productos',
         icon: Ruler,
-        color: '#10b981',
+        color: '#000000',
         questions: [
             {
                 q: '¿Cómo elijo el talle correcto?',
@@ -82,7 +82,7 @@ const faqs = [
     {
         category: 'Cambios y devoluciones',
         icon: RotateCcw,
-        color: '#ef4444',
+        color: '#000000',
         questions: [
             {
                 q: '¿Puedo cambiar una prenda si no me queda bien?',
@@ -101,7 +101,7 @@ const faqs = [
     {
         category: 'Seguridad y privacidad',
         icon: Shield,
-        color: '#6366f1',
+        color: '#000000',
         questions: [
             {
                 q: '¿Es seguro comprar en Shams?',
@@ -116,7 +116,7 @@ const faqs = [
     {
         category: 'Contacto',
         icon: MessageCircle,
-        color: '#25D366',
+        color: '#000000',
         questions: [
             {
                 q: '¿Cómo me comunico con ustedes?',
@@ -134,7 +134,7 @@ const FAQItem = ({ q, a }: { q: string; a: string }) => {
     const [open, setOpen] = useState(false);
     return (
         <div
-            className={`border rounded-xl overflow-hidden transition-all duration-300 ${open ? 'border-white/20 bg-white/5' : 'border-[var(--color-border)] bg-white/[0.02] hover:border-[var(--color-border)]'}`}
+            className={`border overflow-hidden transition-all duration-300 ${open ? 'border-black/20 bg-black/[0.03]' : 'border-[var(--color-border)] bg-white hover:border-black/20'}`}
         >
             <button
                 onClick={() => setOpen(!open)}
@@ -156,9 +156,9 @@ export default function PreguntasFrecuentes() {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text)]">
+        <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', color: '#000000' }}>
             {/* Header */}
-            <div className="bg-[var(--color-background)] border-b border-[var(--color-border)] px-4 py-4 sticky top-0 z-50">
+            <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e5e5e5', padding: '16px', position: 'sticky', top: 0, zIndex: 50 }}>
                 <div className="max-w-4xl mx-auto flex items-center gap-4">
                     <button
                         onClick={() => navigate(-1)}
@@ -184,13 +184,13 @@ export default function PreguntasFrecuentes() {
 
                 {/* Categorías */}
                 <div className="space-y-10">
-                    {faqs.map(({ category, icon: Icon, color, questions }) => (
+                    {faqs.map(({ category, icon: Icon, questions }) => (
                         <div key={category}>
                             <div className="flex items-center gap-3 mb-4">
-                                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${color}20` }}>
-                                    <Icon size={16} style={{ color }} />
+                                <div style={{ width: '32px', height: '32px', backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Icon size={16} color="#000" />
                                 </div>
-                                <h2 className="text-sm font-black tracking-[0.2em] uppercase" style={{ color }}>
+                                <h2 style={{ fontSize: '13px', fontWeight: 900, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#000' }}>
                                     {category}
                                 </h2>
                             </div>
@@ -204,13 +204,13 @@ export default function PreguntasFrecuentes() {
                 </div>
 
                 {/* CTA WhatsApp */}
-                <div className="mt-16 p-8 rounded-2xl border border-[var(--color-border)] bg-white/[0.02] text-center">
+                <div className="mt-16 p-8 border border-[var(--color-border)] bg-white text-center">
                     <p className="text-[var(--color-text-muted)] text-sm mb-4">¿No encontraste la respuesta que buscabas?</p>
                     <a
                         href="https://wa.me/5493412175258"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 bg-[#25D366] text-black font-black px-6 py-3 rounded-xl text-sm uppercase tracking-widest hover:bg-[#20bc5a] transition-colors"
+                        className="inline-flex items-center gap-2 bg-black text-white font-black px-6 py-3 text-sm uppercase tracking-widest hover:bg-zinc-800 transition-colors"
                     >
                         <MessageCircle size={16} />
                         Escribinos por WhatsApp

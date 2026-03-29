@@ -207,8 +207,8 @@ export function AuthProvider({ children }) {
                 fontFamily: 'sans-serif'
             }}>
                 <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '16px' }}>SHAMS</div>
-                    <div style={{ color: '#C4956A' }}>Iniciando sesión...</div>
+                    <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '16px', letterSpacing: '0.4em' }}>SHAMS</div>
+                    <div style={{ color: '#999999', fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Cargando...</div>
                 </div>
             </div>
         )

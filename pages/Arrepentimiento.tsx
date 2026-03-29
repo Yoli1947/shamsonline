@@ -48,9 +48,9 @@ const Arrepentimiento: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text)] selection:bg-black selection:text-white">
+        <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', color: '#000000' }}>
             {/* Header */}
-            <div className="border-b border-[var(--color-border)] px-6 py-5 flex items-center gap-4 sticky top-0 bg-[var(--color-background)]/95 backdrop-blur-sm z-50">
+            <div style={{ borderBottom: '1px solid #e5e5e5', padding: '20px 24px', display: 'flex', alignItems: 'center', gap: '16px', position: 'sticky', top: 0, backgroundColor: '#ffffff', zIndex: 50 }}>
                 <button
                     onClick={() => navigate(-1)}
                     className="flex items-center gap-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors text-xs font-black tracking-widest uppercase"
@@ -77,8 +77,8 @@ const Arrepentimiento: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
                     {/* Información */}
                     <div className="md:col-span-4 space-y-8 animate-in fade-in slide-in-from-left-8 duration-700 delay-300">
-                        <div className="p-6 rounded-3xl bg-white/5 border border-[var(--color-border)] backdrop-blur-sm relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 w-24 h-24 bg-[#C4956A]/5 blur-2xl rounded-full" />
+                        <div style={{ padding: '24px', border: '1px solid #e5e5e5', backgroundColor: '#fafafa' }}>
+                            <div />
                             <Info className="text-black mb-4" size={24} />
                             <h3 className="text-[11px] font-black tracking-[0.3em] text-[var(--color-text)] uppercase mb-4">Información Importante</h3>
                             <p className="text-[var(--color-text-muted)] text-[10px] leading-relaxed tracking-wider font-bold uppercase">
@@ -90,7 +90,7 @@ const Arrepentimiento: React.FC = () => {
                     {/* Formulario */}
                     <div className="md:col-span-8 animate-in fade-in slide-in-from-right-8 duration-700 delay-400">
                         {status === 'success' ? (
-                            <div className="text-center py-20 px-8 rounded-[2.5rem] bg-[#C4956A]/5 border border-[#C4956A]/20 backdrop-blur-3xl animate-in zoom-in-95 duration-500">
+                            <div style={{ textAlign: 'center', padding: '80px 32px', border: '1px solid #e5e5e5', backgroundColor: '#fafafa' }}>
                                 <CheckCircle2 className="text-black mx-auto mb-6" size={64} strokeWidth={1} />
                                 <h2 className="text-2xl font-black uppercase tracking-widest mb-4">Solicitud Recibida</h2>
                                 <p className="text-[var(--color-text-muted)] text-[10px] tracking-[0.3em] font-black uppercase leading-loose mb-8">
@@ -98,7 +98,7 @@ const Arrepentimiento: React.FC = () => {
                                 </p>
                                 <button
                                     onClick={() => navigate('/')}
-                                    className="px-10 py-4 rounded-full bg-white text-black font-black text-[10px] tracking-[0.4em] uppercase hover:bg-[#C4956A] transition-all shadow-2xl hover:shadow-[#C4956A]/40"
+                                    className="px-10 py-4 rounded-full bg-white text-black font-black text-[10px] tracking-[0.4em] uppercase hover:bg-[#DCDCDC] transition-all shadow-2xl hover:shadow-[#DCDCDC]/40"
                                 >
                                     Volver al Inicio
                                 </button>
@@ -113,7 +113,7 @@ const Arrepentimiento: React.FC = () => {
                                             required
                                             value={formData.motivo}
                                             onChange={(e) => setFormData({ ...formData, motivo: e.target.value })}
-                                            className="w-full bg-white/5 border border-[var(--color-border)] rounded-2xl py-4 px-6 text-[11px] font-black tracking-[0.2em] text-[var(--color-text)] focus:outline-none focus:border-[#C4956A] transition-all appearance-none cursor-pointer hover:bg-white/[0.07] uppercase"
+                                            className="w-full border border-[#e5e5e5] py-4 px-6 text-[11px] font-black tracking-[0.2em] text-black focus:outline-none focus:border-black transition-all bg-white appearance-none cursor-pointer hover:bg-white/[0.07] uppercase"
                                         >
                                             <option value="" className="bg-white">SELECCIONÁ UN MOTIVO</option>
                                             <option value="arrepentimiento" className="bg-white">ARREPENTIMIENTO DE COMPRA</option>
@@ -134,7 +134,7 @@ const Arrepentimiento: React.FC = () => {
                                         placeholder="TU NOMBRE COMPLETO"
                                         value={formData.nombre}
                                         onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                                        className="w-full bg-white/5 border border-[var(--color-border)] rounded-2xl py-4 px-6 text-[11px] font-black tracking-[0.2em] text-[var(--color-text)] focus:outline-none focus:border-[#C4956A] transition-all placeholder:text-zinc-800 uppercase"
+                                        className="w-full border border-[#e5e5e5] py-4 px-6 text-[11px] font-black tracking-[0.2em] text-black focus:outline-none focus:border-black transition-all bg-white placeholder:text-zinc-800 uppercase"
                                     />
                                 </div>
 
@@ -148,7 +148,7 @@ const Arrepentimiento: React.FC = () => {
                                             placeholder="TU@EMAIL.COM"
                                             value={formData.email}
                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                            className="w-full bg-white/5 border border-[var(--color-border)] rounded-2xl py-4 px-6 text-[11px] font-black tracking-[0.2em] text-[var(--color-text)] focus:outline-none focus:border-[#C4956A] transition-all placeholder:text-zinc-800 uppercase"
+                                            className="w-full border border-[#e5e5e5] py-4 px-6 text-[11px] font-black tracking-[0.2em] text-black focus:outline-none focus:border-black transition-all bg-white placeholder:text-zinc-800 uppercase"
                                         />
                                     </div>
 
@@ -160,7 +160,7 @@ const Arrepentimiento: React.FC = () => {
                                             placeholder="11 0000 0000"
                                             value={formData.telefono}
                                             onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                                            className="w-full bg-white/5 border border-[var(--color-border)] rounded-2xl py-4 px-6 text-[11px] font-black tracking-[0.2em] text-[var(--color-text)] focus:outline-none focus:border-[#C4956A] transition-all placeholder:text-zinc-800 uppercase"
+                                            className="w-full border border-[#e5e5e5] py-4 px-6 text-[11px] font-black tracking-[0.2em] text-black focus:outline-none focus:border-black transition-all bg-white placeholder:text-zinc-800 uppercase"
                                         />
                                     </div>
                                 </div>
@@ -174,16 +174,16 @@ const Arrepentimiento: React.FC = () => {
                                         rows={4}
                                         value={formData.comentario}
                                         onChange={(e) => setFormData({ ...formData, comentario: e.target.value })}
-                                        className="w-full bg-white/5 border border-[var(--color-border)] rounded-2xl py-4 px-6 text-[11px] font-black tracking-[0.2em] text-[var(--color-text)] focus:outline-none focus:border-[#C4956A] transition-all placeholder:text-zinc-800 resize-none uppercase"
+                                        className="w-full border border-[#e5e5e5] py-4 px-6 text-[11px] font-black tracking-[0.2em] text-black focus:outline-none focus:border-black transition-all bg-white placeholder:text-zinc-800 resize-none uppercase"
                                     />
                                 </div>
 
                                 <button
                                     type="submit"
                                     disabled={status === 'loading'}
-                                    className="w-full py-5 rounded-2xl bg-[#C4956A] text-black font-black text-xs tracking-[0.5em] uppercase hover:bg-white transition-all shadow-[0_10px_30px_rgba(196,149,106,0.3)] hover:shadow-white/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 group overflow-hidden relative"
+                                    style={{ width: '100%', padding: '20px', backgroundColor: '#000', color: '#fff', fontWeight: 900, fontSize: '12px', letterSpacing: '0.5em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}
                                 >
-                                    <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
+                                    <div />
                                     <span className="relative z-10 flex items-center justify-center gap-3">
                                         {status === 'loading' ? 'ENVIANDO...' : 'ENVIAR SOLICITUD'}
                                         <Send size={14} className={`group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform ${status === 'loading' ? 'animate-pulse' : ''}`} />
@@ -194,7 +194,7 @@ const Arrepentimiento: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="w-full h-px bg-white/10 mt-20 mb-12" />
+                <div style={{ width: '100%', height: '1px', backgroundColor: '#e5e5e5', margin: '80px 0 48px' }} />
 
                 {/* Footer del Formulario */}
                 <div className="text-center opacity-40">

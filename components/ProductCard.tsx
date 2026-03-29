@@ -101,7 +101,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onOpenD
                   e.stopPropagation();
                   setHoverIndex(idx);
                 }}
-                className={`h-1 rounded-none transition-all duration-500 ${hoverIndex === idx ? 'w-6 bg-[#C4956A]' : 'w-1 bg-[#2C1810]/20'}`}
+                className={`h-1 rounded-none transition-all duration-500 ${hoverIndex === idx ? 'w-6 bg-[#DCDCDC]' : 'w-1 bg-[#2C1810]/20'}`}
               />
             ))}
           </div>
@@ -136,7 +136,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onOpenD
         <div className="absolute bottom-6 right-6 translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 z-30 hidden md:block">
           <button
             onClick={(e) => { e.stopPropagation(); onOpenDetail(product); }}
-            className="bg-[#2C1810] text-white p-4 rounded-none shadow-2xl hover:bg-[#C4956A] transition-colors"
+            className="bg-[#2C1810] text-white p-4 rounded-none shadow-2xl hover:bg-[#DCDCDC] transition-colors"
           >
             <Plus size={20} />
           </button>
@@ -150,11 +150,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onOpenD
             {Array.from(new Set(product.variants.filter(v => (Number(v.stock) || 0) > 0).map(v => v.color))).filter(Boolean).map((color, idx) => {
               const colorStr = String(color);
               const colorKey = colorStr.toLowerCase().trim();
-              const colorHex = (COLOR_MAP as any)[colorKey] || '#C4956A';
+              const colorHex = (COLOR_MAP as any)[colorKey] || '#DCDCDC';
               return (
                 <div key={idx} className="group/color relative">
                   <div
-                    className="w-3 h-3 md:w-3.5 md:h-3.5 rounded-none border border-[var(--color-border)] shadow-sm transition-all group-hover/color:scale-125 ring-offset-2 ring-offset-[#FAF7F2] group-hover/color:ring-1 ring-[#C4956A]"
+                    className="w-3 h-3 md:w-3.5 md:h-3.5 rounded-none border border-[var(--color-border)] shadow-sm transition-all group-hover/color:scale-125 ring-offset-2 ring-offset-[#FAF7F2] group-hover/color:ring-1 ring-[#DCDCDC]"
                     style={{ backgroundColor: colorHex }}
                   />
                 </div>
@@ -173,10 +173,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onOpenD
         {/* Prices */}
         <div className="mt-auto pt-2 space-y-1.5">
           <div className="flex items-center gap-2">
-            <span className="text-sm md:text-sm font-bold text-[var(--color-text)] tracking-tighter">
+            <span className="text-[12px] md:text-[13px] font-bold text-[var(--color-text)] tracking-tighter leading-none">
               ${(product.originalPrice > product.price ? product.originalPrice : (product.price || 0)).toLocaleString()}
             </span>
-            <span className="text-[10px] font-medium text-[var(--color-text-muted)] uppercase tracking-widest mt-1">CRÉDITO / DÉBITO</span>
+            <span className="text-[9px] font-medium text-[var(--color-text-muted)] uppercase tracking-widest mt-0.5">CRÉDITO / DÉBITO</span>
           </div>
           {(() => {
             const creditPrice = product.originalPrice > product.price ? product.originalPrice : (product.price || 0);
@@ -185,10 +185,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onOpenD
             return (
               <div className="flex flex-col items-start gap-0.5">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs md:text-xs font-bold text-emerald-700 tracking-tighter">
+                  <span className="text-[11px] md:text-[12px] font-bold text-[var(--color-text)] tracking-tighter leading-none">
                     ${transferPrice.toLocaleString()}
                   </span>
-                  <span className="text-[10px] font-medium text-emerald-600 uppercase tracking-widest mt-1">
+                  <span className="text-[9px] font-medium text-[var(--color-text-muted)] uppercase tracking-widest mt-0.5">
                     TRANSFERENCIA {discountPct > 0 ? `${discountPct}% OFF` : ''}
                   </span>
                 </div>
@@ -199,7 +199,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onOpenD
 
         <button
           onClick={(e) => { e.stopPropagation(); onOpenDetail(product); }}
-          className="mt-4 w-full py-4 rounded-none font-medium text-[11px] md:text-[12px] tracking-[0.2em] uppercase transition-all duration-300 flex items-center justify-center bg-[#2C1810]/5 hover:bg-[#C4956A] text-[var(--color-text)] hover:text-white active:scale-[0.98] border border-[var(--color-border)] hover:border-[#C4956A] shadow-sm hover:shadow-md overflow-hidden relative group/btn"
+          className="mt-4 w-full py-4 rounded-none font-medium text-[11px] md:text-[12px] tracking-[0.2em] uppercase transition-all duration-300 flex items-center justify-center bg-[#2C1810]/5 hover:bg-[#DCDCDC] text-[var(--color-text)] hover:text-white active:scale-[0.98] border border-[var(--color-border)] hover:border-[#DCDCDC] shadow-sm hover:shadow-md overflow-hidden relative group/btn"
         >
           <span className="relative z-10">EXPLORAR PIEZA</span>
         </button>

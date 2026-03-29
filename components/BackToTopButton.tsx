@@ -32,45 +32,30 @@ const BackToTopButton: React.FC = () => {
     return (
         <button
             onClick={scrollToTop}
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
             aria-label="Volver arriba"
             style={{
                 position: 'fixed',
                 bottom: '28px',
-                left: '28px', // Posicionado a la inversa (izquierda) del botón de WhatsApp
+                left: '28px',
                 zIndex: 9998,
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
-                background: '#0a0a0a',
-                color: '#C4956A',
-                border: '1px solid rgba(196, 149, 106, 0.3)',
-                borderRadius: '50px',
-                padding: hovered ? '12px 20px 12px 16px' : '14px',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.8), 0 0 15px rgba(196,149,106,0.2)',
-                backdropFilter: 'blur(10px)',
-                fontFamily: 'inherit',
-                fontWeight: 800,
-                fontSize: '11px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.1em',
-                transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                transform: hovered ? 'scale(1.05)' : 'scale(1)',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                maxWidth: hovered ? '200px' : '52px',
-                cursor: 'pointer'
-            }}
-        >
-            <ArrowUp size={22} style={{ flexShrink: 0 }} />
-
-            <span style={{
-                opacity: hovered ? 1 : 0,
+                justifyContent: 'center',
+                width: '36px',
+                height: '36px',
+                background: '#ffffff',
+                color: '#000000',
+                border: '1px solid #e0e0e0',
+                borderRadius: '0',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                cursor: 'pointer',
                 transition: 'opacity 0.2s ease',
-            }}>
-                BACK TO TOP
-            </span>
+                opacity: 0.7,
+            }}
+            onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+            onMouseLeave={e => (e.currentTarget.style.opacity = '0.7')}
+        >
+            <ArrowUp size={16} />
         </button>
     );
 };

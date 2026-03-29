@@ -2,72 +2,76 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Truck, MapPin, Clock, Search, Package, AlertCircle, Store } from 'lucide-react';
 
+const s = {
+    page: { minHeight: '100vh', backgroundColor: '#ffffff', color: '#000000' } as React.CSSProperties,
+    header: { borderBottom: '1px solid #e5e5e5', padding: '20px 24px', display: 'flex', alignItems: 'center', gap: '16px', position: 'sticky' as const, top: 0, backgroundColor: '#ffffff', zIndex: 50 },
+    backBtn: { display: 'flex', alignItems: 'center', gap: '8px', color: '#666', background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 900, letterSpacing: '0.3em', textTransform: 'uppercase' as const },
+    content: { maxWidth: '768px', margin: '0 auto', padding: '64px 24px', display: 'flex', flexDirection: 'column' as const, gap: '64px' },
+    sectionTitle: { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' },
+    sectionTitleText: { fontSize: '13px', fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: '0.3em', color: '#000' },
+    card: { padding: '24px', border: '1px solid #e5e5e5', backgroundColor: '#fafafa' },
+    cardTitle: { fontSize: '11px', fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: '0.1em', color: '#000', marginBottom: '8px' },
+    cardText: { fontSize: '12px', color: '#666', lineHeight: 1.7 },
+    label: { fontSize: '9px', fontWeight: 900, letterSpacing: '0.4em', textTransform: 'uppercase' as const, color: '#999', marginBottom: '4px' },
+    big: { fontSize: '28px', fontWeight: 900, color: '#000', lineHeight: 1 },
+};
+
 const EnviosYSeguimiento: React.FC = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text)] selection:bg-black selection:text-white">
-            {/* Header */}
-            <div className="border-b border-[var(--color-border)] px-6 py-5 flex items-center gap-4 sticky top-0 bg-[var(--color-background)]/95 backdrop-blur-sm z-50">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors text-xs font-black tracking-widest uppercase"
-                >
-                    <ArrowLeft size={16} />
-                    Volver
+        <div style={s.page}>
+            <div style={s.header}>
+                <button onClick={() => navigate(-1)} style={s.backBtn}>
+                    <ArrowLeft size={16} /> Volver
                 </button>
-                <span className="text-[var(--color-text)]/20">|</span>
-                <span className="text-[10px] font-black tracking-[0.4em] text-black uppercase">Shams — Envíos</span>
+                <span style={{ color: '#ccc' }}>|</span>
+                <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#000', textTransform: 'uppercase' }}>Shams — Envíos</span>
             </div>
 
-            <div className="max-w-3xl mx-auto px-6 py-16 space-y-16">
-
+            <div style={s.content}>
                 {/* Título */}
-                <div className="text-center">
-                    <p className="text-black text-[10px] font-black tracking-[0.5em] uppercase mb-4">Logística</p>
-                    <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-6">
-                        Envíos y<br /><span className="text-black italic">Seguimiento</span>
+                <div style={{ textAlign: 'center' }}>
+                    <p style={{ ...s.label, marginBottom: '16px' }}>Logística</p>
+                    <h1 style={{ fontSize: '48px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.02em', marginBottom: '24px', color: '#000' }}>
+                        Envíos y<br /><span style={{ fontStyle: 'italic' }}>Seguimiento</span>
                     </h1>
-                    <p className="text-[var(--color-text-muted)] text-xs tracking-[0.2em] font-medium leading-relaxed max-w-md mx-auto uppercase">
+                    <p style={{ color: '#666', fontSize: '11px', letterSpacing: '0.2em', lineHeight: 1.8, textTransform: 'uppercase', maxWidth: '480px', margin: '0 auto' }}>
                         Trabajamos con Correo Argentino para llegar a cada rincón del país de forma rápida y segura.
                     </p>
                 </div>
 
                 {/* Métodos de envío */}
                 <div>
-                    <div className="flex items-center gap-3 mb-6">
-                        <Truck size={18} className="text-black" />
-                        <h2 className="text-sm font-black uppercase tracking-[0.3em]">Métodos de Envío</h2>
+                    <div style={s.sectionTitle}>
+                        <Truck size={18} color="#000" />
+                        <span style={s.sectionTitleText}>Métodos de Envío</span>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="p-6 rounded-2xl bg-white/5 border border-[var(--color-border)] hover:border-[#C4956A]/30 transition-all">
-                            <Truck size={20} className="text-black mb-4" strokeWidth={1.5} />
-                            <h3 className="text-[11px] font-black uppercase tracking-wider text-[var(--color-text)] mb-2">Envío a Domicilio</h3>
-                            <p className="text-[var(--color-text-muted)] text-[10px] leading-relaxed">El cartero entrega el paquete directamente en la dirección que indiques.</p>
-                        </div>
-                        <div className="p-6 rounded-2xl bg-white/5 border border-[var(--color-border)] hover:border-[#C4956A]/30 transition-all">
-                            <MapPin size={20} className="text-black mb-4" strokeWidth={1.5} />
-                            <h3 className="text-[11px] font-black uppercase tracking-wider text-[var(--color-text)] mb-2">Retiro en Correo</h3>
-                            <p className="text-[var(--color-text-muted)] text-[10px] leading-relaxed">Elegí la sucursal de Correo Argentino más cercana. Ideal si no estás en casa durante el día.</p>
-                        </div>
-                        <div className="p-6 rounded-2xl bg-[#C4956A]/5 border border-[#C4956A]/20 hover:border-[#C4956A]/50 transition-all">
-                            <Store size={20} className="text-black mb-4" strokeWidth={1.5} />
-                            <h3 className="text-[11px] font-black uppercase tracking-wider text-[var(--color-text)] mb-2">Retiro en Local</h3>
-                            <p className="text-[var(--color-text-muted)] text-[10px] leading-relaxed">Retirá tu pedido en cualquiera de nuestros locales en Rosario. ¡Sin costo de envío!</p>
-                        </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                        {[
+                            { icon: Truck, title: 'Envío a Domicilio', desc: 'El cartero entrega el paquete directamente en la dirección que indiques.' },
+                            { icon: MapPin, title: 'Retiro en Correo', desc: 'Elegí la sucursal de Correo Argentino más cercana. Ideal si no estás en casa durante el día.' },
+                            { icon: Store, title: 'Retiro en Local', desc: 'Retirá tu pedido en cualquiera de nuestros locales en Rosario. ¡Sin costo de envío!' },
+                        ].map(({ icon: Icon, title, desc }) => (
+                            <div key={title} style={s.card}>
+                                <Icon size={20} color="#000" strokeWidth={1.5} style={{ marginBottom: '16px' }} />
+                                <p style={s.cardTitle}>{title}</p>
+                                <p style={s.cardText}>{desc}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
                 {/* Retiro en locales */}
-                <div className="p-8 rounded-3xl bg-white/5 border border-[var(--color-border)]">
-                    <div className="flex items-center gap-3 mb-6">
-                        <Store size={18} className="text-black" />
-                        <h2 className="text-sm font-black uppercase tracking-[0.3em]">Nuestros Locales de Retiro</h2>
+                <div style={{ ...s.card, padding: '32px' }}>
+                    <div style={s.sectionTitle}>
+                        <Store size={18} color="#000" />
+                        <span style={s.sectionTitleText}>Nuestros Locales de Retiro</span>
                     </div>
-                    <p className="text-[var(--color-text-muted)] text-xs leading-relaxed mb-6">
-                        Si preferís evitar el envío, podés retirar tu pedido en cualquiera de nuestros locales en Rosario sin costo adicional. Al finalizar la compra, seleccioná <span className="text-[var(--color-text)] font-bold">"Retiro en Tienda"</span> y elegí el local que más te convenga.
+                    <p style={{ ...s.cardText, marginBottom: '24px' }}>
+                        Si preferís evitar el envío, podés retirar tu pedido en cualquiera de nuestros locales en Rosario sin costo adicional. Al finalizar la compra, seleccioná <strong>"Retiro en Tienda"</strong> y elegí el local que más te convenga.
                     </p>
-                    <div className="space-y-3">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
                         {[
                             { name: 'PERRAMUS-SHAMS (LA FAVORITA)', address: 'Córdoba 1101, Rosario', schedule: 'Lun a Sáb 10:00–20:00' },
                             { name: 'PERRAMUS-HUNTER (SHOPPING DEL SIGLO)', address: 'Pte. Roca 844, Rosario (Local 110)', schedule: 'Lun a Dom 9:00–20:00' },
@@ -75,12 +79,12 @@ const EnviosYSeguimiento: React.FC = () => {
                             { name: 'PERRAMUS-HUNTER (PLAZA PRINGLES)', address: 'Córdoba 1543, Rosario', schedule: 'Lun a Vie 9:30–19:30 | Sáb 9:30–19:00' },
                             { name: 'SHAMS - ROSARIO', address: 'Córdoba 1646, Rosario', schedule: 'Lun a Vie 9:30–19:30 | Sáb 9:30–19:00' },
                             { name: 'MONACLE TIENDA', address: 'Pte Roca 871, Rosario', schedule: 'Lun a Sáb 10:00–20:00' },
-                        ].map((local) => (
-                            <div key={local.name} className="flex items-start gap-3 py-3 border-b border-[var(--color-border)] last:border-0">
-                                <MapPin size={12} className="text-black mt-0.5 shrink-0" />
+                        ].map((local, i, arr) => (
+                            <div key={local.name} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '12px 0', borderBottom: i < arr.length - 1 ? '1px solid #e5e5e5' : 'none' }}>
+                                <MapPin size={12} color="#000" style={{ marginTop: '2px', flexShrink: 0 }} />
                                 <div>
-                                    <p className="text-[10px] font-black uppercase tracking-wider text-[var(--color-text)]">{local.name}</p>
-                                    <p className="text-[var(--color-text-muted)] text-[9px] mt-0.5">{local.address} — {local.schedule}</p>
+                                    <p style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#000' }}>{local.name}</p>
+                                    <p style={{ fontSize: '10px', color: '#666', marginTop: '2px' }}>{local.address} — {local.schedule}</p>
                                 </div>
                             </div>
                         ))}
@@ -89,54 +93,54 @@ const EnviosYSeguimiento: React.FC = () => {
 
                 {/* Tiempos de entrega */}
                 <div>
-                    <div className="flex items-center gap-3 mb-6">
-                        <Clock size={18} className="text-black" />
-                        <h2 className="text-sm font-black uppercase tracking-[0.3em]">Tiempos de Entrega</h2>
+                    <div style={s.sectionTitle}>
+                        <Clock size={18} color="#000" />
+                        <span style={s.sectionTitleText}>Tiempos de Entrega</span>
                     </div>
-                    <p className="text-[var(--color-text-muted)] text-xs leading-relaxed mb-6">
-                        Una vez confirmado el pago, despachamos tu pedido en un plazo de <span className="text-[var(--color-text)] font-bold">24 a 48 horas hábiles</span>.
+                    <p style={{ ...s.cardText, marginBottom: '24px' }}>
+                        Una vez confirmado el pago, despachamos tu pedido en un plazo de <strong>24 a 48 horas hábiles</strong>.
                     </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="p-6 rounded-2xl bg-white/5 border border-[var(--color-border)]">
-                            <p className="text-black text-[9px] font-black tracking-[0.4em] uppercase mb-2">Rosario y alrededores</p>
-                            <p className="text-2xl font-black text-[var(--color-text)]">2–4 días</p>
-                            <p className="text-[var(--color-text-muted)] text-[10px] mt-1 uppercase tracking-wider">Hábiles</p>
-                        </div>
-                        <div className="p-6 rounded-2xl bg-white/5 border border-[var(--color-border)]">
-                            <p className="text-black text-[9px] font-black tracking-[0.4em] uppercase mb-2">Resto del país</p>
-                            <p className="text-2xl font-black text-[var(--color-text)]">3–7 días</p>
-                            <p className="text-[var(--color-text-muted)] text-[10px] mt-1 uppercase tracking-wider">Hábiles</p>
-                        </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        {[
+                            { zone: 'Rosario y alrededores', days: '2–4 días' },
+                            { zone: 'Resto del país', days: '3–7 días' },
+                        ].map(({ zone, days }) => (
+                            <div key={zone} style={s.card}>
+                                <p style={s.label}>{zone}</p>
+                                <p style={s.big}>{days}</p>
+                                <p style={{ fontSize: '10px', color: '#999', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '4px' }}>Hábiles</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
                 {/* Seguimiento */}
                 <div>
-                    <div className="flex items-center gap-3 mb-6">
-                        <Search size={18} className="text-black" />
-                        <h2 className="text-sm font-black uppercase tracking-[0.3em]">Cómo Hacer el Seguimiento</h2>
+                    <div style={s.sectionTitle}>
+                        <Search size={18} color="#000" />
+                        <span style={s.sectionTitleText}>Cómo Hacer el Seguimiento</span>
                     </div>
-                    <div className="space-y-4">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         {[
-                            { num: '01', title: 'Email de Confirmación', desc: 'Una vez despachado tu paquete, recibirás un email con tu Número de Seguimiento (Tracking Number).' },
+                            { num: '01', title: 'Email de Confirmación', desc: 'Una vez despachado tu paquete, recibirás un email con tu Número de Seguimiento.' },
                             { num: '02', title: 'Ingresá al Portal', desc: 'Accedé a la sección de Seguimiento de Envíos de Correo Argentino.' },
-                            { num: '03', title: 'Ingresá el Código', desc: 'Pegá el código alfanumérico que te enviamos y verás el estado actual y la fecha estimada de entrega.' },
+                            { num: '03', title: 'Ingresá el Código', desc: 'Pegá el código alfanumérico que te enviamos y verás el estado y la fecha estimada de entrega.' },
                         ].map((step) => (
-                            <div key={step.num} className="flex gap-5 p-5 rounded-2xl bg-white/5 border border-[var(--color-border)]">
-                                <span className="text-black/40 text-2xl font-black shrink-0">{step.num}</span>
+                            <div key={step.num} style={{ display: 'flex', gap: '20px', padding: '20px', border: '1px solid #e5e5e5', backgroundColor: '#fafafa' }}>
+                                <span style={{ fontSize: '22px', fontWeight: 900, color: '#ccc', flexShrink: 0 }}>{step.num}</span>
                                 <div>
-                                    <p className="text-[11px] font-black uppercase tracking-wider text-[var(--color-text)] mb-1">{step.title}</p>
-                                    <p className="text-[var(--color-text-muted)] text-[10px] leading-relaxed">{step.desc}</p>
+                                    <p style={s.cardTitle}>{step.title}</p>
+                                    <p style={s.cardText}>{step.desc}</p>
                                 </div>
                             </div>
                         ))}
                     </div>
-                    <div className="mt-6 text-center">
+                    <div style={{ marginTop: '24px', textAlign: 'center' }}>
                         <a
                             href="https://www.correoargentino.com.ar/seguimiento-de-envios"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-[#C4956A] text-black font-black text-[10px] tracking-[0.3em] uppercase hover:bg-white transition-all shadow-[0_10px_30px_rgba(196,149,106,0.3)]"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '16px 32px', backgroundColor: '#000', color: '#fff', fontWeight: 900, fontSize: '10px', letterSpacing: '0.3em', textTransform: 'uppercase', textDecoration: 'none' }}
                         >
                             <Package size={14} />
                             SEGUÍ TU PEDIDO AQUÍ
@@ -145,20 +149,19 @@ const EnviosYSeguimiento: React.FC = () => {
                 </div>
 
                 {/* Aviso importante */}
-                <div className="p-6 rounded-2xl bg-amber-500/5 border border-amber-500/20 flex gap-4">
-                    <AlertCircle size={18} className="text-amber-400 shrink-0 mt-0.5" />
+                <div style={{ padding: '24px', border: '1px solid #e5e5e5', backgroundColor: '#fafafa', display: 'flex', gap: '16px' }}>
+                    <AlertCircle size={18} color="#000" style={{ flexShrink: 0, marginTop: '2px' }} />
                     <div>
-                        <p className="text-[11px] font-black uppercase tracking-wider text-amber-400 mb-2">Importante</p>
-                        <p className="text-[var(--color-text-muted)] text-[10px] leading-relaxed">
-                            Correo Argentino realiza una visita al domicilio. Si no hay nadie, el paquete permanecerá en la sucursal más cercana durante <strong className="text-[var(--color-text)]">5 días hábiles</strong> para que puedas retirarlo antes de que sea devuelto a nuestro depósito.<br /><br />
-                            Si el código de seguimiento no figura de inmediato, no te preocupes — puede tardar algunas horas en impactar en el sistema del correo.
+                        <p style={{ fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#000', marginBottom: '8px' }}>Importante</p>
+                        <p style={s.cardText}>
+                            Correo Argentino realiza una visita al domicilio. Si no hay nadie, el paquete permanecerá en la sucursal más cercana durante <strong>5 días hábiles</strong> para que puedas retirarlo.<br /><br />
+                            Si el código de seguimiento no figura de inmediato, puede tardar algunas horas en impactar en el sistema del correo.
                         </p>
                     </div>
                 </div>
 
-                <div className="w-full h-px bg-white/10" />
-                <div className="text-center opacity-40">
-                    <p className="text-[10px] font-black tracking-[0.4em] text-[var(--color-text-muted)] uppercase">Shams — Rosario, Santa Fe, Argentina</p>
+                <div style={{ textAlign: 'center', opacity: 0.4, paddingTop: '16px' }}>
+                    <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#666', textTransform: 'uppercase' }}>Shams — Rosario, Santa Fe, Argentina</p>
                 </div>
             </div>
         </div>

@@ -35,6 +35,7 @@ const ComoComprar = lazy(() => import('./pages/ComoComprar'));
 const EnviosYSeguimiento = lazy(() => import('./pages/EnviosYSeguimiento'));
 const PreguntasFrecuentes = lazy(() => import('./pages/PreguntasFrecuentes'));
 const OrderSuccess = lazy(() => import('./pages/OrderSuccess'));
+const GiftCardPage = lazy(() => import('./pages/GiftCardPage'));
 
 const ScrollToTop = () => {
   const location = useLocation();
@@ -65,7 +66,7 @@ const PublicFloatingWidgets = () => {
 // Fallback mientras se carga un chunk diferido
 const PageLoader = () => (
   <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center">
-    <div className="w-8 h-8 border-2 border-[#E5D5C5] border-t-[#C4956A] rounded-full animate-spin" />
+    <div className="w-8 h-8 border-2 border-[#E5D5C5] border-t-[#DCDCDC] rounded-full animate-spin" />
   </div>
 );
 
@@ -73,7 +74,7 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <SettingsProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <ScrollToTop />
         <Suspense fallback={<PageLoader />}>
           <Routes>
@@ -86,6 +87,7 @@ const App: React.FC = () => {
             <Route path="/como-comprar" element={<ComoComprar />} />
             <Route path="/envios" element={<EnviosYSeguimiento />} />
             <Route path="/preguntas-frecuentes" element={<PreguntasFrecuentes />} />
+            <Route path="/gift-cards" element={<GiftCardPage />} />
             <Route path="/orden/exito" element={<OrderSuccess />} />
             <Route path="/orden/pendiente" element={<OrderSuccess />} />
 

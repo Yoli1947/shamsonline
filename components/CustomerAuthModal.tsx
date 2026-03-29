@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Mail, Lock, User, Sparkles, ChevronRight, Gift } from 'lucide-react';
+import { X, Mail, Lock, User, ChevronRight, Gift } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface CustomerAuthModalProps {
@@ -60,25 +60,25 @@ const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({ isOpen, onClose, 
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-[#2C1810]/40 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}>
             <div
-                className="relative w-full max-w-md bg-[var(--color-background)] border border-[var(--color-border)] rounded-none overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500"
+                style={{ position: 'relative', width: '100%', maxWidth: '448px', backgroundColor: '#ffffff', border: '1px solid #e0e0e0', overflow: 'hidden', boxShadow: '0 25px 60px rgba(0,0,0,0.3)' }}
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-none bg-[var(--color-background)]/80 text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-background-alt)] transition-colors backdrop-blur-sm border border-[var(--color-border)]"
+                    style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 20, width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', border: '1px solid #e0e0e0', cursor: 'pointer', color: '#000' }}
                 >
                     <X size={18} />
                 </button>
 
                 {/* Promo Banner */}
-                <div className="bg-[#C4956A]/10 border-b border-[#C4956A]/20 px-6 py-4 text-center relative overflow-hidden">
-                    <div className="relative z-10 flex flex-col items-center gap-1">
-                        <Gift className="text-[#C4956A] mb-1" size={24} />
-                        <h3 className="text-[var(--color-text)] font-black uppercase tracking-[0.2em] text-sm md:text-base">
+                <div style={{ backgroundColor: '#000', borderBottom: '1px solid #222', padding: '16px 24px', textAlign: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                        <Gift color="#fff" size={22} style={{ marginBottom: '4px' }} />
+                        <h3 style={{ color: '#fff', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', fontSize: '14px' }}>
                             10% OFF EN TU PRIMERA COMPRA
                         </h3>
-                        <p className="text-[#C4956A] text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] opacity-90">
+                        <p style={{ color: '#aaa', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.3em' }}>
                             Registrate o iniciá sesión para reclamarlo
                         </p>
                     </div>
@@ -86,11 +86,11 @@ const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({ isOpen, onClose, 
 
                  {/* Form Content */}
                 <div className="p-8">
-                    <div className="text-center mb-8">
-                        <h2 className="font-heading text-2xl font-black tracking-[0.2em] text-[var(--color-text)] uppercase">
+                    <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+                        <h2 style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '0.2em', color: '#000', textTransform: 'uppercase' }}>
                             {isLogin ? 'BIENVENIDO/A' : 'UNITE AL CLUB'}
                         </h2>
-                        <p className="text-[var(--color-text-muted)] text-xs mt-2 font-medium tracking-widest uppercase">
+                        <p style={{ color: '#666', fontSize: '11px', marginTop: '8px', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
                             {isLogin ? 'Ingresá a tu cuenta para continuar' : 'Completá tus datos para acceder'}
                         </p>
                     </div>
@@ -98,7 +98,7 @@ const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({ isOpen, onClose, 
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                          {!isLogin && (
                             <div className="relative group">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[var(--color-text-muted)]/60 group-focus-within:text-[#C4956A] transition-colors">
+                                <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, paddingLeft: '16px', display: 'flex', alignItems: 'center', pointerEvents: 'none', color: '#999' }}>
                                     <User size={18} />
                                 </div>
                                 <input
@@ -107,13 +107,13 @@ const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({ isOpen, onClose, 
                                     placeholder="NOMBRE COMPLETO"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="w-full bg-[var(--color-background-alt)] border border-[var(--color-border)] rounded-none py-3 pl-12 pr-4 text-xs font-bold tracking-widest text-[var(--color-text)] placeholder:text-[var(--color-text-muted)]/40 focus:outline-none focus:border-[#C4956A] focus:bg-[#E8D5C0] transition-all uppercase"
+                                    style={{ width: '100%', backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', padding: '12px 16px 12px 48px', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: '#000', outline: 'none', textTransform: 'uppercase' as const }}
                                 />
                             </div>
                         )}
 
                          <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[var(--color-text-muted)]/60 group-focus-within:text-[#C4956A] transition-colors">
+                            <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, paddingLeft: '16px', display: 'flex', alignItems: 'center', pointerEvents: 'none', color: '#999' }}>
                                 <Mail size={18} />
                             </div>
                             <input
@@ -122,12 +122,12 @@ const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({ isOpen, onClose, 
                                 placeholder="CORREO ELECTRÓNICO"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full bg-[var(--color-background-alt)] border border-[var(--color-border)] rounded-none py-3 pl-12 pr-4 text-xs font-bold tracking-widest text-[var(--color-text)] placeholder:text-[var(--color-text-muted)]/40 focus:outline-none focus:border-[#C4956A] focus:bg-[#E8D5C0] transition-all uppercase"
+                                style={{ width: '100%', backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', padding: '12px 16px 12px 48px', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: '#000', outline: 'none', textTransform: 'uppercase' as const }}
                             />
                         </div>
 
                          <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[var(--color-text-muted)]/60 group-focus-within:text-[#C4956A] transition-colors">
+                            <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, paddingLeft: '16px', display: 'flex', alignItems: 'center', pointerEvents: 'none', color: '#999' }}>
                                 <Lock size={18} />
                             </div>
                             <input
@@ -136,7 +136,7 @@ const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({ isOpen, onClose, 
                                 placeholder="CONTRASEÑA"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full bg-[var(--color-background-alt)] border border-[var(--color-border)] rounded-none py-3 pl-12 pr-4 text-xs font-bold tracking-widest text-[var(--color-text)] placeholder:text-[var(--color-text-muted)]/40 focus:outline-none focus:border-[#C4956A] focus:bg-[#E8D5C0] transition-all"
+                                style={{ width: '100%', backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', padding: '12px 16px 12px 48px', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: '#000', outline: 'none' }}
                             />
                         </div>
 
@@ -146,20 +146,18 @@ const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({ isOpen, onClose, 
                             </p>
                         )}
                         {successMsg && (
-                            <p className="text-emerald-400 text-[10px] text-center font-bold tracking-widest uppercase bg-emerald-500/10 p-3 rounded-none border border-emerald-500/20">
+                            <p style={{ fontSize: '10px', textAlign: 'center', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', backgroundColor: '#f0f0f0', padding: '12px', border: '1px solid #e0e0e0', color: '#000' }}>
                                 {successMsg}
                             </p>
                         )}
 
-                         <button
+                        <button
                             type="submit"
                             disabled={loading}
-                            className="mt-2 w-full bg-[#2C1810] text-white hover:bg-[#C4956A] transition-all rounded-none py-4 flex items-center justify-center gap-2 font-black text-xs tracking-[0.2em] uppercase disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
+                            style={{ marginTop: '8px', width: '100%', backgroundColor: '#000', color: '#fff', border: 'none', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 900, fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.5 : 1 }}
                         >
-                            <span className="relative z-10 flex items-center gap-2">
-                                {loading ? 'PROCESANDO...' : isLogin ? 'INGRESAR AL CLUB' : 'CREAR CUENTA'}
-                                {!loading && <ChevronRight size={16} strokeWidth={3} />}
-                            </span>
+                            {loading ? 'PROCESANDO...' : isLogin ? 'INGRESAR AL CLUB' : 'CREAR CUENTA'}
+                            {!loading && <ChevronRight size={16} strokeWidth={3} />}
                         </button>
                     </form>
 
@@ -170,10 +168,9 @@ const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({ isOpen, onClose, 
                         <button
                             type="button"
                             onClick={() => { setIsLogin(!isLogin); setError(''); }}
-                            className="mt-2 text-[var(--color-text)] hover:text-[#C4956A] text-xs font-black tracking-[0.2em] uppercase flex items-center justify-center gap-1 mx-auto transition-colors"
+                            style={{ marginTop: '8px', color: '#000', background: 'none', border: 'none', fontSize: '12px', fontWeight: 900, letterSpacing: '0.2em', textTransform: 'uppercase', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', margin: '8px auto 0' }}
                         >
                             {isLogin ? 'REGISTRATE AQUÍ' : 'INICIÁ SESIÓN'}
-                            <Sparkles size={14} className={isLogin ? "opacity-0" : "text-[#C4956A]"} />
                         </button>
                     </div>
                 </div>
