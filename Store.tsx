@@ -686,9 +686,10 @@ const Store: React.FC = () => {
             p.brand?.toLowerCase() === selectedBrand.toLowerCase();
 
         // Filter by Gender
-        const matchesGender = !selectedGender ||
-            p.features?.includes(selectedGender) ||
-            p.features?.some(f => f?.toLowerCase() === selectedGender?.toLowerCase());
+        const matchesGender = !selectedGender || 
+            p.features?.includes(selectedGender) || 
+            p.features?.some(f => f?.toLowerCase() === selectedGender?.toLowerCase()) ||
+            (p.brand?.toLowerCase() === 'cibeles' && selectedGender === 'Mujer'); // Force Cibeles to appear in Mujer section
 
         // Filter by Search Query
         const searchTerms = searchQuery.toLowerCase().trim().split(/\s+/);
