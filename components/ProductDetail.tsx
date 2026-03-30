@@ -422,17 +422,17 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                         </div>
                     </div>
 
-                     <div className="pt-4 border-t border-[var(--color-border)] bg-[var(--color-background)] md:sticky md:bottom-0 mt-auto">
+                     <div className="pt-6 border-t border-black/5 bg-[var(--color-background)] md:sticky md:bottom-0 mt-auto">
                         <button
                             onClick={handleAddToCart}
                             disabled={added || isOutOfStock || (sizes.length > 0 && !selectedSize)}
-                            className={`w-full py-4 rounded-none flex items-center justify-center gap-3 font-black tracking-[0.2em] text-[10px] uppercase transition-all shadow-xl ${isOutOfStock
-                                ? 'bg-[var(--color-background-alt)] text-[var(--color-text-muted)] cursor-not-allowed'
+                            className={`w-full py-5 rounded-none flex items-center justify-center gap-3 font-black tracking-[0.3em] text-[11px] uppercase transition-all duration-500 ${isOutOfStock
+                                ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
                                 : added
                                     ? 'bg-black text-white'
                                     : (sizes.length > 0 && !selectedSize)
-                                        ? 'bg-[var(--color-background-alt)] text-[var(--color-text-muted)] cursor-not-allowed'
-                                        : 'bg-[#DCDCDC] text-white hover:bg-[#2C1810] active:scale-[0.98]'
+                                        ? 'bg-white text-black border-2 border-black hover:bg-black hover:text-white'
+                                        : 'bg-black text-white hover:bg-white hover:text-black border-2 border-black active:scale-[0.98] shadow-[0_20px_40px_rgba(0,0,0,0.1)]'
                                 }`}
                         >
                             {isOutOfStock ? (

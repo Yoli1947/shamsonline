@@ -210,55 +210,71 @@ const Navbar: React.FC<NavbarProps> = ({
     </nav>
 
     {isMobileMenuOpen && ReactDOM.createPortal(
-      <div style={{
-        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-        background: '#ffffff',
-        zIndex: 99999,
-        overflowY: 'auto',
-        padding: '20px 24px',
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '20px', borderBottom: '1px solid #e0e0e0', marginBottom: '8px' }}>
-          <span style={{ fontSize: '20px', fontWeight: 800, letterSpacing: '0.3em', color: '#000' }}>MENÚ</span>
-          <button onClick={() => setIsMobileMenuOpen(false)}
-            style={{ padding: '8px 12px', fontSize: '20px', color: '#000', background: '#f5f5f5', border: 'none', cursor: 'pointer', fontWeight: 700 }}>
-            ✕
+      <div className="fixed inset-0 bg-white z-[99999] overflow-y-auto animate-in fade-in duration-300">
+        {/* Header Area */}
+        <div className="flex items-center justify-between px-6 py-6 border-b border-black/5">
+          <span className="font-heading text-xl font-bold tracking-[0.3em] text-black">MENÚ</span>
+          <button 
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="w-10 h-10 flex items-center justify-center bg-black/5 text-black hover:bg-black hover:text-white transition-all"
+          >
+            <X size={20} />
           </button>
         </div>
 
-        {/* Links */}
-        {[
-          { label: 'INICIO', action: () => navigate('/') },
-          { label: 'MUJER', action: () => navigate('/?genero=Mujer#new') },
-          { label: 'HOMBRE', action: () => navigate('/?genero=Hombre#new') },
-          { label: 'ACCESORIOS', action: () => navigate('/?categoria=ACCESORIOS#new') },
-          { label: 'MARCAS', action: () => navigate('/marcas') },
-        ].map((item, index) => (
-          <button key={index} onClick={() => { setIsMobileMenuOpen(false); item.action(); }}
-            style={{ display: 'block', width: '100%', textAlign: 'left', padding: '18px 0', fontSize: '18px', fontWeight: 700, letterSpacing: '0.1em', color: '#000', background: 'none', border: 'none', borderBottom: '1px solid #eee', cursor: 'pointer' }}>
-            {item.label}
+        {/* Scrollable Content */}
+        <div className="px-6 py-8 flex flex-col gap-1">
+          {[
+            { label: 'INICIO', action: () => navigate('/') },
+            { label: 'MUJER', action: () => navigate('/?genero=Mujer#new') },
+            { label: 'HOMBRE', action: () => navigate('/?genero=Hombre#new') },
+            { label: 'ACCESORIOS', action: () => navigate('/?categoria=ACCESORIOS#new') },
+            { label: 'CATEGORÍAS', action: () => navigate('/?openFilter=categoria#new') },
+            { label: 'MARCAS', action: () => navigate('/marcas') },
+          ].map((item, index) => (
+            <button 
+              key={index} 
+              onClick={() => { setIsMobileMenuOpen(false); item.action(); }}
+              className="group flex items-center justify-between w-full py-5 text-left border-b border-black/5 transition-all hover:pl-2"
+            >
+              <span className="text-lg font-black tracking-[0.1em] text-black uppercase">{item.label}</span>
+              <div className="w-1.5 h-1.5 bg-black scale-0 group-hover:scale-100 transition-transform" />
+            </button>
+          ))}
+          
+          <button 
+            onClick={() => { setIsMobileMenuOpen(false); navigate('/gift-cards'); }}
+            className="group flex items-center justify-between w-full py-5 text-left border-b border-black/5 transition-all hover:pl-2"
+          >
+            <div className="flex items-center gap-3">
+              <Gift size={18} className="text-black" />
+              <span className="text-lg font-black tracking-[0.1em] text-black uppercase">GIFT CARDS</span>
+            </div>
+            <div className="w-1.5 h-1.5 bg-black scale-0 group-hover:scale-100 transition-transform" />
           </button>
-        ))}
-        <button onClick={() => { setIsMobileMenuOpen(false); navigate('/gift-cards'); }}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '18px 0', fontSize: '18px', fontWeight: 700, letterSpacing: '0.1em', color: '#000', background: 'none', border: 'none', borderBottom: '1px solid #eee', cursor: 'pointer' }}>
-          <Gift size={18} />
-          GIFT CARDS
-        </button>
-        <button onClick={() => { setIsMobileMenuOpen(false); window.open('https://shamsoutlet.com', '_blank'); }}
-          style={{ display: 'block', width: '100%', textAlign: 'left', padding: '18px 0', fontSize: '18px', fontWeight: 700, letterSpacing: '0.1em', color: '#666666', background: 'none', border: 'none', borderBottom: '1px solid #eee', cursor: 'pointer' }}>
-          OUTLET
-        </button>
-        {isAdmin && (
-          <button onClick={() => { setIsMobileMenuOpen(false); navigate('/admin/login'); }}
-            style={{ display: 'block', width: '100%', textAlign: 'left', padding: '18px 0', fontSize: '18px', fontWeight: 700, letterSpacing: '0.1em', color: '#888', background: 'none', border: 'none', borderBottom: '1px solid #eee', cursor: 'pointer' }}>
-            PANEL DE CONTROL
-          </button>
-        )}
 
-        <div style={{ marginTop: 'auto', paddingTop: '32px', textAlign: 'center' }}>
-          <span style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '0.5em', color: '#000' }}>SHAMS</span>
+          <button 
+            onClick={() => { setIsMobileMenuOpen(false); window.open('https://shamsoutlet.com', '_blank'); }}
+            className="flex items-center justify-between w-full py-5 text-left border-b border-black/10 transition-all hover:pl-2 opacity-60"
+          >
+            <span className="text-lg font-bold tracking-[0.1em] text-zinc-500 uppercase italic">OUTLET</span>
+          </button>
+
+          {isAdmin && (
+            <button 
+              onClick={() => { setIsMobileMenuOpen(false); navigate('/admin/login'); }}
+              className="flex items-center gap-3 w-full py-8 mt-4 text-left border-t border-black/5"
+            >
+              <Settings size={18} className="text-zinc-400" />
+              <span className="text-sm font-black tracking-[0.2em] text-zinc-400 uppercase">PANEL DE CONTROL</span>
+            </button>
+          )}
+        </div>
+
+        {/* Footer Area */}
+        <div className="mt-12 mb-20 px-6 text-center">
+          <h2 className="font-heading text-2xl font-black tracking-[0.5em] text-black/10 mb-2">SHAMS</h2>
+          <p className="text-[10px] tracking-[0.2em] text-zinc-400 uppercase font-medium">Est. 2026 — Rosario, Sta Fe</p>
         </div>
       </div>,
       document.body

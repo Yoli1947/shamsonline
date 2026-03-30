@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react'
-import { Plus, Search, Edit, Trash2, Image, X, Check, Loader, RefreshCw, UploadCloud, Maximize2, Minimize2 } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, Image, X, Check, Loader, RefreshCw, UploadCloud, Maximize2, Minimize2, Star } from 'lucide-react'
 import { getAllProducts, deleteProduct, updateProduct, saveProductVariants, uploadImage, getSeasons } from '../../lib/admin'
 import { supabase } from '../../lib/supabase'
 import { getBrands, getCategories } from '../../lib/api'
@@ -100,6 +100,17 @@ export default function Products() {
             currency: 'ARS',
             minimumFractionDigits: 0
         }).format(price || 0)
+    }
+
+    const toggleFeatured = async (product) => {
+        const newVal = !product.is_featured
+        setProducts(prev => prev.map(p => p.id === product.id ? { ...p, is_featured: newVal } : p))
+        try {
+            await updateProduct(product.id, { isFeatured: newVal })
+        } catch (e) {
+            setProducts(prev => prev.map(p => p.id === product.id ? { ...p, is_featured: !newVal } : p))
+            alert('Error al actualizar: ' + e.message)
+        }
     }
 
     const handleInlineChange = (productId, field, value, variantIndex = null) => {
@@ -924,6 +935,14 @@ export default function Products() {
                                                 {product.saving ? <Loader className="spin" size={16} /> : <Check size={16} />}
                                             </button>
                                         )}
+                                        <button
+                                            className="admin-btn"
+                                            onClick={() => toggleFeatured(product)}
+                                            title={product.is_featured ? 'Quitar de Últimos Ingresos' : 'Agregar a Últimos Ingresos'}
+                                            style={{ padding: '0.5rem', color: product.is_featured ? '#F59E0B' : '#9CA3AF', background: product.is_featured ? '#FEF3C7' : undefined }}
+                                        >
+                                            <Star size={16} fill={product.is_featured ? '#F59E0B' : 'none'} />
+                                        </button>
                                         <button
                                             className="admin-btn admin-btn-secondary"
                                             onClick={() => openEditProduct(product)}

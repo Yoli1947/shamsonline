@@ -155,7 +155,8 @@ const Store: React.FC = () => {
                     is_published: p.is_published,
                     is_active: p.is_active,
                     sort_order: p.sort_order,
-                    brandCardUrl: p.brand?.card_image_url
+                    brandCardUrl: p.brand?.card_image_url,
+                    is_featured: p.is_featured
                 };
             });
 
@@ -367,6 +368,23 @@ const Store: React.FC = () => {
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' });
     }, [selectedCategory, selectedBrand, selectedGender]);
+
+    // Handle openFilter URL parameter (from Navbar or other links)
+    useEffect(() => {
+        const openFilter = searchParams.get('openFilter');
+        if (openFilter === 'categoria') {
+            setIsCategoryFilterOpen(true);
+            setIsBrandFilterOpen(false);
+            setIsSizeFilterOpen(false);
+            setIsGenderFilterOpen(false);
+            setIsOrderFilterOpen(false);
+            
+            // Reemplazar la URL para limpiar el parámetro pero manteniendo el scroll
+            const newParams = new URLSearchParams(searchParams);
+            newParams.delete('openFilter');
+            navigate(`/?${newParams.toString()}#new`, { replace: true });
+        }
+    }, [searchParams, navigate]);
 
     // Extract available sizes from products - Filtered by current gender selection
     useEffect(() => {
@@ -729,6 +747,11 @@ const Store: React.FC = () => {
         const finalImageCheck = (totalWithPhotos > 0) ? hasValidImage : true;
 
         if (!(finalImageCheck && matchesCategory && matchesBrand && matchesGender && matchesSearch && matchesSize)) return false;
+
+        // Cuando no hay filtros activos, mostrar solo productos destacados (is_featured)
+        const noFilters = !selectedCategory && !selectedBrand && !selectedGender && !searchQuery && !selectedSize;
+        if (noFilters && p.is_featured === false) return false;
+
         return true;
     }).sort((a, b) => {
         if (!selectedOrder) return 0;
@@ -904,72 +927,66 @@ const Store: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Barra de Filtros Sticky y Compacta */}
-                    <div className="sticky top-[50px] md:top-[60px] z-[90] w-full bg-white py-3 px-3 md:px-6 mb-6 md:mb-8 rounded-none md:rounded-none border border-[var(--color-text)]/10 shadow-[0_15px_40px_rgba(0,0,0,0.05)] relative">
+                    {/* Barra de Filtros Sticky y Compacta - Diseño Premium */}
+                    <div className="sticky top-[95px] md:top-[128px] z-[90] w-full bg-white/95 backdrop-blur-md py-4 px-3 md:px-6 mb-6 md:mb-8 border-y border-[var(--color-text)]/5 shadow-[0_15px_35px_rgba(0,0,0,0.04)]">
                         <div className="flex flex-col gap-2 md:gap-3">
-                            {selectedGender && (
-                                <span className="text-[9px] md:text-xs font-black tracking-[0.2em] text-[#999] uppercase whitespace-nowrap md:text-right w-full">
-                                    FILTRAR POR:
+                            <div className="flex items-center justify-between px-1">
+                                <span className="text-[9px] md:text-xs font-black tracking-[0.2em] text-[#999] uppercase whitespace-nowrap">
+                                    {(selectedGender || selectedBrand || selectedCategory || searchQuery) ? 'FILTRANDO POR:' : 'FILTRAR CATÁLOGO:'}
+                                    <span className="ml-2 text-black/40 font-medium">({filteredProducts.length} ARTÍCULOS)</span>
                                 </span>
-                            )}
+                            </div>
                             <div className="flex flex-col xl:flex-row xl:items-center justify-end gap-3 md:gap-4">
                                 <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar w-full xl:w-auto relative [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                                    {/* Brand Filter Button */}
                                     <button
                                         onClick={() => { setIsBrandFilterOpen(!isBrandFilterOpen); setIsCategoryFilterOpen(false); setIsSizeFilterOpen(false); setIsGenderFilterOpen(false); setIsOrderFilterOpen(false); }}
-                                        className={`flex items-center gap-1.5 px-2.5 py-1.5 md:px-4 md:py-2 rounded-none border transition-all text-[8px] md:text-xs font-black tracking-[0.1em] md:tracking-[0.15em] uppercase whitespace-nowrap shrink-0 ${isBrandFilterOpen || selectedBrand
-                                            ? 'filter-btn-active scale-105'
-                                            : 'border-[var(--color-text)]/10 text-[var(--color-text)] hover:border-black/30 hover:bg-black/5'
+                                        className={`flex items-center gap-1.5 px-3 py-2 md:px-5 md:py-2.5 rounded-none border transition-all text-[10px] md:text-xs font-black tracking-[0.1em] md:tracking-[0.15em] uppercase whitespace-nowrap shrink-0 active:scale-95 ${isBrandFilterOpen || selectedBrand
+                                            ? 'bg-black text-white border-black shadow-[0_5px_15px_rgba(0,0,0,0.2)]'
+                                            : 'border-black/10 text-black/60 hover:border-black/30 hover:bg-black/5'
                                             }`}
                                     >
                                         <Tag size={10} className={isBrandFilterOpen || selectedBrand ? 'text-white' : ''} />
                                         <span>{selectedBrand || 'MARCA'}</span>
                                     </button>
 
-                                    {/* Category Filter Button */}
                                     <button
                                         onClick={() => { setIsCategoryFilterOpen(!isCategoryFilterOpen); setIsBrandFilterOpen(false); setIsSizeFilterOpen(false); setIsGenderFilterOpen(false); setIsOrderFilterOpen(false); }}
-                                        className={`flex items-center gap-1.5 px-2.5 py-1.5 md:px-4 md:py-2 rounded-none border transition-all text-[8px] md:text-xs font-black tracking-[0.1em] md:tracking-[0.15em] uppercase whitespace-nowrap shrink-0 ${isCategoryFilterOpen || selectedCategory
-                                            ? 'filter-btn-active scale-105'
-                                            : 'border-[var(--color-text)]/10 text-[var(--color-text)] hover:border-black/30 hover:bg-black/5'
+                                        className={`flex items-center gap-1.5 px-3 py-2 md:px-5 md:py-2.5 rounded-none border transition-all text-[10px] md:text-xs font-black tracking-[0.1em] md:tracking-[0.15em] uppercase whitespace-nowrap shrink-0 active:scale-95 ${isCategoryFilterOpen || selectedCategory
+                                            ? 'bg-black text-white border-black shadow-[0_5px_15px_rgba(0,0,0,0.2)]'
+                                            : 'border-black/10 text-black/60 hover:border-black/30 hover:bg-black/5'
                                             }`}
                                     >
                                         <Filter size={10} className={isCategoryFilterOpen || selectedCategory ? 'text-white' : ''} />
                                         <span>{selectedCategory || 'CATEGORÍA'}</span>
                                     </button>
 
-                                    {/* Gender Filter Button */}
                                     <button
                                         onClick={() => { setIsGenderFilterOpen(!isGenderFilterOpen); setIsBrandFilterOpen(false); setIsCategoryFilterOpen(false); setIsSizeFilterOpen(false); setIsOrderFilterOpen(false); }}
-                                        className={`flex items-center gap-1.5 px-2.5 py-1.5 md:px-4 md:py-2 rounded-none border transition-all text-[8px] md:text-xs font-black tracking-[0.1em] md:tracking-[0.15em] uppercase whitespace-nowrap shrink-0 ${isGenderFilterOpen || selectedGender
-                                            ? 'filter-btn-active scale-105'
-                                            : 'border-[var(--color-text)]/10 text-[var(--color-text)] hover:border-black/30 hover:bg-black/5'
+                                        className={`flex items-center gap-1.5 px-3 py-2 md:px-5 md:py-2.5 rounded-none border transition-all text-[10px] md:text-xs font-black tracking-[0.1em] md:tracking-[0.15em] uppercase whitespace-nowrap shrink-0 active:scale-95 ${isGenderFilterOpen || selectedGender
+                                            ? 'bg-black text-white border-black shadow-[0_5px_15px_rgba(0,0,0,0.2)]'
+                                            : 'border-black/10 text-black/60 hover:border-black/30 hover:bg-black/5'
                                             }`}
                                     >
                                         <Users size={10} className={isGenderFilterOpen || selectedGender ? 'text-white' : ''} />
                                         <span>{selectedGender || 'GÉNERO'}</span>
                                     </button>
 
-                                    {/* Size Filter Button */}
                                     <button
                                         onClick={() => { setIsSizeFilterOpen(!isSizeFilterOpen); setIsBrandFilterOpen(false); setIsCategoryFilterOpen(false); setIsGenderFilterOpen(false); setIsOrderFilterOpen(false); }}
-                                        className={`flex items-center gap-1.5 px-2.5 py-1.5 md:px-4 md:py-2 rounded-none border transition-all text-[8px] md:text-xs font-black tracking-[0.1em] md:tracking-[0.15em] uppercase whitespace-nowrap shrink-0 ${isSizeFilterOpen || selectedSize
-                                            ? 'filter-btn-active scale-105'
-                                            : 'border-black/20 text-[var(--color-text)] bg-black/5 hover:border-black/40 hover:bg-black/10'
+                                        className={`flex items-center gap-1.5 px-3 py-2 md:px-5 md:py-2.5 rounded-none border transition-all text-[10px] md:text-xs font-black tracking-[0.1em] md:tracking-[0.15em] uppercase whitespace-nowrap shrink-0 active:scale-95 ${isSizeFilterOpen || selectedSize
+                                            ? 'bg-black text-white border-black shadow-[0_5px_15px_rgba(0,0,0,0.2)]'
+                                            : 'border-black/10 text-black/60 hover:border-black/30 hover:bg-black/5'
                                             }`}
                                     >
-                                        <Ruler size={10} className={isSizeFilterOpen || selectedSize ? 'text-white' : 'text-[#666]'} />
-                                        <span className={!selectedSize ? 'text-[#666] font-bold' : ''}>
-                                            {selectedSize ? `TALLE: ${selectedSize}` : 'TALLE'}
-                                        </span>
+                                        <Ruler size={10} className={isSizeFilterOpen || selectedSize ? 'text-white' : ''} />
+                                        <span>{selectedSize ? `TALLE: ${selectedSize}` : 'TALLE'}</span>
                                     </button>
 
-                                    {/* Sort Order Button */}
                                     <button
                                         onClick={() => { setIsOrderFilterOpen(!isOrderFilterOpen); setIsBrandFilterOpen(false); setIsCategoryFilterOpen(false); setIsGenderFilterOpen(false); setIsSizeFilterOpen(false); }}
-                                        className={`flex items-center gap-1.5 px-2.5 py-1.5 md:px-4 md:py-2 rounded-none border transition-all text-[8px] md:text-xs font-black tracking-[0.1em] md:tracking-[0.15em] uppercase whitespace-nowrap shrink-0 ${isOrderFilterOpen || selectedOrder
-                                            ? 'filter-btn-active scale-105'
-                                            : 'border-[var(--color-text)]/10 text-[var(--color-text)] hover:border-black/30 hover:bg-black/5'
+                                        className={`flex items-center gap-1.5 px-3 py-2 md:px-5 md:py-2.5 rounded-none border transition-all text-[10px] md:text-xs font-black tracking-[0.1em] md:tracking-[0.15em] uppercase whitespace-nowrap shrink-0 active:scale-95 ${isOrderFilterOpen || selectedOrder
+                                            ? 'bg-black text-white border-black shadow-[0_5px_15px_rgba(0,0,0,0.2)]'
+                                            : 'border-black/10 text-black/60 hover:border-black/30 hover:bg-black/5'
                                             }`}
                                     >
                                         <Tag size={10} className={isOrderFilterOpen || selectedOrder ? 'text-white' : ''} />
@@ -983,8 +1000,7 @@ const Store: React.FC = () => {
                                                 params.delete('categoria');
                                                 params.delete('marca');
                                                 params.delete('orden');
-                                                // We keep gender as it defines the "context"
-                                                // but clear search, sizes, brands, categories
+                                                params.delete('search');
                                                 navigate(`/?${params.toString()}`, { replace: true, preventScrollReset: true });
                                                 setSelectedSize(null);
                                                 setSearchQuery('');
@@ -994,17 +1010,17 @@ const Store: React.FC = () => {
                                                 setIsGenderFilterOpen(false);
                                                 setIsOrderFilterOpen(false);
                                             }}
-                                            className="group flex items-center gap-1.5 px-3 py-1.5 md:px-5 md:py-2.5 rounded-none border border-red-500/30 bg-red-500/5 text-red-500 text-[9px] md:text-sm font-black tracking-[0.1em] md:tracking-[0.2em] uppercase transition-all hover:bg-red-500 hover:text-white hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] whitespace-nowrap shrink-0"
+                                            className="group flex items-center gap-1.5 px-3 py-1.5 md:px-5 md:py-2.5 rounded-none border border-black text-black text-[9px] md:text-sm font-black tracking-[0.1em] md:tracking-[0.2em] uppercase transition-all hover:bg-black hover:text-white whitespace-nowrap shrink-0"
                                         >
-                                            <Trash2 size={12} className="group-hover:animate-bounce" />
-                                            <span>LIMPIAR</span>
+                                            <Trash2 size={12} className="group-hover:rotate-12 transition-transform" />
+                                            <span>BORRAR</span>
                                         </button>
                                     )}
                                 </div>
 
                                 {/* Expandable Gender Filter Panel */}
                                 {isGenderFilterOpen && (
-                                    <div className="absolute top-[110%] left-0 right-0 p-6 bg-white border-2 border-[#e0e0e0] rounded-none w-full xl:w-[550px] z-[50] shadow-[0_20px_80px_rgba(0,0,0,0.1)] animate-in fade-in slide-in-from-top-4 duration-300 xl:left-auto xl:right-0">
+                                    <div className="absolute top-[110%] left-0 right-0 p-6 bg-white border border-black/5 rounded-none w-full xl:w-[550px] z-[50] shadow-[0_30px_100px_rgba(0,0,0,0.12)] animate-in fade-in slide-in-from-top-4 duration-500 xl:left-auto xl:right-0">
                                         <div className="flex justify-between items-center mb-6">
                                             <h4 className="text-[10px] font-black tracking-[0.3em] text-[#999] uppercase">SELECCIONAR GÉNERO</h4>
                                             {selectedGender && (
@@ -1047,7 +1063,7 @@ const Store: React.FC = () => {
 
                                 {/* Expandable Brand Filter Panel */}
                                 {isBrandFilterOpen && (
-                                    <div className="absolute top-[110%] left-0 right-0 p-6 bg-white border-2 border-[#e0e0e0] rounded-none w-full xl:w-[550px] z-[50] shadow-[0_20px_80px_rgba(0,0,0,0.1)] animate-in fade-in slide-in-from-top-4 duration-300 xl:left-auto xl:right-0">
+                                    <div className="absolute top-[110%] left-0 right-0 p-6 bg-white border border-black/5 rounded-none w-full xl:w-[550px] z-[50] shadow-[0_30px_100px_rgba(0,0,0,0.12)] animate-in fade-in slide-in-from-top-4 duration-500 xl:left-auto xl:right-0">
                                         <div className="flex justify-between items-center mb-6">
                                             <h4 className="text-[10px] font-black tracking-[0.3em] text-[#999] uppercase">SELECCIONAR MARCA</h4>
                                             {selectedBrand && (
@@ -1111,7 +1127,7 @@ const Store: React.FC = () => {
 
                                 {/* Size Filter Panel */}
                                 {isSizeFilterOpen && (
-                                    <div className="absolute top-[110%] left-0 right-0 p-6 bg-white border-2 border-[#e0e0e0] rounded-none w-full xl:w-[450px] z-[50] shadow-[0_20px_80px_rgba(0,0,0,0.1)] animate-in fade-in slide-in-from-top-4 duration-300 xl:left-auto xl:right-0">
+                                    <div className="absolute top-[110%] left-0 right-0 p-6 bg-white border border-black/5 rounded-none w-full xl:w-[450px] z-[50] shadow-[0_30px_100px_rgba(0,0,0,0.12)] animate-in fade-in slide-in-from-top-4 duration-500 xl:left-auto xl:right-0">
                                         <div className="flex justify-between items-center mb-6">
                                             <h4 className="text-[10px] font-black tracking-[0.3em] text-[#999] uppercase">SELECCIONAR TALLE</h4>
                                             {selectedSize && (
@@ -1142,7 +1158,7 @@ const Store: React.FC = () => {
 
                                 {/* Category Filter Panel */}
                                 {isCategoryFilterOpen && (
-                                    <div className="absolute top-[110%] left-0 right-0 p-6 bg-white border-2 border-[#e0e0e0] rounded-none w-full xl:w-[550px] z-[50] shadow-[0_20px_80px_rgba(0,0,0,0.1)] animate-in fade-in slide-in-from-top-4 duration-300 xl:left-auto xl:right-0">
+                                    <div className="absolute top-[110%] left-0 right-0 p-6 bg-white border border-black/5 rounded-none w-full xl:w-[550px] z-[50] shadow-[0_30px_100px_rgba(0,0,0,0.12)] animate-in fade-in slide-in-from-top-4 duration-500 xl:left-auto xl:right-0">
                                         <div className="flex justify-between items-center mb-6">
                                             <h4 className="text-[10px] font-black tracking-[0.3em] text-[#999] uppercase">SELECCIONAR CATEGORÍA</h4>
                                             {selectedCategory && (
@@ -1194,7 +1210,7 @@ const Store: React.FC = () => {
 
                                 {/* Sort Order Filter Panel */}
                                 {isOrderFilterOpen && (
-                                    <div className="absolute top-[110%] left-0 right-0 p-4 bg-white border border-[#e0e0e0] rounded-none w-full xl:w-[350px] z-[50] shadow-[0_20px_80px_rgba(0,0,0,0.1)] animate-in fade-in slide-in-from-top-4 duration-300 xl:left-auto xl:right-0">
+                                    <div className="absolute top-[110%] left-0 right-0 p-4 bg-white border border-black/5 rounded-none w-full xl:w-[350px] z-[50] shadow-[0_30px_100px_rgba(0,0,0,0.12)] animate-in fade-in slide-in-from-top-4 duration-500 xl:left-auto xl:right-0">
                                         <div className="flex justify-between items-center mb-4">
                                             <h4 className="text-[9px] font-black tracking-[0.2em] text-[#999] uppercase">ORDENAR POR</h4>
                                             {selectedOrder && (
