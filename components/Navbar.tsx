@@ -96,7 +96,7 @@ const Navbar: React.FC<NavbarProps> = ({
             <button
               className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5"
               style={{ color: '#666666' }}
-              onClick={() => navigate('/?categoria=Accesorios#new')}
+              onClick={() => navigate('/?categoria=ACCESORIOS#new')}
             >
               ACCESORIOS
             </button>
@@ -116,8 +116,8 @@ const Navbar: React.FC<NavbarProps> = ({
               GIFT CARDS
             </button>
             <button
-              className="hover:text-red-600 transition-all uppercase text-[10px] lg:text-[12px] font-bold tracking-[0.12em] border-b border-transparent hover:border-red-600/10 pb-0.5"
-              style={{ color: '#d32f2f' }}
+              className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5"
+              style={{ color: '#666666' }}
               onClick={() => window.open('https://shamsoutlet.com', '_blank')}
             >
               OUTLET
@@ -233,7 +233,7 @@ const Navbar: React.FC<NavbarProps> = ({
           { label: 'INICIO', action: () => navigate('/') },
           { label: 'MUJER', action: () => navigate('/?genero=Mujer#new') },
           { label: 'HOMBRE', action: () => navigate('/?genero=Hombre#new') },
-          { label: 'ACCESORIOS', action: () => navigate('/?categoria=Accesorios#new') },
+          { label: 'ACCESORIOS', action: () => navigate('/?categoria=ACCESORIOS#new') },
           { label: 'MARCAS', action: () => navigate('/marcas') },
         ].map((item, index) => (
           <button key={index} onClick={() => { setIsMobileMenuOpen(false); item.action(); }}
@@ -247,7 +247,7 @@ const Navbar: React.FC<NavbarProps> = ({
           GIFT CARDS
         </button>
         <button onClick={() => { setIsMobileMenuOpen(false); window.open('https://shamsoutlet.com', '_blank'); }}
-          style={{ display: 'block', width: '100%', textAlign: 'left', padding: '18px 0', fontSize: '18px', fontWeight: 700, letterSpacing: '0.1em', color: '#d32f2f', background: 'none', border: 'none', borderBottom: '1px solid #eee', cursor: 'pointer' }}>
+          style={{ display: 'block', width: '100%', textAlign: 'left', padding: '18px 0', fontSize: '18px', fontWeight: 700, letterSpacing: '0.1em', color: '#666666', background: 'none', border: 'none', borderBottom: '1px solid #eee', cursor: 'pointer' }}>
           OUTLET
         </button>
         {isAdmin && (

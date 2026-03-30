@@ -23,6 +23,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
     const [added, setAdded] = useState(false);
     const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
     const [isZooming, setIsZooming] = useState(false);
+    const [showSizeGuide, setShowSizeGuide] = useState(false);
     const rafRef = useRef<number | null>(null);
 
     // Reset image index and selections when product or modal visibility changes
@@ -373,38 +374,13 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                         )}
 
                         {/* Color Selection - Hidden as per request, auto-selected in useEffect */}
-                        {/* {colorOptions.length > 0 && (
-                            <div className="mb-8">
-                                <label className="text-[10px] font-black tracking-[0.2em] text-zinc-500 uppercase block mb-4">
-                                    COLOR: <span className="text-[#DCDCDC] ml-2">{selectedColor || 'SELECCIONAR'}</span>
-                                </label>
-                                <div className="flex flex-wrap gap-3">
-                                    {colorOptions.map((opt, idx) => {
-                                        return (
-                                            <button
-                                                key={idx}
-                                                onClick={() => setSelectedColor(opt.name)}
-                                                className={`w-10 h-10 rounded-none border-2 p-1 transition-all duration-300 ${selectedColor === opt.name ? 'border-[#DCDCDC] scale-110 shadow-[0_0_15px_rgba(196,149,106,0.4)]' : 'border-white/10 hover:border-white/30 hover:scale-105'}`}
-                                                title={opt.name}
-                                            >
-                                                <div
-                                                    className="w-full h-full rounded-none shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]"
-                                                    style={{ backgroundColor: opt.code }}
-                                                />
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        )} */}
-
-                         {/* Size Selection */}
+                        {/* Size Selection */}
                         {sizes.length > 0 && (
                             <div className="mb-8">
                                 <label className="text-[11px] font-black tracking-[0.2em] text-[var(--color-text-muted)] uppercase block mb-4">
                                     SELECCIONAR MI TALLE:
                                 </label>
-                                 <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
+                                <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
                                     {sizes.map((size, idx) => (
                                         <button
                                             key={idx}
@@ -418,7 +394,27 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                             </div>
                         )}
 
-                         <div className="mb-6">
+                        {/* Size Guide Button */}
+                        {product.brandCardUrl && (
+                            <div className="mb-8">
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setShowSizeGuide(true); }}
+                                    className="flex items-center gap-3 group transition-all"
+                                >
+                                    <div className="w-10 h-10 flex items-center justify-center bg-zinc-100 border border-zinc-200 group-hover:border-[#8B6F5E] transition-all">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" className="text-zinc-600 group-hover:text-[#8B6F5E]">
+                                            <path d="M21 16V4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12l4-4Z"/><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h5"/>
+                                        </svg>
+                                    </div>
+                                    <div className="flex flex-col items-start translate-y-[1px]">
+                                        <span className="text-[10px] font-black tracking-[0.2em] text-[var(--color-text)] uppercase leading-none">VER GUÍA DE TALLES</span>
+                                        <span className="text-[8px] font-medium text-[var(--color-text-muted)] uppercase tracking-widest mt-1 opacity-60">CARTA OFICIAL DE {product.brand}</span>
+                                    </div>
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="mb-6">
                             <h4 className="text-[8px] font-black tracking-widest text-[var(--color-text-muted)] uppercase mb-2">Descripción</h4>
                             <p className="text-[var(--color-text-muted)] text-[11px] leading-relaxed tracking-wide font-medium whitespace-pre-line break-words">
                                 {product.description || 'Este exclusivo artículo de Shams combina diseño premium con materiales de alta calidad.'}
@@ -452,6 +448,25 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                     </div>
                 </div>
             </div>
+            {/* Size Guide Modal (Overlayed) */}
+            {showSizeGuide && product.brandCardUrl && (
+                <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 md:p-12 animate-in fade-in duration-300">
+                    <div className="absolute inset-0 bg-[#2C1810]/95 backdrop-blur-xl" onClick={() => setShowSizeGuide(false)} />
+                    <div className="relative w-full max-w-4xl max-h-full bg-white shadow-2xl overflow-auto rounded-none md:rounded-xl">
+                        <button 
+                            onClick={() => setShowSizeGuide(false)}
+                            className="absolute top-4 right-4 z-30 bg-black/50 hover:bg-black text-white p-3 rounded-none transition-all"
+                        >
+                            <X size={24} />
+                        </button>
+                        <img 
+                            src={product.brandCardUrl} 
+                            alt={`Guía de talles ${product.brand}`}
+                            className="w-full h-auto object-contain p-2 md:p-8"
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

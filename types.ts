@@ -24,6 +24,7 @@ export interface Product {
   is_published?: boolean;
   is_active?: boolean;
   sort_order?: number;
+  brandCardUrl?: string;
 }
 
 export interface CartItem extends Product {

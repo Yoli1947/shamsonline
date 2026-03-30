@@ -15,7 +15,7 @@ call npm run build
 
 echo 3. Guardando cambios en Git...
 git add .
-git commit -m "Actualizacion de tienda: Banner MAXG, Menu y Outlet"
+git commit -m "Fix accesorios, titulos por seccion, outlet gris, sin duplicados en categorias, carta de talles"
 
 echo 4. Subiendo a GitHub para el servidor...
 git push

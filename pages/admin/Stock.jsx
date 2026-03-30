@@ -285,6 +285,14 @@ export default function Stock() {
                     for (let i = 0; i < variantsToUpdate.length; i += chunkSize) {
                         await batchUpsertVariants(variantsToUpdate.slice(i, i + chunkSize))
                     }
+                    
+                    // Actualizar timestamp de sync para invalidar caché de la tienda
+                    try {
+                        await updateSiteSetting('last_catalog_update', Date.now().toString());
+                    } catch (e) {
+                        console.warn('No se pudo actualizar el timestamp de sync', e);
+                    }
+
                     alert(`✅ Stock actualizado: ${foundCount} variantes modificadas. ${notFoundCount > 0 ? `(${notFoundCount} productos no encontrados en DB)` : ''}`)
                     setRefreshTrigger(p => p + 1)
                 } else {
@@ -722,6 +730,13 @@ export default function Stock() {
                     } catch (e) {
                         throw new Error(`[PASO 4 - crear variantes] ${e.message}`);
                     }
+                }
+
+                // Actualizar timestamp de sync para invalidar caché de la tienda
+                try {
+                    await updateSiteSetting('last_catalog_update', Date.now().toString());
+                } catch (e) {
+                    console.warn('No se pudo actualizar el timestamp de sync', e);
                 }
 
                 if (window.confirm(`✅ IMPORTACIÓN EXITOSA\n\n- Productos: ${createdCount} nuevos / ${updatedCount} actualizados\n- Variantes de stock: ${finalVariantsToUpsert.length}\n\n¿Recargar página para ver los cambios?`)) {

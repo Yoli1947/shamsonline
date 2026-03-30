@@ -10,7 +10,7 @@ import FavoritesDrawer from './components/FavoritesDrawer';
 import ProductDetail from './components/ProductDetail';
 // import { PRODUCTS } from './constants'; // Removed static products
 // ... (previous imports)
-import { getAllProducts, getBrands, getCategories } from './lib/admin'; // Import DB function
+import { getAllProducts, getBrands, getCategories, getLastSyncDate } from './lib/admin'; // Import DB function
 import { supabase } from './lib/supabase';
 import { createOrder } from './lib/orders';
 import { Product, CartItem } from './types';
@@ -154,7 +154,8 @@ const Store: React.FC = () => {
                     variants: p.variants,
                     is_published: p.is_published,
                     is_active: p.is_active,
-                    sort_order: p.sort_order
+                    sort_order: p.sort_order,
+                    brandCardUrl: p.brand?.card_image_url
                 };
             });
 
@@ -168,7 +169,7 @@ const Store: React.FC = () => {
             });
         };
 
-        async function fetchRemainingData(offset = 20) {
+        async function fetchRemainingData(offset = 20, lastSyncTs = 0) {
             if (!isMounted) return;
             try {
                 // Traemos los productos en lotes más pequeños para evitar AbortError
@@ -178,7 +179,7 @@ const Store: React.FC = () => {
 
                 while (hasMore && isMounted) {
                     console.log(`Cargando lote de productos: ${currentOffset} a ${currentOffset + CHUNK_SIZE}...`);
-                    const { products: chunk, count } = await getAllProducts(1, CHUNK_SIZE, '', currentOffset, true);
+                    const { products: chunk, count } = await getAllProducts(1, CHUNK_SIZE, '', currentOffset, true, lastSyncTs);
 
                     if (!chunk || chunk.length === 0) {
                         hasMore = false;
@@ -189,12 +190,12 @@ const Store: React.FC = () => {
                     setProducts(prev => {
                         const prevIds = new Set(prev.map(p => p.id));
                         const uniqueNew = mappedChunk.filter(p => !prevIds.has(p.id));
-                        return [...prev, ...uniqueNew].sort((a, b) => {
-                            if ((a.sort_order || 0) !== (b.sort_order || 0)) {
-                                return (a.sort_order || 0) - (b.sort_order || 0);
-                            }
-                            return (a.name || '').localeCompare(b.name || '');
-                        });
+                        if (uniqueNew.length === 0) return prev;
+                        
+                        // Si ya tenemos muchos productos cargados, append es mucho más ligero
+                        // que volver a ordenar toda la colección de 1000+ items.
+                        // La BD ya garantiza sort_order.
+                        return [...prev, ...uniqueNew];
                     });
 
                     currentOffset += CHUNK_SIZE;
@@ -223,17 +224,29 @@ const Store: React.FC = () => {
             try {
                 setLoading(true);
 
-                // Verificar caché persistente (TTL: 30 minutos)
-                const CACHE_TTL = 30 * 60 * 1000;
+                // --- CACHE-BUSTING DINÁMICO ---
+                // 1. Obtener la fecha del último sync desde Supabase (site_settings)
+                const lastSyncStr = await getLastSyncDate();
+                const lastSyncTs = lastSyncStr ? parseInt(lastSyncStr) : 0;
+                
+                // 2. Verificar caché persistente (TTL: 15 minutos ó hasta que haya un sync nuevo)
+                const CACHE_TTL = 15 * 60 * 1000;
                 try {
                     const cachedTs = localStorage.getItem('shams_cache_ts_v4');
-                    const isFresh = cachedTs && (Date.now() - parseInt(cachedTs)) < CACHE_TTL;
+                    const cachedTsNum = cachedTs ? parseInt(cachedTs) : 0;
+                    
+                    // Si el cache es más viejo que el último sync, INVALIDAR CACHE
+                    const isStaleBySync = lastSyncTs > 0 && cachedTsNum < lastSyncTs;
+                    const isExpiredByTime = (Date.now() - cachedTsNum) > CACHE_TTL;
+                    const isFresh = cachedTs && !isStaleBySync && !isExpiredByTime;
+
                     if (isFresh) {
                         const cachedProducts = JSON.parse(localStorage.getItem('shams_products_v4') || '[]');
                         const cachedBrands = JSON.parse(localStorage.getItem('shams_brands_v4') || '[]');
                         const cachedCategories = JSON.parse(localStorage.getItem('shams_categories_v4') || '[]');
+                        
                         if (cachedProducts.length > 0) {
-                            console.log(`Tienda: [FLASH] Cargando ${cachedProducts.length} productos desde memoria local.`);
+                            console.log(`Tienda: [FLASH] Usando caché (${cachedProducts.length} productos).`);
                             setBrands(cachedBrands);
                             const mujerParent = cachedCategories.find((c: any) => c.name === 'MUJER');
                             const hombreParent = cachedCategories.find((c: any) => c.name === 'HOMBRE');
@@ -246,10 +259,12 @@ const Store: React.FC = () => {
                             setLoading(false);
                             clearTimeout(timeout);
 
-                            // AUNQUE HAYA CACHÉ, ACTUALIZAMOS EN SEGUNDO PLANO
-                            setTimeout(() => fetchRemainingData(0), 1000);
+                            // AUNQUE HAYA CACHÉ, ACTUALIZAMOS EN SEGUNDO PLANO PARA MANTENER FRESHNESS
+                            setTimeout(() => fetchRemainingData(0, lastSyncTs), 1000);
                             return;
                         }
+                    } else if (isStaleBySync) {
+                        console.log("Tienda: [SYNC] Cache invalidada por nuevo sync en servidor.");
                     }
                 } catch (e) {
                     console.warn('Error leyendo caché:', e);
@@ -259,9 +274,9 @@ const Store: React.FC = () => {
 
                 // CARGA EN PARALELO (Mucho más rápido)
                 const [productsRes, brandsRes, categoriesRes] = await Promise.all([
-                    getAllProducts(1, 40, '', 0, true), // Cargamos 40 de entrada para llenar la pantalla
-                    getBrands(),
-                    getCategories()
+                    getAllProducts(1, 40, '', 0, true, lastSyncTs), // Cargamos 40 de entrada para llenar la pantalla
+                    getBrands(lastSyncTs),
+                    getCategories(lastSyncTs)
                 ]).catch(e => {
                     console.error("Error en carga paralela:", e);
                     throw e;
@@ -285,12 +300,19 @@ const Store: React.FC = () => {
                 });
 
                 // Extract all unique categories from products (sin duplicados)
-                const uniqueCategories = new Set(
-                    dbCategories
-                        .filter((c: any) => c.parent_id !== null && c.name?.toLowerCase() !== 'camisas/bluzas/top') // Solo subcategorías
-                        .map((c: any) => c.name)
-                );
-                const allCategories = Array.from(uniqueCategories);
+                // Normalizar nombres antes de deduplicar para evitar duplicados por mayúsculas/espacios/tildes
+                const EXCLUDED_CATS = ['camisas/bluzas/top', 'camisas/blusas/top'];
+                const seenNames = new Set<string>();
+                const allCategories: string[] = [];
+                dbCategories
+                    .filter((c: any) => c.parent_id !== null && !EXCLUDED_CATS.includes(c.name?.toLowerCase().trim()))
+                    .forEach((c: any) => {
+                        const normalized = c.name?.trim();
+                        if (normalized && !seenNames.has(normalized.toLowerCase())) {
+                            seenNames.add(normalized.toLowerCase());
+                            allCategories.push(normalized);
+                        }
+                    });
                 setAvailableCategories(allCategories);
 
                 const sortedProducts = mapProductsToUI(dbProducts);
@@ -312,7 +334,7 @@ const Store: React.FC = () => {
 
                     // Lanzamos silenciosamente la descarga del resto del catálogo
                     setTimeout(() => {
-                        fetchRemainingData(20);
+                        fetchRemainingData(20, lastSyncTs);
                     }, 500);
                 }
             } catch (error: any) {
@@ -679,7 +701,7 @@ const Store: React.FC = () => {
 
         // Filter by Category
         const matchesCategory = !selectedCategory || selectedCategory === 'Todos' ||
-            p.category === selectedCategory;
+            p.category?.toLowerCase() === selectedCategory.toLowerCase();
 
         // Filter by Brand
         const matchesBrand = !selectedBrand ||
@@ -769,7 +791,7 @@ const Store: React.FC = () => {
             />
 
             <main>
-                {!selectedBrand && !selectedGender && (
+                {!selectedBrand && !selectedGender && !selectedCategory && (
                     <>
                         <Hero />
                         <div id="brands">
@@ -844,7 +866,7 @@ const Store: React.FC = () => {
                 )}
 
                 {/* Collection Section */}
-                <section className={`pb-32 px-0.5 md:px-12 max-w-screen-2xl mx-auto ${(selectedBrand || selectedGender) ? 'pt-24 md:pt-32' : 'pt-4'}`} id="new">
+                <section className={`pb-32 px-0.5 md:px-12 max-w-screen-2xl mx-auto ${(selectedBrand || selectedGender || selectedCategory) ? 'pt-24 md:pt-32' : 'pt-4'}`} id="new">
                     <div className="flex flex-col md:flex-row md:items-start justify-between mb-6 px-1.5 md:px-0 gap-6 md:gap-10">
                         <div className="pt-0">
                             <span className="text-[#999] uppercase tracking-[0.4em] text-[10px] block mb-2 font-bold">
@@ -861,6 +883,18 @@ const Store: React.FC = () => {
                                     <div className="flex flex-col items-start leading-tight animate-in fade-in slide-in-from-left-8 duration-700 mt-2">
                                         <span className="text-2xl md:text-4xl font-black text-[var(--color-text)] tracking-[0.1em] uppercase">
                                             {selectedBrand}
+                                        </span>
+                                    </div>
+                                ) : selectedCategory ? (
+                                    <div className="flex flex-col items-start leading-tight animate-in fade-in slide-in-from-left-8 duration-700 mt-2">
+                                        <span className="text-2xl md:text-4xl font-black text-[var(--color-text)] tracking-[0.1em] uppercase">
+                                            {selectedCategory}
+                                        </span>
+                                    </div>
+                                ) : selectedGender ? (
+                                    <div className="flex flex-col items-start leading-tight animate-in fade-in slide-in-from-left-8 duration-700 mt-2">
+                                        <span className="text-2xl md:text-4xl font-black text-[var(--color-text)] tracking-[0.1em] uppercase">
+                                            {selectedGender}
                                         </span>
                                     </div>
                                 ) : (
