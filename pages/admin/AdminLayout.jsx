@@ -16,7 +16,8 @@ import {
     GripVertical,
     Camera,
     Plus,
-    Star
+    Star,
+    User
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
@@ -62,6 +63,7 @@ export default function AdminLayout() {
         { path: '/admin/promociones', icon: Percent, label: 'Promociones Vigentes' },
         { path: '/admin/imagenes', icon: ImageIcon, label: 'Carga de Fotos' },
         { path: '/admin/orden-productos', icon: GripVertical, label: 'Orden Productos' },
+        { path: '/admin/ultimos-ingresos', icon: Star, label: 'Últimos Ingresos' },
         { path: '/admin/imagenes-marcas', icon: Camera, label: 'Imágenes Marcas' },
         { path: '/admin/configuracion', icon: Settings, label: 'Configuración' },
     ]

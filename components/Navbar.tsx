@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { ShoppingBag, Search, Menu, User, X, Heart, Settings, Gift } from 'lucide-react';
+import { ShoppingBag, Search, Menu, User, X, Heart, Settings, Gift, Coffee } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -106,6 +106,14 @@ const Navbar: React.FC<NavbarProps> = ({
               onClick={() => navigate('/marcas')}
             >
               MARCAS
+            </button>
+            <button
+              className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5 flex items-center gap-1"
+              style={{ color: '#666666' }}
+              onClick={() => navigate('/?categoria=CAFETERIA#new')}
+            >
+              <Coffee size={12} />
+              CAFETERÍA
             </button>
             <button
               className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5 flex items-center gap-1"
@@ -231,6 +239,7 @@ const Navbar: React.FC<NavbarProps> = ({
             { label: 'ACCESORIOS', action: () => navigate('/?categoria=ACCESORIOS#new') },
             { label: 'CATEGORÍAS', action: () => navigate('/?openFilter=categoria#new') },
             { label: 'MARCAS', action: () => navigate('/marcas') },
+            { label: 'CAFETERÍA', action: () => navigate('/?categoria=CAFETERIA#new') },
           ].map((item, index) => (
             <button 
               key={index} 

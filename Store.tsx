@@ -717,6 +717,10 @@ const Store: React.FC = () => {
             !p.image.includes('No+Image') &&
             p.image !== 'https://via.placeholder.com/400x500?text=No+Image';
 
+        // Categoría Cafetería check
+        const isCafeteriaProduct = p.category?.toLowerCase() === 'cafeteria';
+        const isCafeteriaFilterActive = selectedCategory?.toLowerCase() === 'cafeteria';
+
         // Filter by Category
         const matchesCategory = !selectedCategory || selectedCategory === 'Todos' ||
             p.category?.toLowerCase() === selectedCategory.toLowerCase();
@@ -726,10 +730,11 @@ const Store: React.FC = () => {
             p.brand?.toLowerCase() === selectedBrand.toLowerCase();
 
         // Filter by Gender
-        const matchesGender = !selectedGender || 
-            p.features?.includes(selectedGender) || 
-            p.features?.some(f => f?.toLowerCase() === selectedGender?.toLowerCase()) ||
-            (p.brand?.toLowerCase() === 'cibeles' && selectedGender === 'Mujer'); // Force Cibeles to appear in Mujer section
+        const matchesGender = isCafeteriaFilterActive || (
+            (!selectedGender || (p.features?.includes(selectedGender) || p.features?.some(f => f?.toLowerCase() === selectedGender?.toLowerCase()))) &&
+            (!selectedGender || !isCafeteriaProduct) || 
+            (p.brand?.toLowerCase() === 'cibeles' && selectedGender === 'Mujer')
+        );
 
         // Filter by Search Query
         const searchTerms = searchQuery.toLowerCase().trim().split(/\s+/);
