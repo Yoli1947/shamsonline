@@ -237,9 +237,7 @@ const Navbar: React.FC<NavbarProps> = ({
             { label: 'MUJER', action: () => navigate('/?genero=Mujer#new') },
             { label: 'HOMBRE', action: () => navigate('/?genero=Hombre#new') },
             { label: 'ACCESORIOS', action: () => navigate('/?categoria=ACCESORIOS#new') },
-            { label: 'CATEGORÍAS', action: () => navigate('/?openFilter=categoria#new') },
             { label: 'MARCAS', action: () => navigate('/marcas') },
-            { label: 'CAFETERÍA', action: () => navigate('/?categoria=CAFETERIA#new') },
           ].map((item, index) => (
             <button 
               key={index} 
@@ -251,6 +249,17 @@ const Navbar: React.FC<NavbarProps> = ({
             </button>
           ))}
           
+          <button 
+            onClick={() => { setIsMobileMenuOpen(false); navigate('/?categoria=CAFETERIA#new'); }}
+            className="group flex items-center justify-between w-full py-5 text-left border-b border-black/5 transition-all hover:pl-2"
+          >
+            <div className="flex items-center gap-3">
+              <Coffee size={18} className="text-black" />
+              <span className="text-lg font-black tracking-[0.1em] text-black uppercase">CAFETERÍA</span>
+            </div>
+            <div className="w-1.5 h-1.5 bg-black scale-0 group-hover:scale-100 transition-transform" />
+          </button>
+
           <button 
             onClick={() => { setIsMobileMenuOpen(false); navigate('/gift-cards'); }}
             className="group flex items-center justify-between w-full py-5 text-left border-b border-black/5 transition-all hover:pl-2"

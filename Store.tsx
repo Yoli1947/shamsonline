@@ -161,8 +161,10 @@ const Store: React.FC = () => {
             });
 
             return mapped.sort((a, b) => {
-                if ((a.sort_order || 0) !== (b.sort_order || 0)) {
-                    return (a.sort_order || 0) - (b.sort_order || 0);
+                const sortA = a.sort_order || 99999;
+                const sortB = b.sort_order || 99999;
+                if (sortA !== sortB) {
+                    return sortA - sortB;
                 }
                 const nameA = a.name || '';
                 const nameB = b.name || '';
@@ -228,7 +230,7 @@ const Store: React.FC = () => {
                 // --- CACHE-BUSTING DINÁMICO ---
                 // 1. Obtener la fecha del último sync desde Supabase (site_settings)
                 const lastSyncStr = await getLastSyncDate();
-                const lastSyncTs = lastSyncStr ? parseInt(lastSyncStr) : 0;
+                const lastSyncTs = lastSyncStr ? (isNaN(Number(lastSyncStr)) ? new Date(lastSyncStr).getTime() : parseInt(lastSyncStr)) : 0;
                 
                 // 2. Verificar caché persistente (TTL: 15 minutos ó hasta que haya un sync nuevo)
                 const CACHE_TTL = 15 * 60 * 1000;
@@ -771,8 +773,10 @@ const Store: React.FC = () => {
         }
         
         // Orden por defecto if no extra order is chosen
-        if ((a.sort_order || 0) !== (b.sort_order || 0)) {
-            return (a.sort_order || 0) - (b.sort_order || 0);
+        const sortA = a.sort_order || 99999;
+        const sortB = b.sort_order || 99999;
+        if (sortA !== sortB) {
+            return sortA - sortB;
         }
         return (a.name || '').localeCompare(b.name || '');
     }), [products, selectedCategory, selectedBrand, selectedGender, searchQuery, selectedSize, selectedOrder]);
