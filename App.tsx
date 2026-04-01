@@ -27,6 +27,7 @@ const Customers = lazy(() => import('./pages/admin/Customers'));
 const Settings = lazy(() => import('./pages/admin/Settings'));
 const ProductOrder = lazy(() => import('./pages/admin/ProductOrder'));
 const BrandImages = lazy(() => import('./pages/admin/BrandImages'));
+const UltimosIngresos = lazy(() => import('./pages/admin/UltimosIngresos'));
 const BrandsPage = lazy(() => import('./pages/BrandPage'));
 const FuturistPreview = lazy(() => import('./pages/FuturistPreview'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
@@ -111,6 +112,7 @@ const App: React.FC = () => {
               <Route path="clientes" element={<Customers />} />
               <Route path="configuracion" element={<Settings />} />
               <Route path="orden-productos" element={<ProductOrder />} />
+              <Route path="ultimos-ingresos" element={<UltimosIngresos />} />
               <Route path="imagenes-marcas" element={<BrandImages />} />
             </Route>
           </Routes>

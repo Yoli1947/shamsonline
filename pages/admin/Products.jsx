@@ -1,5 +1,6 @@
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Plus, Search, Edit, Trash2, Image, X, Check, Loader, RefreshCw, UploadCloud, Maximize2, Minimize2, Star } from 'lucide-react'
 import { getAllProducts, deleteProduct, updateProduct, saveProductVariants, uploadImage, getSeasons } from '../../lib/admin'
 import { supabase } from '../../lib/supabase'
@@ -24,6 +25,7 @@ export default function Products() {
     const [brands, setBrands] = useState([])
     const [categories, setCategories] = useState([])
     const [seasons, setSeasons] = useState([])
+    const [searchParams, setSearchParams] = useSearchParams()
 
     const [selectedIds, setSelectedIds] = useState(new Set())
     const [bulkDiscountValue, setBulkDiscountValue] = useState('')
@@ -32,7 +34,12 @@ export default function Products() {
     useEffect(() => {
         loadProducts()
         loadDependencies()
-    }, [refreshTrigger])
+
+        // Si viene ?new=true por URL, abrir modal de creación
+        if (searchParams.get('new') === 'true') {
+            openNewProduct()
+        }
+    }, [refreshTrigger, searchParams])
 
     async function loadDependencies() {
         try {
@@ -70,6 +77,7 @@ export default function Products() {
 
     const handleSuccess = () => {
         setShowModal(false)
+        setSearchParams({}) // Limpiar el parámetro ?new=true si existe
         setRefreshTrigger(prev => prev + 1)
     }
 
@@ -401,6 +409,22 @@ export default function Products() {
         return matchesSearch && matchesBrand && matchesPhoto && matchesCategory && matchesSeason && matchesVisibility;
     })
 
+    const { stats, filteredStats } = useMemo(() => {
+        const calculateStats = (list) => {
+            const hasPhoto = (p) => (p.images && p.images.length > 0) || p.image_url || p.image_url_2 || p.image_url_3 || p.image_url_4;
+            const withPhoto = list.filter(hasPhoto).length;
+            return {
+                total: list.length,
+                withPhoto,
+                withoutPhoto: list.length - withPhoto
+            };
+        };
+        return {
+            stats: calculateStats(products),
+            filteredStats: calculateStats(filteredProducts)
+        };
+    }, [products, filteredProducts]);
+
     // Calculate total stock from variants
     const getStock = (product) => {
         return product.variants?.reduce((acc, v) => acc + v.stock, 0) || 0
@@ -416,7 +440,22 @@ export default function Products() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                     <div>
                         <h1 className="admin-title" style={{ margin: 0 }}>Productos</h1>
-                        <p style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.875rem' }}>{products.length} productos en total</p>
+                        <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+                            <p style={{ color: '#666', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                                TOTAL: <span style={{ color: '#000' }}>{stats.total}</span>
+                            </p>
+                            <p style={{ color: '#666', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                                CON FOTO: <span style={{ color: '#10b981' }}>{stats.withPhoto}</span>
+                            </p>
+                            <p style={{ color: '#666', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                                SIN FOTO: <span style={{ color: '#ef4444' }}>{stats.withoutPhoto}</span>
+                            </p>
+                            {searchTerm || selectedBrandId || selectedCategoryId || selectedSeasons.length > 0 ? (
+                                <p style={{ color: '#c4956a', fontSize: '0.75rem', fontWeight: 'bold', borderLeft: '1px solid #ddd', paddingLeft: '1rem' }}>
+                                    FILTRADOS: {filteredStats.total} ({filteredStats.withPhoto} c/foto | {filteredStats.withoutPhoto} s/foto)
+                                </p>
+                            ) : null}
+                        </div>
                     </div>
                     <button
                         onClick={() => setIsFullscreen(!isFullscreen)}

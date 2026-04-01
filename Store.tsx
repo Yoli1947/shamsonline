@@ -889,7 +889,11 @@ const Store: React.FC = () => {
                 )}
 
                 {/* Collection Section */}
-                <section className={`pb-32 px-0.5 md:px-12 max-w-screen-2xl mx-auto ${(selectedBrand || selectedGender || selectedCategory) ? 'pt-24 md:pt-32' : 'pt-4'}`} id="new">
+                <section 
+                    className={`pb-32 px-0.5 md:px-12 max-w-screen-2xl mx-auto ${(selectedBrand || selectedGender || selectedCategory) ? 'pt-24 md:pt-32' : 'pt-4'}`} 
+                    id="new"
+                    style={{ scrollMarginTop: '160px' }}
+                >
                     <div className="flex flex-col md:flex-row md:items-start justify-between mb-6 px-1.5 md:px-0 gap-6 md:gap-10">
                         <div className="pt-0">
                             <span className="text-[#999] uppercase tracking-[0.4em] text-[10px] block mb-2 font-bold">
@@ -930,12 +934,6 @@ const Store: React.FC = () => {
                     {/* Barra de Filtros Sticky y Compacta - Diseño Premium */}
                     <div className="sticky top-[95px] md:top-[128px] z-[90] w-full bg-white/95 backdrop-blur-md py-4 px-3 md:px-6 mb-6 md:mb-8 border-y border-[var(--color-text)]/5 shadow-[0_15px_35px_rgba(0,0,0,0.04)]">
                         <div className="flex flex-col gap-2 md:gap-3">
-                            <div className="flex items-center justify-between px-1">
-                                <span className="text-[9px] md:text-xs font-black tracking-[0.2em] text-[#999] uppercase whitespace-nowrap">
-                                    {(selectedGender || selectedBrand || selectedCategory || searchQuery) ? 'FILTRANDO POR:' : 'FILTRAR CATÁLOGO:'}
-                                    <span className="ml-2 text-black/40 font-medium">({filteredProducts.length} ARTÍCULOS)</span>
-                                </span>
-                            </div>
                             <div className="flex flex-col xl:flex-row xl:items-center justify-end gap-3 md:gap-4">
                                 <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar w-full xl:w-auto relative [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                                     <button

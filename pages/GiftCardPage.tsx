@@ -18,8 +18,8 @@ const GiftCardPage: React.FC = () => {
     const navigate = useNavigate();
     const [isGift, setIsGift] = useState(false);
     const [amount, setAmount] = useState(200000);
-    const [customAmount, setCustomAmount] = useState('');
-    const [useCustom, setUseCustom] = useState(false);
+    const [customAmount, setCustomAmount] = useState('200000');
+    const [useCustom, setUseCustom] = useState(true);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -38,8 +38,8 @@ const GiftCardPage: React.FC = () => {
 
     const handleAmountSelect = (val: number) => {
         setAmount(val);
-        setUseCustom(false);
-        setCustomAmount('');
+        setCustomAmount(val.toString());
+        setUseCustom(true);
     };
 
     const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -231,9 +231,9 @@ const GiftCardPage: React.FC = () => {
                                     onClick={() => handleAmountSelect(val)}
                                     style={{
                                         padding: '12px 8px',
-                                        border: amount === val && !useCustom ? '2px solid #000' : '1px solid #e0e0e0',
-                                        backgroundColor: amount === val && !useCustom ? '#000' : '#fff',
-                                        color: amount === val && !useCustom ? '#fff' : '#000',
+                                        border: effectiveAmount === val ? '2px solid #000' : '1px solid #e0e0e0',
+                                        backgroundColor: effectiveAmount === val ? '#000' : '#fff',
+                                        color: effectiveAmount === val ? '#fff' : '#000',
                                         fontWeight: 900,
                                         fontSize: '11px',
                                         letterSpacing: '0.05em',
@@ -241,7 +241,7 @@ const GiftCardPage: React.FC = () => {
                                         transition: 'all 0.15s',
                                     }}
                                 >
-                                    ${(val / 1000).toFixed(0)}K
+                                    ${(val / 1000).toLocaleString('es-AR')} MIL
                                 </button>
                             ))}
                         </div>
@@ -250,7 +250,7 @@ const GiftCardPage: React.FC = () => {
                                 type="text"
                                 inputMode="numeric"
                                 placeholder="OTRO MONTO (MÍN. $100.000)"
-                                value={useCustom ? `$${Number(customAmount).toLocaleString('es-AR')}` : ''}
+                                value={useCustom && customAmount !== '' ? `$${Number(customAmount).toLocaleString('es-AR')}` : ''}
                                 onChange={handleCustomAmountChange}
                                 onFocus={() => setUseCustom(true)}
                                 style={{
@@ -267,12 +267,11 @@ const GiftCardPage: React.FC = () => {
                                 }}
                             />
                         </div>
-                        <p style={{ fontSize: '9px', color: '#999', marginTop: '6px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                            Monto efectivo: <strong style={{ color: '#000' }}>${effectiveAmount.toLocaleString('es-AR')}</strong>
-                            {effectiveAmount > 0 && effectiveAmount < 100000 && (
-                                <span style={{ color: '#c00', marginLeft: '8px' }}>— mínimo $100.000</span>
-                            )}
-                        </p>
+                        {effectiveAmount > 0 && effectiveAmount < 100000 && (
+                            <p style={{ fontSize: '9px', color: '#c00', marginTop: '6px', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 900 }}>
+                                El monto mínimo es $100.000
+                            </p>
+                        )}
                     </div>
 
                     {/* SECCIÓN: Para quién */}

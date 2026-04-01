@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { BarChart3, ShoppingBag, Users, AlertTriangle, ArrowUpRight, ArrowDownRight, ExternalLink, TrendingUp, Eye, MousePointer } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { BarChart3, ShoppingBag, Users, AlertTriangle, ArrowUpRight, ArrowDownRight, ExternalLink, TrendingUp, Eye, Plus, Package, Boxes } from 'lucide-react'
 import { getDashboardStats, getRecentOrders } from '../../lib/admin'
 import './Dashboard.css'
 
@@ -154,6 +155,47 @@ export default function Dashboard() {
             </div>
 
             <div className="dashboard__content">
+                {/* Acciones Rápidas */}
+                <div className="dashboard__section" style={{ marginBottom: '32px' }}>
+                    <h2 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '16px' }}>Acciones Rápidas</h2>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+                        <Link to="/admin/productos?new=true" className="quick-action-card" style={{ textDecoration: 'none' }}>
+                            <div style={{ background: '#fff', padding: '24px', borderRadius: '16px', border: '1px solid #eee', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.3s', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981' }}>
+                                    <Plus size={24} />
+                                </div>
+                                <div>
+                                    <span style={{ display: 'block', fontSize: '15px', fontWeight: '800', color: '#111', letterSpacing: '0.05em' }}>NUEVO ARTÍCULO</span>
+                                    <span style={{ display: 'block', fontSize: '12px', color: '#666', marginTop: '4px' }}>Carga manual paso a paso</span>
+                                </div>
+                            </div>
+                        </Link>
+
+                        <Link to="/admin/stock" className="quick-action-card" style={{ textDecoration: 'none' }}>
+                            <div style={{ background: '#fff', padding: '24px', borderRadius: '16px', border: '1px solid #eee', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.3s', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F59E0B' }}>
+                                    <Boxes size={24} />
+                                </div>
+                                <div>
+                                    <span style={{ display: 'block', fontSize: '15px', fontWeight: '800', color: '#111', letterSpacing: '0.05em' }}>CARGA MASIVA</span>
+                                    <span style={{ display: 'block', fontSize: '12px', color: '#666', marginTop: '4px' }}>Importar desde Excel de Stock</span>
+                                </div>
+                            </div>
+                        </Link>
+
+                        <Link to="/admin/productos" className="quick-action-card" style={{ textDecoration: 'none' }}>
+                            <div style={{ background: '#fff', padding: '24px', borderRadius: '16px', border: '1px solid #eee', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.3s', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3B82F6' }}>
+                                    <Package size={24} />
+                                </div>
+                                <div>
+                                    <span style={{ display: 'block', fontSize: '15px', fontWeight: '800', color: '#111', letterSpacing: '0.05em' }}>LISTADO TOTAL</span>
+                                    <span style={{ display: 'block', fontSize: '12px', color: '#666', marginTop: '4px' }}>Ver y editar catálogo completo</span>
+                                </div>
+                            </div>
+                        </Link>
+                    </div>
+                </div>
                 {/* Recent Orders */}
                 <div className="dashboard__section">
                     <h2>Pedidos Recientes</h2>

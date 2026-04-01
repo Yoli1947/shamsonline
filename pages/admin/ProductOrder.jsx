@@ -19,17 +19,17 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-const SortableCard = ({ product, isSearchActive }) => {
+const SortableCard = ({ product, highlighted, dimmed }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: product.id,
-        disabled: isSearchActive,
     });
 
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
         zIndex: isDragging ? 100 : 'auto',
-        opacity: isDragging ? 0.4 : 1,
+        opacity: isDragging ? 0.5 : dimmed ? 0.25 : 1,
+        cursor: isDragging ? 'grabbing' : 'grab',
     };
 
     const image = product.images?.find(i => i.is_primary)?.url || product.images?.[0]?.url;
@@ -38,36 +38,29 @@ const SortableCard = ({ product, isSearchActive }) => {
         <div
             ref={setNodeRef}
             style={style}
-            className={`relative bg-white border rounded-xl overflow-hidden group transition-all ${
-                isDragging ? 'border-[#DCDCDC] shadow-[0_0_20px_rgba(196,149,106,0.3)]' : 'border-[var(--color-border)] hover:border-white/20'
+            {...attributes}
+            {...listeners}
+            className={`relative bg-white border-2 rounded-xl overflow-hidden transition-all select-none ${
+                isDragging ? 'border-black shadow-2xl scale-105'
+                : highlighted ? 'border-black shadow-lg ring-2 ring-black ring-offset-1'
+                : 'border-[var(--color-border)] hover:border-black hover:shadow-md'
             }`}
         >
-            {/* Drag handle */}
-            {!isSearchActive && (
-                <div
-                    {...attributes}
-                    {...listeners}
-                    className="absolute top-2 left-2 z-10 p-1 rounded-lg bg-[var(--color-background)]/60 text-[var(--color-text-muted)] hover:text-[var(--color-text)] cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                    <GripVertical size={16} />
+            {highlighted && (
+                <div className="absolute top-1.5 left-1.5 z-10 bg-black text-white text-[8px] font-black px-1.5 py-0.5 rounded">
+                    ★
                 </div>
             )}
-
-            {/* Imagen */}
+            <div className="absolute top-1.5 right-1.5 z-10">
+                <GripVertical size={14} className="text-white drop-shadow" />
+            </div>
             <div className="aspect-[3/4] bg-[var(--color-background-alt)]">
                 {image ? (
-                    <img
-                        src={image}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                    />
+                    <img src={image} alt={product.name} className="w-full h-full object-cover pointer-events-none" loading="lazy" draggable={false} />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center text-zinc-700 text-xs">Sin imagen</div>
+                    <div className="w-full h-full flex items-center justify-center text-zinc-400 text-xs">Sin imagen</div>
                 )}
             </div>
-
-            {/* Info */}
             <div className="p-2">
                 <p className="text-[var(--color-text)] text-[11px] font-bold uppercase truncate leading-tight">{product.name}</p>
                 {product.brand?.name && (
@@ -146,31 +139,9 @@ export default function ProductOrder() {
     const handleDragEnd = (event) => {
         const { active, over } = event;
         if (!over || active.id === over.id) return;
-
-        const isFiltered = selectedBrand !== '' || photoFilter !== 'todas';
-
-        if (isFiltered) {
-            // Reordenar dentro del subconjunto filtrado y mergear de vuelta al array completo
-            const oldFilteredIndex = filteredProducts.findIndex(p => p.id === active.id);
-            const newFilteredIndex = filteredProducts.findIndex(p => p.id === over.id);
-            const newFiltered = arrayMove(filteredProducts, oldFilteredIndex, newFilteredIndex);
-
-            // Posiciones en el array completo que corresponden a los filtrados
-            const filteredPositions = products
-                .map((p, i) => filteredProducts.some(fp => fp.id === p.id) ? i : -1)
-                .filter(i => i !== -1);
-
-            const newProducts = [...products];
-            filteredPositions.forEach((pos, i) => {
-                newProducts[pos] = newFiltered[i];
-            });
-            setProducts(newProducts);
-        } else {
-            const oldIndex = products.findIndex(p => p.id === active.id);
-            const newIndex = products.findIndex(p => p.id === over.id);
-            setProducts(arrayMove(products, oldIndex, newIndex));
-        }
-
+        const oldIndex = products.findIndex(p => p.id === active.id);
+        const newIndex = products.findIndex(p => p.id === over.id);
+        setProducts(arrayMove(products, oldIndex, newIndex));
         setHasChanges(true);
         setSaved(false);
     };
@@ -190,8 +161,9 @@ export default function ProductOrder() {
         }
     };
 
-    const isDragDisabled = search.trim().length > 0;
-    const isFiltered = selectedBrand !== '' || photoFilter !== 'todas';
+    const isDragDisabled = false;
+    const isFiltered = selectedBrand !== '' || photoFilter !== 'todas' || search.trim() !== '';
+    const matchIds = new Set(filteredProducts.map(p => p.id));
 
     return (
         <div className="p-6 max-w-7xl mx-auto">
@@ -282,12 +254,7 @@ export default function ProductOrder() {
                 </div>
             </div>
 
-            {isDragDisabled && (
-                <div className="mb-4 px-3 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-yellow-400 text-xs">
-                    Búsqueda activa — el drag está desactivado. Borrá el texto para reordenar.
-                </div>
-            )}
-            {!isDragDisabled && isFiltered && (
+            {isFiltered && (
                 <div className="mb-4 px-3 py-2 bg-[#DCDCDC]/10 border border-[#DCDCDC]/20 rounded-xl text-[#DCDCDC] text-xs">
                     Podés arrastrar para reordenar dentro del filtro seleccionado.
                 </div>
@@ -300,13 +267,14 @@ export default function ProductOrder() {
                 </div>
             ) : (
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                    <SortableContext items={filteredProducts.map(p => p.id)} strategy={rectSortingStrategy}>
+                    <SortableContext items={products.map(p => p.id)} strategy={rectSortingStrategy}>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-                            {filteredProducts.map(product => (
+                            {products.map(product => (
                                 <SortableCard
                                     key={product.id}
                                     product={product}
-                                    isSearchActive={isDragDisabled}
+                                    highlighted={isFiltered && matchIds.has(product.id)}
+                                    dimmed={isFiltered && !matchIds.has(product.id)}
                                 />
                             ))}
                         </div>

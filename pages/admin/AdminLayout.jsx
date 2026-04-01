@@ -12,11 +12,13 @@ import {
     X,
     Eye,
     Ruler,
-    User,
-    Image as ImageIcon,
+    ImageIcon,
     GripVertical,
-    Camera
+    Camera,
+    Plus,
+    Star
 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useState, useEffect } from 'react'
 import './AdminLayout.css'
@@ -49,6 +51,7 @@ export default function AdminLayout() {
     const navItems = [
         { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         { path: '/admin/productos', icon: Package, label: 'Productos' },
+        { path: '/admin/productos?new=true', icon: Plus, label: 'Crear Artículo', action: 'new' },
         { path: '/admin/stock', icon: Boxes, label: 'Stock' },
         { path: '/admin/marcas', icon: Tags, label: 'Marcas' },
         { path: '/admin/categorias', icon: Tags, label: 'Categorías' },
@@ -139,6 +142,9 @@ export default function AdminLayout() {
                         </div>
                     </div>
                 </header>
+
+
+
                 <main className="admin-content">
                     <Outlet />
                 </main>

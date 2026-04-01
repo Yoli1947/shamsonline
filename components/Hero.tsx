@@ -59,6 +59,13 @@ const Hero: React.FC = () => {
     return () => clearInterval(timer);
   }, [nextSlide]);
 
+  const scrollToCollection = () => {
+    const section = document.getElementById('new');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="relative h-[90vh] md:h-[100vh] w-full flex flex-col items-center justify-center overflow-hidden pt-12 md:pt-0 group bg-black">
       
@@ -88,7 +95,7 @@ const Hero: React.FC = () => {
       ))}
 
       {/* Content Area */}
-      <div className="relative z-40 text-center px-4 md:px-6 max-w-5xl mt-12 md:mt-16">
+      <div className="relative z-[60] text-center px-4 md:px-6 max-w-5xl mt-12 md:mt-16">
         
         {/* Animated Slide Content */}
         <div key={currentSlide} className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
@@ -112,8 +119,8 @@ const Hero: React.FC = () => {
 
           {/* Button */}
           <button
-            onClick={() => document.getElementById('new')?.scrollIntoView({ behavior: 'smooth' })}
-            className="bg-white text-black px-12 py-4 md:px-16 md:py-5 rounded-none font-bold text-[11px] md:text-xs tracking-[0.5em] hover:bg-black hover:text-white transition-all flex items-center gap-4 mx-auto shadow-2xl uppercase border border-white/20 group"
+            onClick={scrollToCollection}
+            className="bg-white text-black px-12 py-4 md:px-16 md:py-5 rounded-none font-bold text-[11px] md:text-xs tracking-[0.5em] hover:bg-black hover:text-white transition-all flex items-center gap-4 mx-auto shadow-2xl uppercase border border-white/20 group relative z-[70] cursor-pointer"
           >
             VER COLECCIÓN <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
           </button>
