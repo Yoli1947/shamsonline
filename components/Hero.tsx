@@ -55,7 +55,7 @@ const Hero: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const timer = setInterval(nextSlide, 7000);
+    const timer = setInterval(nextSlide, 4000);
     return () => clearInterval(timer);
   }, [nextSlide]);
 
@@ -73,7 +73,7 @@ const Hero: React.FC = () => {
       {slides.map((slide, index) => (
         <div
           key={index}
-          className={`absolute inset-0 transition-all duration-[1500ms] ease-in-out ${
+          className={`absolute inset-0 transition-all duration-[1000ms] ease-in-out ${
             index === currentSlide ? 'opacity-100 z-10 scale-100' : 'opacity-0 z-0 scale-105'
           } ${(slide as any).bgColor || 'bg-black'}`}
         >

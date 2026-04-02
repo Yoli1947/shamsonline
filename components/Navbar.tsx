@@ -81,35 +81,35 @@ const Navbar: React.FC<NavbarProps> = ({
           <div className="hidden md:flex items-center gap-8 lg:gap-12 absolute left-1/2 -translate-x-1/2">
             <button
               className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5"
-              style={{ color: '#666666' }}
+              style={{ color: '#000000' }}
               onClick={() => navigate('/?genero=Mujer#new')}
             >
               MUJER
             </button>
             <button
               className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5"
-              style={{ color: '#666666' }}
+              style={{ color: '#000000' }}
               onClick={() => navigate('/?genero=Hombre#new')}
             >
               HOMBRE
             </button>
             <button
               className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5"
-              style={{ color: '#666666' }}
+              style={{ color: '#000000' }}
               onClick={() => navigate('/?categoria=ACCESORIOS#new')}
             >
               ACCESORIOS
             </button>
             <button
               className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5"
-              style={{ color: '#666666' }}
+              style={{ color: '#000000' }}
               onClick={() => navigate('/marcas')}
             >
               MARCAS
             </button>
             <button
               className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5 flex items-center gap-1"
-              style={{ color: '#666666' }}
+              style={{ color: '#000000' }}
               onClick={() => navigate('/?categoria=CAFETERIA#new')}
             >
               <Coffee size={12} />
@@ -117,7 +117,7 @@ const Navbar: React.FC<NavbarProps> = ({
             </button>
             <button
               className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5 flex items-center gap-1"
-              style={{ color: '#666666' }}
+              style={{ color: '#000000' }}
               onClick={() => navigate('/gift-cards')}
             >
               <Gift size={12} />
@@ -125,7 +125,7 @@ const Navbar: React.FC<NavbarProps> = ({
             </button>
             <button
               className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5"
-              style={{ color: '#666666' }}
+              style={{ color: '#000000' }}
               onClick={() => window.open('https://shamsoutlet.com', '_blank')}
             >
               OUTLET
@@ -273,9 +273,10 @@ const Navbar: React.FC<NavbarProps> = ({
 
           <button 
             onClick={() => { setIsMobileMenuOpen(false); window.open('https://shamsoutlet.com', '_blank'); }}
-            className="flex items-center justify-between w-full py-5 text-left border-b border-black/10 transition-all hover:pl-2 opacity-60"
+            className="group flex items-center justify-between w-full py-5 text-left border-b border-black/5 transition-all hover:pl-2"
           >
-            <span className="text-lg font-bold tracking-[0.1em] text-zinc-500 uppercase italic">OUTLET</span>
+            <span className="text-lg font-black tracking-[0.1em] text-black uppercase">OUTLET</span>
+            <div className="w-1.5 h-1.5 bg-black scale-0 group-hover:scale-100 transition-transform" />
           </button>
 
           {isAdmin && (

@@ -23,6 +23,9 @@ import { useAuth } from './context/AuthContext';
 import { useSettings } from './context/SettingsContext';
 import StoreLocationsModal from './components/StoreLocationsModal';
 
+// Categorías que no deben aparecer en navegación, filtros ni en la grilla general
+const EXCLUDED_CATS = ['camisas/bluzas/top', 'camisas/blusas/top', 'short de baño', 'mallas', 'malla'];
+
 const Store: React.FC = () => {
     const [cart, setCart] = useState<CartItem[]>([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
@@ -297,14 +300,14 @@ const Store: React.FC = () => {
                 const mujerParent = dbCategories.find((c: any) => c.name === 'MUJER');
                 const hombreParent = dbCategories.find((c: any) => c.name === 'HOMBRE');
 
+                // Categorías a excluir de la navegación y filtros
                 setCategoriesByGender({
-                    Mujer: dbCategories.filter((c: any) => c.parent_id === mujerParent?.id),
-                    Hombre: dbCategories.filter((c: any) => c.parent_id === hombreParent?.id)
+                    Mujer: dbCategories.filter((c: any) => c.parent_id === mujerParent?.id && !EXCLUDED_CATS.includes(c.name?.toLowerCase().trim())),
+                    Hombre: dbCategories.filter((c: any) => c.parent_id === hombreParent?.id && !EXCLUDED_CATS.includes(c.name?.toLowerCase().trim()))
                 });
 
                 // Extract all unique categories from products (sin duplicados)
                 // Normalizar nombres antes de deduplicar para evitar duplicados por mayúsculas/espacios/tildes
-                const EXCLUDED_CATS = ['camisas/bluzas/top', 'camisas/blusas/top'];
                 const seenNames = new Set<string>();
                 const allCategories: string[] = [];
                 dbCategories
@@ -726,6 +729,11 @@ const Store: React.FC = () => {
         // Filter by Category
         const matchesCategory = !selectedCategory || selectedCategory === 'Todos' ||
             p.category?.toLowerCase() === selectedCategory.toLowerCase();
+        
+        // Excluir categorías de la lista negra global (para que no aparezcan en la grilla general tampoco)
+        if (!selectedCategory && p.category && EXCLUDED_CATS.includes(p.category.toLowerCase().trim())) {
+            return false;
+        }
 
         // Filter by Brand
         const matchesBrand = !selectedBrand ||
