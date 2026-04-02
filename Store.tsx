@@ -1330,10 +1330,35 @@ const Store: React.FC = () => {
                                 )}
                             </div>
                         ) : (
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-0.5 sm:gap-6 gap-y-4 sm:gap-y-12 min-h-[50vh]">
-                                {filteredProducts.map(product => (
-                                    <ProductCard key={product.id} product={product} onAddToCart={addToCart} onOpenDetail={(p) => setSelectedProduct(p)} isFavorite={favorites.includes(product.id)} onToggleFavorite={toggleFavorite} />
-                                ))}
+                            <div>
+                                {selectedCategory?.toLowerCase() === 'cafeteria' && (
+                                    <div className="relative w-full h-48 md:h-64 mb-8 overflow-hidden bg-[#1a2a1a] flex flex-col items-center justify-center">
+                                        <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/10" />
+                                        <div className="relative z-10 flex flex-col items-center gap-2">
+                                            <div className="flex items-center" style={{ fontFamily: "'Playfair Display', serif", color: 'white', fontSize: 'clamp(2rem, 8vw, 4rem)', fontWeight: 400, letterSpacing: '0.15em' }}>
+                                                <span>M</span>
+                                                <span className="relative inline-flex items-center justify-center mx-1" style={{ width: '1em', height: '1em' }}>
+                                                    <span>O</span>
+                                                    <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                        <svg viewBox="0 0 40 40" width="50%" height="50%" fill="none">
+                                                            <ellipse cx="20" cy="20" rx="14" ry="10" fill="white" transform="rotate(-30 20 20)"/>
+                                                            <path d="M20 10.5 Q26 20 20 29.5" stroke="#1a2a1a" strokeWidth="2" fill="none" strokeLinecap="round" transform="rotate(-30 20 20)"/>
+                                                        </svg>
+                                                    </span>
+                                                </span>
+                                                <span>NACLE</span>
+                                            </div>
+                                            <div style={{ fontFamily: "'Playfair Display', serif", color: 'rgba(255,255,255,0.75)', fontSize: 'clamp(0.6rem, 2vw, 0.85rem)', letterSpacing: '0.4em', fontWeight: 400 }}>
+                                                SPECIALTY COFFEE
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-0.5 sm:gap-6 gap-y-4 sm:gap-y-12 min-h-[50vh]">
+                                    {filteredProducts.map(product => (
+                                        <ProductCard key={product.id} product={product} onAddToCart={addToCart} onOpenDetail={(p) => setSelectedProduct(p)} isFavorite={favorites.includes(product.id)} onToggleFavorite={toggleFavorite} />
+                                    ))}
+                                </div>
                             </div>
                         )
                     )}
