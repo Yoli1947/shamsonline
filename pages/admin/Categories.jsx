@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Plus, Edit, Trash2, GripVertical, X, Loader, Upload, Image as ImageIcon, Tags } from 'lucide-react'
+import { Plus, Edit, Trash2, GripVertical, X, Loader, Upload, Image as ImageIcon, Tags, Eye, EyeOff } from 'lucide-react'
 import {
     getBrands, createBrand, updateBrand, deleteBrand,
     getCategories, createCategory, updateCategory, deleteCategory, uploadImage,
@@ -78,8 +78,8 @@ export default function Categories() {
             try {
                 setLoading(true)
                 const [brandsData, categoriesData] = await Promise.all([
-                    getBrands(),
-                    getCategories()
+                    getBrands(null, true),
+                    getCategories(null, true)
                 ])
                 setBrands(brandsData)
                 setCategories(categoriesData)
@@ -200,6 +200,21 @@ export default function Categories() {
         }
     }
 
+    const handleToggleActive = async (type, item) => {
+        const newState = !item.is_active;
+        try {
+            if (type === 'marca') {
+                await updateBrand(item.id, { is_active: newState });
+                setBrands(prev => prev.map(b => b.id === item.id ? { ...b, is_active: newState } : b));
+            } else {
+                await updateCategory(item.id, { is_active: newState });
+                setCategories(prev => prev.map(c => c.id === item.id ? { ...c, is_active: newState } : c));
+            }
+        } catch (error) {
+            alert('Error updating visibility: ' + error.message);
+        }
+    };
+
     const deleteItem = async (type, id) => {
         if (!confirm('¿Eliminar?')) return
         try {
@@ -245,6 +260,7 @@ export default function Categories() {
                                 <CategoryItem
                                     category={item}
                                     onEdit={() => openModal('categoria', item)}
+                                    onToggle={() => handleToggleActive('categoria', item)}
                                     onDelete={() => deleteItem('categoria', item.id)}
                                 />
                             </SortableItem>
@@ -292,7 +308,12 @@ export default function Categories() {
                                 <SortableContext items={brands.map(b => b.id)} strategy={rectSortingStrategy}>
                                     {brands.map((brand) => (
                                         <SortableItem key={brand.id} id={brand.id}>
-                                            <BrandItem brand={brand} onEdit={() => openModal('marca', brand)} onDelete={() => deleteItem('marca', brand.id)} />
+                                            <BrandItem 
+                                                brand={brand} 
+                                                onEdit={() => openModal('marca', brand)} 
+                                                onToggle={() => handleToggleActive('marca', brand)}
+                                                onDelete={() => deleteItem('marca', brand.id)} 
+                                            />
                                         </SortableItem>
                                     ))}
                                 </SortableContext>
@@ -339,9 +360,9 @@ export default function Categories() {
     )
 }
 
-function BrandItem({ brand, onEdit, onDelete, attributes, listeners }) {
+function BrandItem({ brand, onEdit, onToggle, onDelete, attributes, listeners }) {
     return (
-        <div className="category-item">
+        <div className={`category-item ${brand.is_active === false ? 'category-item--inactive' : ''}`}>
             <div className="category-item__drag" {...attributes} {...listeners}>
                 <GripVertical size={20} />
             </div>
@@ -349,6 +370,13 @@ function BrandItem({ brand, onEdit, onDelete, attributes, listeners }) {
                 <span className="category-item__name">{brand.name}</span>
             </div>
             <div className="category-item__actions">
+                <button 
+                    onClick={onToggle} 
+                    className={brand.is_active === false ? 'text-zinc-500' : 'text-green-500'}
+                    title={brand.is_active === false ? "Mostrar en tienda" : "Ocultar de tienda"}
+                >
+                    {brand.is_active === false ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
                 <button onClick={onEdit}><Edit size={14} /></button>
                 <button onClick={onDelete} className="text-red-500"><Trash2 size={14} /></button>
             </div>
@@ -356,9 +384,9 @@ function BrandItem({ brand, onEdit, onDelete, attributes, listeners }) {
     );
 }
 
-function CategoryItem({ category, onEdit, onDelete, attributes, listeners }) {
+function CategoryItem({ category, onEdit, onToggle, onDelete, attributes, listeners }) {
     return (
-        <div className="category-item">
+        <div className={`category-item ${category.is_active === false ? 'category-item--inactive' : ''}`}>
             <div className="category-item__drag bg-white border border-[var(--color-border)]" {...attributes} {...listeners}>
                 <GripVertical size={20} />
             </div>
@@ -366,6 +394,13 @@ function CategoryItem({ category, onEdit, onDelete, attributes, listeners }) {
                 <span className="category-item__name">{category.name}</span>
             </div>
             <div className="category-item__actions">
+                <button 
+                    onClick={onToggle} 
+                    className={category.is_active === false ? 'text-zinc-500' : 'text-green-500'}
+                    title={category.is_active === false ? "Mostrar en tienda" : "Ocultar de tienda"}
+                >
+                    {category.is_active === false ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
                 <button onClick={onEdit}><Edit size={14} /></button>
                 <button onClick={onDelete} className="text-red-500"><Trash2 size={14} /></button>
             </div>

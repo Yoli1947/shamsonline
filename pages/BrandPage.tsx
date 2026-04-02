@@ -52,7 +52,7 @@ const BrandPage: React.FC = () => {
     }, []);
 
     return (
-        <div className="min-h-screen relative selection:bg-black selection:text-white bg-[var(--color-background)] text-[var(--color-text)] overflow-hidden">
+        <div className="min-h-screen relative selection:bg-black selection:text-white bg-[var(--color-background)] text-[var(--color-text)] overflow-x-hidden">
             {/* Background elements - More subtle luxury */}
             <div className="fixed inset-0 bg-[var(--color-background)] pointer-events-none" />
             <div className="fixed inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] hidden pointer-events-none" />
@@ -67,12 +67,12 @@ const BrandPage: React.FC = () => {
                 onOpenAuth={() => {}}
             />
 
-            <main className="relative pt-4 px-0.5 md:px-12 max-w-screen-2xl mx-auto z-10">
+            <main className="relative pt-4 px-4 md:px-12 max-w-screen-2xl mx-auto z-10">
                 <header className="mb-8 text-center max-w-4xl mx-auto">
                     <span className="text-[var(--color-text-muted)] uppercase tracking-[0.8em] text-[10px] font-black mb-6 block animate-in fade-in slide-in-from-bottom-4 duration-1000">
                         CURATED SELECTION
                     </span>
-                    <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-[var(--color-text)] mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 uppercase italic">
+                    <h1 className="text-4xl sm:text-5xl md:text-8xl font-black tracking-tighter text-[var(--color-text)] mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 uppercase italic leading-tight">
                         MARCAS <span className="text-[var(--color-text-muted)]">SELECTAS</span>
                     </h1>
                     <div className="w-24 h-[1px] bg-white mx-auto mb-8" />

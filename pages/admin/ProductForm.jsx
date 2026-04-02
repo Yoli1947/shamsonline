@@ -191,7 +191,8 @@ export default function ProductForm({ product, onSuccess, onCancel }) {
         const keywordMap = [
             { keywords: ['botas de lluvia', 'bota de lluvia', 'bota goma', 'hunter'], category: ['botas de lluvia'] },
             { keywords: ['piloto', 'trench', 'impermeable', 'trew'], category: ['pilotos', 'piloto'] },
-            { keywords: ['campera', 'camperon', 'parka', 'rompeviento', 'abrigo', 'saco', 'chaleco'], category: ['camperas', 'campera', 'abrigos'] },
+            { keywords: ['campera', 'camperon', 'parka', 'rompeviento', 'abrigo', 'saco'], category: ['camperas', 'campera', 'abrigos'] },
+            { keywords: ['chaleco'], category: ['campera/chaleco', 'chalecos', 'campera'] },
             { keywords: ['remera', 'chomba', 'polo', 't-shirt', 'musculosa', 'top'], category: ['remeras', 'chombas', 'remera', 'chomba'] },
             { keywords: ['pantalon', 'jean', 'denim', 'cargo', 'jogger', 'babucha', 'legging', 'calza'], category: ['pantalones', 'jeans', 'pantalon'] },
             { keywords: ['bermuda', 'short', 'traje de baño', 'malla'], category: ['bermudas', 'shorts', 'trajes de baño'] },

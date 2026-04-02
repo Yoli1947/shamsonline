@@ -379,6 +379,41 @@ export default function Stock() {
                     console.log('Columnas detectadas en Excel:', columns);
                 }
 
+                // Funciones auxiliares para mapeo flexible de nombres
+                const getFlexibleCategoryId = (name) => {
+                    if (!name) return null;
+                    const uName = name.toString().toUpperCase().trim();
+                    
+                    // 1. Intento exacto
+                    if (categoryMap[uName]) return categoryMap[uName];
+                    
+                    // 2. Mapeos de Alias conocidos
+                    const aliases = {
+                        'CHALECO': 'CAMPERA/CHALECO',
+                        'CHALECOS': 'CAMPERA/CHALECO',
+                        'CHALECO/CAMPERA': 'CAMPERA/CHALECO',
+                        'CAMPERAS': 'CAMPERA/CHALECO',
+                        'CAMPERA': 'CAMPERA/CHALECO',
+                        'REMERA': 'REMERA/CHOMBA',
+                        'REMERAS': 'REMERA/CHOMBA',
+                        'CHOMBA': 'REMERA/CHOMBA',
+                        'CHOMBAS': 'REMERA/CHOMBA'
+                    };
+
+                    const aliasTarget = aliases[uName];
+                    if (aliasTarget && categoryMap[aliasTarget]) {
+                        return categoryMap[aliasTarget];
+                    }
+
+                    // 3. Intento parcial (si el nombre en DB contiene lo que buscamos)
+                    const partialMatch = Object.keys(categoryMap).find(catName => 
+                        catName.includes(uName) || uName.includes(catName)
+                    );
+                    if (partialMatch) return categoryMap[partialMatch];
+
+                    return null;
+                };
+
                 for (const row of data) {
                     const rawSku = (row['CODIGO'] || row['codigo'] || row['CODIGO INTERNO'] || row['Codigo'] || row['ARTICULO'] || row.sku || '').toString().trim().toUpperCase()
                     if (!rawSku) continue // ESTRICTO: Si no hay código, lo saltamos.
@@ -414,8 +449,12 @@ export default function Stock() {
 
                     // 3. Manejar Categoría sin crear
                     let effectiveCategoryId = existingP?.category_id || null;
-                    if (categoryName && categoryMap[categoryName]) {
-                        effectiveCategoryId = categoryMap[categoryName];
+                    const catIdFromExcel = getFlexibleCategoryId(categoryName);
+                    if (catIdFromExcel) {
+                        effectiveCategoryId = catIdFromExcel;
+                    } else if (!effectiveCategoryId && (rawName.toUpperCase().includes('CHALECO') || rawName.toUpperCase().includes('CAMPERA'))) {
+                        // Fallback automático por nombre del artículo si sigue sin categoría (ej: CHALECO REVERS)
+                        effectiveCategoryId = getFlexibleCategoryId('CAMPERA/CHALECO');
                     }
 
                     // Sincronizar Features con Género

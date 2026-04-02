@@ -55,7 +55,8 @@ const Hero: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const timer = setInterval(nextSlide, 4000);
+    const isMobile = window.innerWidth < 768;
+    const timer = setInterval(nextSlide, isMobile ? 2500 : 4000);
     return () => clearInterval(timer);
   }, [nextSlide]);
 
