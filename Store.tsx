@@ -1327,25 +1327,22 @@ const Store: React.FC = () => {
                         ) : (
                             <div>
                                 {selectedCategory?.toLowerCase() === 'cafeteria' && (
-                                    <div className="relative w-full h-48 md:h-64 mb-8 overflow-hidden bg-[#1a2a1a] flex flex-col items-center justify-center">
-                                        <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/10" />
-                                        <div className="relative z-10 flex flex-col items-center gap-2">
-                                            <div className="flex items-center" style={{ fontFamily: "'Playfair Display', serif", color: 'white', fontSize: 'clamp(2rem, 8vw, 4rem)', fontWeight: 400, letterSpacing: '0.15em' }}>
-                                                <span>M</span>
-                                                <span className="relative inline-flex items-center justify-center mx-1" style={{ width: '1em', height: '1em' }}>
-                                                    <span>O</span>
-                                                    <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                                        <svg viewBox="0 0 40 40" width="50%" height="50%" fill="none">
-                                                            <ellipse cx="20" cy="20" rx="14" ry="10" fill="white" transform="rotate(-30 20 20)"/>
-                                                            <path d="M20 10.5 Q26 20 20 29.5" stroke="#1a2a1a" strokeWidth="2" fill="none" strokeLinecap="round" transform="rotate(-30 20 20)"/>
-                                                        </svg>
-                                                    </span>
+                                    <div style={{ position: 'relative', width: '100%', minHeight: '180px', marginBottom: '2rem', background: '#1a2a1a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', fontFamily: "'Playfair Display', Georgia, serif", color: 'white', fontSize: 'clamp(2.2rem, 10vw, 4rem)', fontWeight: 400, letterSpacing: '0.15em' }}>
+                                            <span>M</span>
+                                            <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <span>O</span>
+                                                <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+                                                    <svg viewBox="0 0 40 40" width="48%" height="48%" fill="none">
+                                                        <ellipse cx="20" cy="20" rx="14" ry="10" fill="white" transform="rotate(-30 20 20)"/>
+                                                        <path d="M20 10.5 Q26 20 20 29.5" stroke="#1a2a1a" strokeWidth="2" fill="none" strokeLinecap="round" transform="rotate(-30 20 20)"/>
+                                                    </svg>
                                                 </span>
-                                                <span>NACLE</span>
-                                            </div>
-                                            <div style={{ fontFamily: "'Playfair Display', serif", color: 'rgba(255,255,255,0.75)', fontSize: 'clamp(0.6rem, 2vw, 0.85rem)', letterSpacing: '0.4em', fontWeight: 400 }}>
-                                                SPECIALTY COFFEE
-                                            </div>
+                                            </span>
+                                            <span>NACLE</span>
+                                        </div>
+                                        <div style={{ fontFamily: "'Playfair Display', Georgia, serif", color: 'rgba(255,255,255,0.7)', fontSize: 'clamp(0.55rem, 2.5vw, 0.8rem)', letterSpacing: '0.4em', marginTop: '0.5rem' }}>
+                                            SPECIALTY COFFEE
                                         </div>
                                     </div>
                                 )}
