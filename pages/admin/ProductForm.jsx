@@ -128,12 +128,16 @@ export default function ProductForm({ product, onSuccess, onCancel }) {
             images: product.images?.map(img => ({ id: img.id, url: img.url, isNew: false, color: img.alt_text })) || []
         })
 
-        // Initialize Gender from features
-        const features = product.features || []
-        if (features.includes('Hombre')) setGender('Hombre')
-        else if (features.includes('Mujer')) setGender('Mujer')
-        else if (features.includes('Unisex')) setGender('Unisex')
-        else setGender('')
+        // Initialize Gender from DB column or fallback to features
+        if (product.gender) {
+            setGender(product.gender)
+        } else {
+            const features = product.features || []
+            if (features.includes('Hombre')) setGender('Hombre')
+            else if (features.includes('Mujer')) setGender('Mujer')
+            else if (features.includes('Unisex')) setGender('Unisex')
+            else setGender('')
+        }
 
         if (product.variants && product.variants.length > 0) {
             // Mapear variantes para asegurar estructura

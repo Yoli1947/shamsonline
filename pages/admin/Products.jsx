@@ -144,11 +144,17 @@ export default function Products() {
             if (field === 'category_id') {
                 const selectedCat = categories.find(c => c.id === value);
                 let features = p.features || [];
+                let gender = p.gender;
                 if (selectedCat) {
-                    if (selectedCat.parentName === 'MUJER') features = ['Mujer'];
-                    else if (selectedCat.parentName === 'HOMBRE') features = ['Hombre'];
+                    if (selectedCat.parentName === 'MUJER') {
+                        features = ['Mujer'];
+                        gender = 'Mujer';
+                    } else if (selectedCat.parentName === 'HOMBRE') {
+                        features = ['Hombre'];
+                        gender = 'Hombre';
+                    }
                 }
-                return { ...p, [field]: value, features: features, hasChanges: true };
+                return { ...p, [field]: value, features: features, gender: gender, hasChanges: true };
             }
 
             if (field === 'name') {
@@ -199,6 +205,25 @@ export default function Products() {
                 }
             }
 
+            if (field === 'gender') {
+                return { 
+                    ...p, 
+                    gender: value, 
+                    features: value ? [value] : [], 
+                    hasChanges: true 
+                };
+            }
+
+            if (field === 'features') {
+                const head = Array.isArray(value) ? value[0] : value;
+                return { 
+                    ...p, 
+                    features: Array.isArray(value) ? value : (value ? [value] : []), 
+                    gender: head || null,
+                    hasChanges: true 
+                };
+            }
+
             return { ...p, [field]: value, hasChanges: true };
         }))
     }
@@ -229,6 +254,7 @@ export default function Products() {
                 brandId: product.brand_id || product.brand?.id,
                 categoryId: product.category_id || product.category?.id,
                 features: product.features || [],
+                gender: product.gender || null,
                 price: parseFloat(product.price),
                 salePrice: product.sale_price ? parseFloat(product.sale_price) : null
             })
@@ -360,6 +386,7 @@ export default function Products() {
                     brandId: product.brand_id || product.brand?.id,
                     categoryId: product.category_id || product.category?.id,
                     features: product.features || [],
+                    gender: product.gender || null,
                     price: parseFloat(product.price),
                     salePrice: product.sale_price ? parseFloat(product.sale_price) : null
                 });
@@ -863,8 +890,8 @@ export default function Products() {
                                 <td>
                                     <select
                                         className="inline-select"
-                                        value={product.features?.[0] || ''}
-                                        onChange={(e) => handleInlineChange(product.id, 'features', e.target.value ? [e.target.value] : [])}
+                                        value={product.gender || ''}
+                                        onChange={(e) => handleInlineChange(product.id, 'gender', e.target.value)}
                                     >
                                         <option value="">-</option>
                                         <option value="Hombre">Hombre</option>
