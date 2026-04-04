@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Gift, User, Mail, Phone, MessageSquare, ChevronRight, Loader } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-const PRESET_AMOUNTS = [1000, 150000, 200000, 300000, 500000];
+const PRESET_AMOUNTS = [800, 150000, 200000, 300000, 500000];
 
 const FUNCTIONS_URL = import.meta.env.VITE_SUPABASE_FUNCTIONS_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -56,7 +56,7 @@ const GiftCardPage: React.FC = () => {
             setError('Completá tus datos de contacto.');
             return;
         }
-        if (effectiveAmount < 1000) {
+        if (effectiveAmount < 800) {
             setError('El monto mínimo es $100.000.');
             return;
         }
@@ -241,7 +241,7 @@ const GiftCardPage: React.FC = () => {
                                         transition: 'all 0.15s',
                                     }}
                                 >
-                                    ${(val / 1000).toLocaleString('es-AR')} MIL
+                                    ${(val / 800).toLocaleString('es-AR')} MIL
                                 </button>
                             ))}
                         </div>
@@ -267,7 +267,7 @@ const GiftCardPage: React.FC = () => {
                                 }}
                             />
                         </div>
-                        {effectiveAmount > 0 && effectiveAmount < 1000 && (
+                        {effectiveAmount > 0 && effectiveAmount < 800 && (
                             <p style={{ fontSize: '9px', color: '#c00', marginTop: '6px', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 900 }}>
                                 El monto mínimo es $100.000
                             </p>
@@ -388,10 +388,10 @@ const GiftCardPage: React.FC = () => {
 
                         <button
                             type="submit"
-                            disabled={loading || effectiveAmount < 1000}
+                            disabled={loading || effectiveAmount < 800}
                             style={{
                                 width: '100%',
-                                backgroundColor: effectiveAmount < 1000 ? '#ccc' : '#000',
+                                backgroundColor: effectiveAmount < 800 ? '#ccc' : '#000',
                                 color: '#fff',
                                 border: 'none',
                                 padding: '18px',
@@ -403,7 +403,7 @@ const GiftCardPage: React.FC = () => {
                                 fontSize: '12px',
                                 letterSpacing: '0.2em',
                                 textTransform: 'uppercase',
-                                cursor: loading || effectiveAmount < 1000 ? 'not-allowed' : 'pointer',
+                                cursor: loading || effectiveAmount < 800 ? 'not-allowed' : 'pointer',
                             }}
                         >
                             {loading ? (
