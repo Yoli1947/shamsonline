@@ -933,7 +933,7 @@ const Store: React.FC = () => {
                                 ) : selectedCategory ? (
                                     <div className="flex flex-col items-start leading-tight animate-in fade-in slide-in-from-left-8 duration-700 mt-2">
                                         <span className="text-2xl md:text-4xl font-black text-[var(--color-text)] tracking-[0.1em] uppercase">
-                                            {selectedCategory.toLowerCase() === 'cafeteria' ? 'SPECIALTY COFFEE' : selectedCategory}
+                                            {selectedCategory.toLowerCase() === 'cafeteria' ? 'SPECIALITY COFFEE' : selectedCategory}
                                         </span>
                                     </div>
                                 ) : selectedGender ? (
@@ -1342,7 +1342,7 @@ const Store: React.FC = () => {
                                             <span>NACLE</span>
                                         </div>
                                         <div style={{ fontFamily: "'Playfair Display', Georgia, serif", color: 'rgba(255,255,255,0.7)', fontSize: 'clamp(0.55rem, 2.5vw, 0.8rem)', letterSpacing: '0.4em', marginTop: '0.5rem' }}>
-                                            SPECIALTY COFFEE
+                                            SPECIALITY COFFEE
                                         </div>
                                     </div>
                                 )}

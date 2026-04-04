@@ -113,7 +113,7 @@ const Navbar: React.FC<NavbarProps> = ({
               onClick={() => navigate('/?categoria=CAFETERIA#new')}
             >
               <Coffee size={12} />
-              SPECIALTY COFFEE
+              SPECIALITY COFFEE
             </button>
             <button
               className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5 flex items-center gap-1"
@@ -255,7 +255,7 @@ const Navbar: React.FC<NavbarProps> = ({
           >
             <div className="flex items-center gap-3">
               <Coffee size={18} className="text-black" />
-              <span className="text-lg font-black tracking-[0.1em] text-black uppercase">SPECIALTY COFFEE</span>
+              <span className="text-lg font-black tracking-[0.1em] text-black uppercase">SPECIALITY COFFEE</span>
             </div>
             <div className="w-1.5 h-1.5 bg-black scale-0 group-hover:scale-100 transition-transform" />
           </button>
