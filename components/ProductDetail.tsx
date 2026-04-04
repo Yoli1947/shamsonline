@@ -306,8 +306,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                 {/* Right Side: Info */}
                 <div className="w-full md:w-[40%] p-6 md:p-8 md:overflow-y-auto flex flex-col bg-[var(--color-background)] min-h-[50vh]">
                     <div className="flex-1">
-                        <div className="mb-1">
+                        <div className="mb-1 flex items-center justify-between">
                             <span className="text-[var(--color-text-muted)] uppercase tracking-[0.4em] text-[8px] font-black">{product.brand}</span>
+                            {product.features?.some(f => f?.toLowerCase() === 'unisex') && (
+                                <span className="bg-black text-white text-[7px] font-black tracking-[0.2em] px-2 py-0.5 border border-black uppercase">Unisex</span>
+                            )}
                         </div>
                         <div className="flex justify-between items-start mb-4">
                             <h2 className="font-heading text-xl md:text-2xl font-bold tracking-tighter text-[var(--color-text)] uppercase leading-none break-words pr-4">{product.name}</h2>

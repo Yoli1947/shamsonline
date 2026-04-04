@@ -96,6 +96,13 @@ const Navbar: React.FC<NavbarProps> = ({
             <button
               className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5"
               style={{ color: '#000000' }}
+              onClick={() => navigate('/?genero=Unisex#new')}
+            >
+              UNISEX
+            </button>
+            <button
+              className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5"
+              style={{ color: '#000000' }}
               onClick={() => navigate('/?categoria=ACCESORIOS#new')}
             >
               ACCESORIOS
@@ -236,6 +243,7 @@ const Navbar: React.FC<NavbarProps> = ({
             { label: 'INICIO', action: () => navigate('/') },
             { label: 'MUJER', action: () => navigate('/?genero=Mujer#new') },
             { label: 'HOMBRE', action: () => navigate('/?genero=Hombre#new') },
+            { label: 'UNISEX', action: () => navigate('/?genero=Unisex#new') },
             { label: 'ACCESORIOS', action: () => navigate('/?categoria=ACCESORIOS#new') },
             { label: 'MARCAS', action: () => navigate('/marcas') },
           ].map((item, index) => (

@@ -419,19 +419,20 @@ const Store: React.FC = () => {
 
     // Calculate available genders for the selected brand
     const availableGendersForBrand = React.useMemo(() => {
-        if (!selectedBrand) return ['Hombre', 'Mujer'];
+        if (!selectedBrand) return ['Hombre', 'Mujer', 'Unisex'];
 
         const genders = new Set<string>();
         products.forEach(p => {
             if (p.brand?.toLowerCase() === selectedBrand.toLowerCase()) {
                 if (p.features?.includes('Mujer')) genders.add('Mujer');
                 if (p.features?.includes('Hombre')) genders.add('Hombre');
+                if (p.features?.includes('Unisex')) genders.add('Unisex');
             }
         });
 
-        if (genders.size === 0) return ['Hombre', 'Mujer'];
+        if (genders.size === 0) return ['Hombre', 'Mujer', 'Unisex'];
 
-        return ['Hombre', 'Mujer'].filter(g => genders.has(g));
+        return ['Hombre', 'Mujer', 'Unisex'].filter(g => genders.has(g));
     }, [products, selectedBrand]);
 
     const addToCart = (product: Product, size?: string, color?: string) => {
@@ -742,7 +743,12 @@ const Store: React.FC = () => {
 
         // Filter by Gender
         const matchesGender = isCafeteriaFilterActive || (
-            (!selectedGender || (p.features?.includes(selectedGender) || p.features?.some(f => f?.toLowerCase() === selectedGender?.toLowerCase()))) &&
+            (!selectedGender || (
+                p.features?.includes(selectedGender) || 
+                p.features?.some(f => f?.toLowerCase() === selectedGender?.toLowerCase()) ||
+                (selectedGender === 'Mujer' && p.features?.some(f => f?.toLowerCase() === 'unisex')) ||
+                (selectedGender === 'Hombre' && p.features?.some(f => f?.toLowerCase() === 'unisex'))
+            )) &&
             (!selectedGender || !isCafeteriaProduct) || 
             (p.brand?.toLowerCase() === 'cibeles' && selectedGender === 'Mujer')
         );
