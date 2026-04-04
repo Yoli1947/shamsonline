@@ -85,15 +85,16 @@ export default function ProductForm({ product, onSuccess, onCancel }) {
             setSizeCurves(curvesData || [])
             setSeasons(seasonsData || [])
 
-            // Organize categories hierarchically
-            const hierarchical = (categoriesData || []).map(cat => {
-                const parent = (categoriesData || []).find(p => p.id === cat.parent_id);
-                return {
+            // Solo mostrar categorías bajo el padre GENERAL (sin género)
+            const GENERAL_ID = '00000000-0000-0000-0000-000000000003';
+            const hierarchical = (categoriesData || [])
+                .filter(cat => cat.parent_id === GENERAL_ID)
+                .map(cat => ({
                     ...cat,
                     displayName: cat.name,
-                    parentName: parent ? parent.name : ''
-                };
-            }).sort((a, b) => a.displayName.localeCompare(b.displayName));
+                    parentName: 'GENERAL'
+                }))
+                .sort((a, b) => a.displayName.localeCompare(b.displayName));
 
             setCategories(hierarchical)
 

@@ -25,7 +25,7 @@ import StoreLocationsModal from './components/StoreLocationsModal';
 
 // Categorías que no deben aparecer en navegación, filtros ni en la grilla general
 // Categorías que no deben aparecer en navegación, filtros ni en la grilla general (Antiguo, ahora se usa el campo is_active de la DB)
-const EXCLUDED_CATS: string[] = [];
+const EXCLUDED_CATS: string[] = ['cafeteria', 'cafetería'];
 
 const Store: React.FC = () => {
     const [cart, setCart] = useState<CartItem[]>([]);
