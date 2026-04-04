@@ -1054,7 +1054,7 @@ const Store: React.FC = () => {
                                             )}
                                         </div>
                                         <div className="flex flex-col gap-1.5 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                                            {['Mujer', 'Hombre'].map(gender => (
+                                            {['Mujer', 'Hombre', 'Unisex'].map(gender => (
                                                 <button
                                                     key={gender}
                                                     onClick={() => {
