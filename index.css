@@ -649,13 +649,15 @@ button.bg-\[\#DCDCDC\]:hover {
    OVERRIDE GLOBAL: Fondo Blanco / Letras Negras
    ============================================ */
 
-/* Forzar fondo blanco en los contenedores principales de forma agresiva */
-body, #root, main, section, header, nav, footer, aside, article {
+/* Forzar fondo blanco en los contenedores principales de forma suavizada (sin !important en todo) */
+body, #root {
     background-color: #ffffff !important;
 }
 
 /* Solo divs que no tengan imagenes de fondo o sean parte de overlays */
-main > div, section > div:not([class*="absolute"]), .bg-white {
+main > div:not([class*="bg-black"]):not([class*="bg-zinc"]):not([class*="bg-slate"]), 
+section > div:not([class*="absolute"]):not([class*="bg-black"]), 
+.bg-white {
     background-color: #ffffff !important;
 }
 

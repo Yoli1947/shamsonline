@@ -933,7 +933,7 @@ const Store: React.FC = () => {
                                 ) : selectedCategory ? (
                                     <div className="flex flex-col items-start leading-tight animate-in fade-in slide-in-from-left-8 duration-700 mt-2">
                                         <span className="text-2xl md:text-4xl font-black text-[var(--color-text)] tracking-[0.1em] uppercase">
-                                            {selectedCategory}
+                                            {selectedCategory.toLowerCase() === 'cafeteria' ? 'SPECIALTY COFFEE' : selectedCategory}
                                         </span>
                                     </div>
                                 ) : selectedGender ? (
