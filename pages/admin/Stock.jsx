@@ -47,7 +47,7 @@ export default function Stock() {
                 ])
                 setProducts(productsRes.products)
                 setBrands(brandsRes)
-                setCategories(categoriesRes)
+                setCategories((categoriesRes || []).filter(c => c.parent_id === '00000000-0000-0000-0000-000000000003').sort((a, b) => a.name.localeCompare(b.name)))
                 setSeasons(seasonsRes)
             } catch (error) {
                 console.error('Error loading stock:', error)

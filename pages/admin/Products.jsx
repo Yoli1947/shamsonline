@@ -47,15 +47,10 @@ export default function Products() {
             setBrands(b)
             setSeasons(s)
 
-            // Organize categories without gender prefix
-            const hierarchical = (cRaw || []).map(cat => {
-                const parent = (cRaw || []).find(p => p.id === cat.parent_id);
-                return {
-                    ...cat,
-                    displayName: cat.name,
-                    parentName: parent ? parent.name : ''
-                };
-            }).sort((a, b) => a.displayName.localeCompare(b.displayName));
+            const hierarchical = (cRaw || [])
+                .filter(cat => cat.parent_id === '00000000-0000-0000-0000-000000000003')
+                .map(cat => ({ ...cat, displayName: cat.name, parentName: 'GENERAL' }))
+                .sort((a, b) => a.displayName.localeCompare(b.displayName));
 
             setCategories(hierarchical)
         } catch (error) {
