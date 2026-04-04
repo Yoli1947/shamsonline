@@ -17,6 +17,7 @@ import { Product, CartItem } from './types';
 import { Filter, Loader, X, Ruler, Trash2, Tag, Search, Users, Mail, Phone, MapPin, HelpCircle, ShoppingBag, Instagram, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import CheckoutModal from './components/CheckoutModal';
 import CustomerAuthModal from './components/CustomerAuthModal';
+import OrderSuccessModal from './components/OrderSuccessModal';
 import { SIZE_ORDER, sortSizes } from './lib/constants';
 import NewsletterModal from './components/NewsletterModal';
 import { useAuth } from './context/AuthContext';
@@ -92,6 +93,12 @@ const Store: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [footerEmail, setFooterEmail] = useState('');
     const [footerSubStatus, setFooterSubStatus] = useState<'idle' | 'loading' | 'success'>('idle');
+    const [successOrderData, setSuccessOrderData] = useState<{
+        order: any;
+        bankDetails: any;
+        whatsappNumber: string;
+        whatsappMsg: string;
+    } | null>(null);
 
     const [products, setProducts] = useState<Product[]>([]);
     const [brands, setBrands] = useState<any[]>([]);
@@ -123,12 +130,12 @@ const Store: React.FC = () => {
             };
 
             const mapped = dbProducts.map((p: any) => {
-                const features = [...(p.features || [])];
+                const GENDER_VALUES = ['Mujer', 'Hombre', 'Unisex'];
+                // Remove any gender already in features array to avoid conflicts
+                let features = (p.features || []).filter((f: string) => !GENDER_VALUES.includes(f));
                 if (p.gender) {
                     const normalizedGender = p.gender.charAt(0).toUpperCase() + p.gender.slice(1).toLowerCase();
-                    if (!features.includes(normalizedGender)) {
-                        features.push(normalizedGender);
-                    }
+                    features.push(normalizedGender);
                 }
 
                 const galleryImages: any[] = [];
@@ -461,8 +468,11 @@ const Store: React.FC = () => {
                 );
             }
 
+            const creditPrice = (product.originalPrice > product.price) ? product.originalPrice : product.price;
+
             return [...prev, {
                 ...product,
+                price: creditPrice,
                 image: colorImage || product.image, // Use color-specific image if found
                 quantity: 1,
                 selectedSize: size || variant?.size,
@@ -566,6 +576,10 @@ const Store: React.FC = () => {
                 }).catch(e => console.warn('correo-import error (no crítico):', e));
             }
 
+            const itemsText = orderItems
+                .map(i => `• ${i.name} (T: ${i.size}) x${i.quantity} — $${i.price.toLocaleString('es-AR')}`)
+                .join('\n');
+
             if (formData.paymentMethod === 'mercadopago') {
                 // Crear preferencia de Mercado Pago y redirigir
                 const functionsUrl = import.meta.env.VITE_SUPABASE_FUNCTIONS_URL;
@@ -602,6 +616,7 @@ const Store: React.FC = () => {
                 setCart([]);
                 setIsCheckoutOpen(false);
                 localStorage.removeItem('shams_products_v4');
+                localStorage.removeItem('shams_promo_10');
                 window.location.href = mpData.init_point;
             } else if (formData.paymentMethod === 'transferencia') {
                 const transferDiscount = settings.transfer_discount || 15;
@@ -610,70 +625,85 @@ const Store: React.FC = () => {
                 const bankAlias = settings.bank_alias || '';
                 const bankName = settings.bank_name || 'Banco Galicia';
 
-                const itemsText = orderItems
-                    .map(i => `• ${i.name} (T: ${i.size}) x${i.quantity} — $${i.price.toLocaleString('es-AR')}`)
-                    .join('\n');
-
                 const shippingLine = order.shipping_cost === 0
                     ? 'Envío: *GRATIS* ✅'
                     : `Envío: *$${order.shipping_cost.toLocaleString('es-AR')}*`;
 
+                const whatsappNumber = settings.whatsapp_number || '5493412175258';
+
                 const msg = [
-                    `🏦 *QUIERO PAGAR POR TRANSFERENCIA — Pedido #${order.order_number}*`,
+                    `🏦 *NUEVO PEDIDO #${order.order_number} (TRANSFERENCIA)*`,
                     ``,
-                    `¡Hola! Acabo de realizar un pedido en *Shams* y quiero abonarlo por transferencia bancaria.`,
+                    `¡Hola! Acabo de realizar un pedido en *Shams* y deseo abonarlo por transferencia bancaria.`,
                     ``,
                     `*📦 Detalle del pedido:*`,
                     itemsText,
                     ``,
                     `Subtotal: $${order.subtotal.toLocaleString('es-AR')}`,
-                    `Descuento transferencia (-${transferDiscount}%): -$${order.discount.toLocaleString('es-AR')}`,
+                    `Descuentos aplicados: -$${order.discount.toLocaleString('es-AR')}`,
                     shippingLine,
-                    `*💰 TOTAL A TRANSFERIR: $${order.total.toLocaleString('es-AR')}*`,
+                    `*💰 TOTAL A ABONAR: $${order.total.toLocaleString('es-AR')}*`,
                     ``,
-                    `*📋 Datos bancarios confirmados:*`,
+                    `*📋 Datos para la transferencia:*`,
                     `🏦 Banco: ${bankName}`,
                     `👤 Titular: ${bankHolder}`,
                     `🔢 CBU: ${bankCbu}`,
                     ...(bankAlias ? [`📲 Alias: ${bankAlias}`] : []),
                     ``,
-                    `En cuanto realice la transferencia les envío el comprobante. ¡Muchas gracias! 🙏`,
-                ].join('\n');
-
-                // Mensaje de confirmación para el cliente
-                const rawPhone = (formData.phone || '').replace(/\D/g, '').replace(/^0/, '');
-                const clientPhone = rawPhone.startsWith('54') ? rawPhone : `549${rawPhone}`;
-                const clientConfirmMsg = [
-                    `✅ *Confirmación de Pedido #${order.order_number} — Shams*`,
-                    ``,
-                    `¡Hola ${order.customer_first_name}! Gracias por elegir *Shams — Perramus* 🛍️`,
-                    ``,
-                    `Recibimos tu pedido y estamos esperando el comprobante de la transferencia.`,
-                    `Una vez que lo confirmemos, te enviamos el número de seguimiento de tu envío 📦`,
-                    ``,
-                    `*Total a abonar: $${order.total.toLocaleString('es-AR')}*`,
-                    ``,
-                    `¡Gracias por elegirnos! 💙`,
-                    `*Shams — Perramus*`,
+                    `En cuanto realice el pago les enviaré el comprobante por este medio. 🙏`,
                 ].join('\n');
 
                 decrementLocalStock(orderItems);
                 setCart([]);
                 setIsCheckoutOpen(false);
                 localStorage.removeItem('shams_products_v4');
-                // 1. Notificación a la tienda
-                window.open(`https://wa.me/5493412175258?text=${encodeURIComponent(msg)}`, '_blank');
-                // 2. Confirmación al cliente
-                if (rawPhone.length >= 8) {
-                    window.open(`https://wa.me/${clientPhone}?text=${encodeURIComponent(clientConfirmMsg)}`, '_blank');
-                }
+                localStorage.removeItem('shams_promo_10');
+
+                setSuccessOrderData({
+                    order,
+                    bankDetails: {
+                        holder: bankHolder,
+                        cbu: bankCbu,
+                        alias: bankAlias,
+                        bank: bankName
+                    },
+                    whatsappNumber,
+                    whatsappMsg: msg
+                });
+
             } else {
                 // Efectivo
-                alert('¡Pedido realizado con éxito! Nos contactaremos pronto por WhatsApp.');
+                const whatsappNumber = settings.whatsapp_number || '5493412175258';
+                const msg = [
+                    `💵 *PEDIDO #${order.order_number} (EFECTIVO)*`,
+                    ``,
+                    `¡Hola! Acabo de realizar un pedido en *Shams* y deseo abonarlo en efectivo al retirar/recibir.`,
+                    ``,
+                    `*📦 Detalle del pedido:*`,
+                    itemsText,
+                    ``,
+                    `*💰 TOTAL A ABONAR: $${order.total.toLocaleString('es-AR')}*`,
+                    ``,
+                    `Favor de avisarme cuando el pedido esté listo. ¡Gracias!`,
+                ].join('\n');
+
                 decrementLocalStock(orderItems);
                 setCart([]);
                 setIsCheckoutOpen(false);
                 localStorage.removeItem('shams_products_v4');
+                localStorage.removeItem('shams_promo_10');
+
+                setSuccessOrderData({
+                    order,
+                    bankDetails: {
+                        holder: '',
+                        cbu: '',
+                        alias: '',
+                        bank: ''
+                    },
+                    whatsappNumber,
+                    whatsappMsg: msg
+                });
             }
         } catch (error) {
             console.error(error);
@@ -732,8 +762,8 @@ const Store: React.FC = () => {
         const matchesCategory = !selectedCategory || selectedCategory === 'Todos' ||
             p.category?.toLowerCase() === selectedCategory.toLowerCase();
         
-        // Excluir categorías de la lista negra global (para que no aparezcan en la grilla general tampoco)
-        if (!selectedCategory && p.category && EXCLUDED_CATS.includes(p.category.toLowerCase().trim())) {
+        // Excluir categorías de la lista negra global SOLO si no hay un filtro de marca o categoría activo
+        if (!selectedCategory && !selectedBrand && p.category && EXCLUDED_CATS.includes(p.category.toLowerCase().trim())) {
             return false;
         }
 
@@ -1494,6 +1524,16 @@ const Store: React.FC = () => {
                 onConfirm={handleCheckoutConfirm}
                 total={cart.reduce((sum, item) => sum + item.price * item.quantity, 0)}
             />
+
+            {successOrderData && (
+                <OrderSuccessModal
+                    order={successOrderData.order}
+                    bankDetails={successOrderData.bankDetails}
+                    whatsappNumber={successOrderData.whatsappNumber}
+                    whatsappMsg={successOrderData.whatsappMsg}
+                    onClose={() => setSuccessOrderData(null)}
+                />
+            )}
 
             <CustomerAuthModal
                 isOpen={isAuthOpen}
