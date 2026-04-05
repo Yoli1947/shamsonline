@@ -631,26 +631,40 @@ const Store: React.FC = () => {
 
                 const whatsappNumber = settings.whatsapp_number || '5493412175258';
 
+                const deliveryInfo = formData.shippingMethod === 'retiro'
+                    ? `📍 Retiro en local`
+                    : `📬 Envío a: ${formData.address} ${formData.addressNumber}${formData.apartment ? ` ${formData.apartment}` : ''}, ${formData.city}, ${formData.province} (CP: ${formData.postalCode})`;
+
                 const msg = [
-                    `🏦 *RECIBO DE PEDIDO #${order.order_number} (TRANSFERENCIA)*`,
+                    `🏦 *NUEVO PEDIDO #${order.order_number} — TRANSFERENCIA*`,
+                    `━━━━━━━━━━━━━━━━━━━━━━`,
                     ``,
-                    `¡Hola! Hemos registrado tu pedido en *Shams* con éxito.`,
+                    `👤 *Cliente:* ${formData.firstName} ${formData.lastName}`,
+                    `📧 *Email:* ${formData.email}`,
+                    `📱 *Teléfono:* ${formData.phone || '-'}`,
+                    `🪪 *DNI:* ${formData.dni || '-'}`,
                     ``,
-                    `*📦 Detalle del pedido:*`,
+                    `*📦 PRODUCTOS:*`,
                     itemsText,
                     ``,
+                    `──────────────────────`,
                     `Subtotal: $${order.subtotal.toLocaleString('es-AR')}`,
-                    `Descuentos aplicados: -$${order.discount.toLocaleString('es-AR')}`,
+                    ...(order.discount > 0 ? [`Descuento 15% transf.: -$${order.discount.toLocaleString('es-AR')}`] : []),
                     shippingLine,
-                    `*💰 TOTAL A ABONAR: $${order.total.toLocaleString('es-AR')}*`,
                     ``,
-                    `*📋 Datos para la transferencia:*`,
+                    `💰 *TOTAL A ABONAR: $${order.total.toLocaleString('es-AR')}*`,
+                    ``,
+                    `──────────────────────`,
+                    `*📋 DATOS PARA LA TRANSFERENCIA:*`,
                     `🏦 Banco: ${bankName}`,
                     `👤 Titular: ${bankHolder}`,
                     `🔢 CBU: ${bankCbu}`,
                     ...(bankAlias ? [`📲 Alias: ${bankAlias}`] : []),
                     ``,
-                    `⚠️ *IMPORTANTE:* Envía el comprobante de pago por este medio en cuanto lo realices para procesar tu pedido. ¡Gracias!`,
+                    `──────────────────────`,
+                    deliveryInfo,
+                    ``,
+                    `⚠️ *Envianos el comprobante por este chat para procesar tu pedido. ¡Gracias!*`,
                 ].join('\n');
 
                 setSuccessOrderData({

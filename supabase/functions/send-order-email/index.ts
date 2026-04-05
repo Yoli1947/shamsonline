@@ -40,77 +40,89 @@ serve(async (req) => {
     `).join('');
 
     const emailHtml = `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 10px; overflow: hidden;">
-        <div style="background-color: #000; color: #fff; padding: 30px; text-align: center;">
-          <h1 style="margin: 0; letter-spacing: 5px; font-size: 24px;">SHAMS <span style="color: #00D1FF;">ONLINE</span></h1>
-          <p style="margin: 10px 0 0; color: #00D1FF; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 2px;">Confirmación de Pedido</p>
+      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e0e0e0;">
+
+        <!-- HEADER -->
+        <div style="background-color: #000000; padding: 40px 30px; text-align: center;">
+          <div style="letter-spacing: 12px; font-size: 22px; font-weight: 900; color: #ffffff; text-transform: uppercase; margin-bottom: 8px;">SHAMS</div>
+          <div style="letter-spacing: 6px; font-size: 10px; font-weight: 400; color: #999999; text-transform: uppercase;">ONLINE STORE</div>
+          <div style="width: 40px; height: 1px; background-color: #444; margin: 20px auto 0;"></div>
+          <div style="letter-spacing: 4px; font-size: 9px; font-weight: 700; color: #888888; text-transform: uppercase; margin-top: 16px;">CONFIRMACIÓN DE PEDIDO</div>
         </div>
-        
-        <div style="padding: 30px;">
-          <p>Hola <strong>${order.customer_first_name}</strong>,</p>
-          <p>¡Gracias por tu compra! Hemos recibido tu pedido con éxito y ya estamos trabajando en él.</p>
-          
-          <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0; font-size: 14px;"><strong>Número de Pedido:</strong> #${order.order_number}</p>
-            <p style="margin: 5px 0 0; font-size: 14px;"><strong>Fecha:</strong> ${new Date(order.created_at).toLocaleDateString('es-AR')}</p>
-            <p style="margin: 5px 0 0; font-size: 14px;"><strong>Método de Pago:</strong> ${order.payment_method.toUpperCase()}</p>
-          </div>
-          
-          <h3 style="border-bottom: 2px solid #00D1FF; padding-bottom: 10px; text-transform: uppercase; font-size: 14px; letter-spacing: 1px;">Detalle de productos</h3>
-          <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-            <thead>
-              <tr style="background-color: #f4f4f4;">
-                <th style="padding: 10px; text-align: left;">Producto</th>
-                <th style="padding: 10px; text-align: center;">Cant.</th>
-                <th style="padding: 10px; text-align: right;">Subtotal</th>
+
+        <!-- BODY -->
+        <div style="padding: 40px 36px; background-color: #ffffff;">
+
+          <p style="font-size: 13px; color: #333333; margin: 0 0 6px 0; letter-spacing: 0.5px;">Hola <strong>${order.customer_first_name}</strong>,</p>
+          <p style="font-size: 13px; color: #666666; margin: 0 0 32px 0; line-height: 1.7;">Recibimos tu pedido con éxito. A continuación encontrás el resumen de tu compra.</p>
+
+          <!-- ORDER INFO -->
+          <div style="border: 1px solid #e8e8e8; padding: 20px 24px; margin-bottom: 32px; background-color: #fafafa;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+              <tr>
+                <td style="color: #999999; letter-spacing: 2px; text-transform: uppercase; padding: 4px 0;">N° de Pedido</td>
+                <td style="color: #000000; font-weight: 700; text-align: right; letter-spacing: 1px;">#${order.order_number}</td>
               </tr>
-            </thead>
+              <tr>
+                <td style="color: #999999; letter-spacing: 2px; text-transform: uppercase; padding: 4px 0;">Fecha</td>
+                <td style="color: #333333; text-align: right;">${new Date(order.created_at).toLocaleDateString('es-AR')}</td>
+              </tr>
+              <tr>
+                <td style="color: #999999; letter-spacing: 2px; text-transform: uppercase; padding: 4px 0;">Método de Pago</td>
+                <td style="color: #333333; text-align: right; text-transform: uppercase; letter-spacing: 1px;">${order.payment_method}</td>
+              </tr>
+              <tr>
+                <td style="color: #999999; letter-spacing: 2px; text-transform: uppercase; padding: 4px 0;">Entrega</td>
+                <td style="color: #333333; text-align: right;">${order.shipping_method === 'retiro' ? 'Retiro en local' : `${order.shipping_address} ${order.shipping_number}, ${order.shipping_city}`}</td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- PRODUCTS TITLE -->
+          <div style="border-top: 2px solid #000000; border-bottom: 1px solid #e0e0e0; padding: 10px 0; margin-bottom: 0;">
+            <span style="font-size: 9px; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; color: #000000;">Detalle de Productos</span>
+          </div>
+
+          <!-- PRODUCTS TABLE -->
+          <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 0;">
             <tbody>
               ${itemsHtml}
             </tbody>
-            <tfoot>
+          </table>
+
+          <!-- TOTALS -->
+          <div style="border-top: 1px solid #e0e0e0; margin-top: 0;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
               <tr>
-                <td colspan="2" style="padding: 10px; text-align: right; font-weight: bold;">Subtotal:</td>
-                <td style="padding: 10px; text-align: right;">$${Number(order.subtotal).toLocaleString()}</td>
+                <td style="padding: 10px 0; color: #999999; letter-spacing: 1px; text-transform: uppercase;">Subtotal</td>
+                <td style="padding: 10px 0; text-align: right; color: #333333;">$${Number(order.subtotal).toLocaleString('es-AR')}</td>
               </tr>
               ${order.discount > 0 ? `
               <tr>
-                <td colspan="2" style="padding: 10px; text-align: right; color: #e4405f; font-weight: bold;">Descuento:</td>
-                <td style="padding: 10px; text-align: right; color: #e4405f;">-$${Number(order.discount).toLocaleString()}</td>
-              </tr>
-              ` : ''}
-              ${order.shipping_cost > 0 ? `
+                <td style="padding: 6px 0; color: #555555; letter-spacing: 1px; text-transform: uppercase;">Descuento</td>
+                <td style="padding: 6px 0; text-align: right; color: #555555;">-$${Number(order.discount).toLocaleString('es-AR')}</td>
+              </tr>` : ''}
               <tr>
-                <td colspan="2" style="padding: 10px; text-align: right; font-weight: bold;">Envío:</td>
-                <td style="padding: 10px; text-align: right;">$${Number(order.shipping_cost).toLocaleString()}</td>
+                <td style="padding: 6px 0; color: #999999; letter-spacing: 1px; text-transform: uppercase;">Envío</td>
+                <td style="padding: 6px 0; text-align: right; color: #333333;">${order.shipping_cost > 0 ? `$${Number(order.shipping_cost).toLocaleString('es-AR')}` : 'Sin cargo'}</td>
               </tr>
-              ` : `
-              <tr>
-                <td colspan="2" style="padding: 10px; text-align: right; color: #00D1FF; font-weight: bold;">Envío:</td>
-                <td style="padding: 10px; text-align: right; color: #00D1FF;">GRATIS</td>
+              <tr style="border-top: 2px solid #000000;">
+                <td style="padding: 16px 0 8px; font-size: 13px; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; color: #000000;">TOTAL</td>
+                <td style="padding: 16px 0 8px; text-align: right; font-size: 20px; font-weight: 900; color: #000000;">$${Number(order.total).toLocaleString('es-AR')}</td>
               </tr>
-              `}
-              <tr style="font-size: 18px; font-weight: bold; background-color: #f9f9f9;">
-                <td colspan="2" style="padding: 15px; text-align: right;">TOTAL:</td>
-                <td style="padding: 15px; text-align: right; color: #00D1FF;">$${Number(order.total).toLocaleString()}</td>
-              </tr>
-            </tfoot>
-          </table>
-          
-          <div style="margin-top: 30px; font-size: 14px; line-height: 1.6;">
-            <p><strong>Información de Entrega:</strong></p>
-            <p style="margin: 0; color: #666;">
-              ${order.shipping_method === 'retiro' 
-                ? 'Retiro por local seleccionado.' 
-                : `Envío a: ${order.shipping_address} ${order.shipping_number}, ${order.shipping_city}, ${order.shipping_province}`}
-            </p>
+            </table>
           </div>
-          
-          <div style="margin-top: 40px; text-align: center; border-top: 1px solid #eee; padding-top: 20px;">
-            <p style="font-size: 12px; color: #999;">Si tenés alguna duda, contactanos por WhatsApp al 3412175258</p>
-            <p style="font-size: 10px; color: #ccc; margin-top: 10px;">SHAMS ONLINE &copy; 2026 - Rosario, Argentina</p>
-          </div>
+
         </div>
+
+        <!-- FOOTER -->
+        <div style="background-color: #f5f5f5; border-top: 1px solid #e0e0e0; padding: 28px 36px; text-align: center;">
+          <p style="font-size: 11px; color: #666666; margin: 0 0 6px 0; letter-spacing: 0.5px;">¿Tenés alguna duda? Contactanos por WhatsApp</p>
+          <p style="font-size: 13px; font-weight: 700; color: #000000; margin: 0 0 20px 0; letter-spacing: 1px;">341 217-5258</p>
+          <div style="width: 30px; height: 1px; background-color: #cccccc; margin: 0 auto 16px;"></div>
+          <p style="font-size: 9px; color: #aaaaaa; margin: 0; letter-spacing: 3px; text-transform: uppercase;">SHAMS ONLINE &copy; 2026 — Rosario, Argentina</p>
+        </div>
+
       </div>
     `;
 
