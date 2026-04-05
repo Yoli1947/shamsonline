@@ -12,26 +12,39 @@ interface CheckoutModalProps {
     total: number;
 }
 
+const CUSTOMER_STORAGE_KEY = 'shams_customer_data';
+
 const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfirm, total }) => {
     const { settings } = useSettings();
     const [loading, setLoading] = useState(false);
     const transferDiscount = settings.transfer_discount || 15;
-    const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        address: '',
-        addressNumber: '',
-        city: '',
-        province: '',
-        postalCode: '',
-        dni: '',
-        floor: '',
-        apartment: '',
-        shippingMethod: 'envio', // 'envio' | 'retiro'
-        pickupLocationId: 'local_favorita', // id del punto de retiro
-        paymentMethod: 'mercadopago' // 'mercadopago' | 'transferencia' | 'efectivo'
+
+    const getSavedCustomer = () => {
+        try {
+            const saved = localStorage.getItem(CUSTOMER_STORAGE_KEY);
+            return saved ? JSON.parse(saved) : {};
+        } catch { return {}; }
+    };
+
+    const [formData, setFormData] = useState(() => {
+        const saved = getSavedCustomer();
+        return {
+            firstName: saved.firstName || '',
+            lastName: saved.lastName || '',
+            email: saved.email || '',
+            phone: saved.phone || '',
+            address: saved.address || '',
+            addressNumber: saved.addressNumber || '',
+            city: saved.city || '',
+            province: saved.province || '',
+            postalCode: saved.postalCode || '',
+            dni: saved.dni || '',
+            floor: saved.floor || '',
+            apartment: saved.apartment || '',
+            shippingMethod: 'envio',
+            pickupLocationId: 'local_favorita',
+            paymentMethod: 'mercadopago'
+        };
     });
 
     const [giftCard, setGiftCard] = useState<GiftCardData | null>(null);
@@ -243,6 +256,11 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+        // Guardar datos del cliente para autocompletar en próximas compras
+        try {
+            const { shippingMethod, pickupLocationId, paymentMethod, ...customerData } = formData;
+            localStorage.setItem(CUSTOMER_STORAGE_KEY, JSON.stringify(customerData));
+        } catch { /* no crítico */ }
         try {
             const quotedShipping = formData.shippingMethod === 'retiro' ? 0 : (shippingQuote?.cost ?? null);
             const promoFactor = (hasPromo && !promoAlreadyUsed) ? 0.9 : 1;
