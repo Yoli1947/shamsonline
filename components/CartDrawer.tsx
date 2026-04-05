@@ -18,7 +18,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemov
   const { settings } = useSettings();
   const navigate = useNavigate();
   const transferDiscount = settings.transfer_discount || 15;
-  const rawTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  // Siempre mostrar precio de lista (originalPrice) en el carrito; los descuentos se aplican en el checkout
+  const rawTotal = items.reduce((sum, item) => sum + (item.originalPrice || item.price) * item.quantity, 0);
   const hasPromo = localStorage.getItem('shams_promo_10') === 'true';
   const total = hasPromo ? rawTotal * 0.9 : rawTotal;
 
@@ -125,19 +126,10 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemov
                       <button onClick={() => onUpdateQty(item.id, 1, item.selectedSize, item.selectedColor)} className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors text-lg font-light">+</button>
                     </div>
                     <div className="flex flex-col items-end gap-0.5">
-                      {item.originalPrice > item.price && (
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-[12px] text-[var(--color-text-muted)] font-bold tracking-wider">
-                            ${((item.originalPrice || 0) * (item.quantity || 1)).toLocaleString()}
-                          </span>
-                          <span className="text-[9px] bg-black/5 text-[var(--color-text-muted)] border border-black/10 px-1.5 py-0.5 rounded-none font-black">
-                            -{Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)}%
-                          </span>
-                        </div>
-                      )}
                        <span className="text-base font-bold text-[var(--color-text)] tracking-widest">
-                        ${((item.price || 0) * (item.quantity || 1)).toLocaleString()}
+                        ${(((item.originalPrice || item.price) || 0) * (item.quantity || 1)).toLocaleString()}
                       </span>
+                      <span className="text-[9px] text-[var(--color-text-muted)] font-bold tracking-widest uppercase">Crédito / Lista</span>
                     </div>
                   </div>
                 </div>

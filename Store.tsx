@@ -1538,7 +1538,7 @@ const Store: React.FC = () => {
                 isOpen={isCheckoutOpen}
                 onClose={() => setIsCheckoutOpen(false)}
                 onConfirm={handleCheckoutConfirm}
-                total={cart.reduce((sum, item) => sum + item.price * item.quantity, 0)}
+                total={cart.reduce((sum, item) => sum + (item.originalPrice || item.price) * item.quantity, 0)}
             />
 
             {successOrderData && (
