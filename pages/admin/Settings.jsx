@@ -13,6 +13,7 @@ export default function Settings() {
         bank_cbu: '0070233320000006212542',
         bank_alias: '',
         bank_name: 'Banco Galicia',
+        whatsapp_number: '5493412175258',
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -50,6 +51,7 @@ export default function Settings() {
                 updateSiteSetting('bank_cbu', settings.bank_cbu, 'CBU'),
                 updateSiteSetting('bank_alias', settings.bank_alias, 'Alias CBU'),
                 updateSiteSetting('bank_name', settings.bank_name, 'Banco'),
+                updateSiteSetting('whatsapp_number', settings.whatsapp_number, 'Teléfono WhatsApp Tienda'),
             ]);
             await refreshSettings();
             setStatus({ type: 'success', message: 'Configuración guardada correctamente' });
@@ -100,6 +102,22 @@ export default function Settings() {
                             </div>
                             <p className="text-[10px] text-zinc-600 leading-relaxed uppercase tracking-wider">
                                 Este valor se aplica en las etiquetas de productos, carrito y checkout cuando el cliente elige transferencia.
+                            </p>
+                        </div>
+
+                        <div className="space-y-3 mt-8">
+                            <label className="block text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">
+                                Número de WhatsApp de la Tienda (con código de país)
+                            </label>
+                            <input
+                                type="text"
+                                className="admin-input"
+                                value={settings.whatsapp_number}
+                                onChange={(e) => setSettings({ ...settings, whatsapp_number: e.target.value })}
+                                placeholder="Ej: 5493412175258"
+                            />
+                            <p className="text-[10px] text-zinc-600 leading-relaxed uppercase tracking-wider">
+                                Este es el número que recibirá los mensajes de pedidos por transferencia y efectivo.
                             </p>
                         </div>
                     </div>

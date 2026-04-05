@@ -23,7 +23,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
     const [added, setAdded] = useState(false);
     const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
     const [isZooming, setIsZooming] = useState(false);
-    const [showSizeGuide, setShowSizeGuide] = useState(false);
     const rafRef = useRef<number | null>(null);
 
     // Reset image index and selections when product or modal visibility changes
@@ -345,15 +344,43 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                             })()}
                         </div>
 
-                        <a
-                            href={`https://wa.me/5493412175258?text=${encodeURIComponent(`Hola! Quería consultar por el pago vía transferencia de: ${product.name}`)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 mb-6 px-4 py-2 bg-black/5 border border-black/10 rounded-none hover:bg-black/10 transition-all group"
-                        >
-                            <span className="w-2 h-2 bg-black rounded-none" />
-                            <span className="text-[10px] font-black tracking-widest text-[var(--color-text)] uppercase">Consultar transferencia por WhatsApp</span>
-                        </a>
+                        {(() => {
+                            const creditPrice = product.originalPrice > product.price ? product.originalPrice : (product.price || 0);
+                            const transferPrice = product.originalPrice > product.price ? product.price : Math.round((product.price || 0) * (1 - transferDiscount / 100));
+                            const bankDetailsStr = [
+                                `🏦 *Consulta por Transferencia — Shams*`,
+                                ``,
+                                `¡Hola! Me gustaría comprar: *${product.name}*`,
+                                selectedSize ? `📏 Talle: ${selectedSize}` : ``,
+                                selectedColor ? `🎨 Color: ${selectedColor}` : ``,
+                                ``,
+                                `💳 Precio Lista: $${creditPrice.toLocaleString()}`,
+                                `💰 *Precio Transferencia (-${transferDiscount}%): $${transferPrice.toLocaleString()}*`,
+                                ``,
+                                `-------------------------------`,
+                                `*📋 Datos bancarios:*`,
+                                `🏦 *Banco:* ${settings.bank_name || 'Banco Galicia'}`,
+                                `👤 *Titular:* ${settings.bank_holder || 'YOLANDA TERUZ'}`,
+                                `🔢 *CBU:* ${settings.bank_cbu || '0070233320000006212542'}`,
+                                settings.bank_alias ? `📲 *Alias:* ${settings.bank_alias}` : ``,
+                                ``,
+                                `En cuanto realice el pago les enviaré el comprobante. 🙏`
+                            ].filter(Boolean).join('\n');
+
+                            const whatsappNumber = settings.whatsapp_number || '5493412175258';
+
+                            return (
+                                <a
+                                    href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(bankDetailsStr)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-3 mb-8 px-6 py-4 bg-emerald-500/10 border border-emerald-500/30 rounded-none hover:bg-emerald-500/20 transition-all group w-full justify-center"
+                                >
+                                    <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
+                                    <span className="text-[10px] font-black tracking-widest text-[#10b981] uppercase">Recibir datos de transferencia por WhatsApp</span>
+                                </a>
+                            );
+                        })()}
 
                         <div className="h-px bg-white/5 w-full mb-4" />
 
@@ -397,25 +424,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                             </div>
                         )}
 
-                        {/* Size Guide Button */}
-                        {product.brandCardUrl && (
-                            <div className="mb-8">
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); setShowSizeGuide(true); }}
-                                    className="flex items-center gap-3 group transition-all"
-                                >
-                                    <div className="w-10 h-10 flex items-center justify-center bg-zinc-100 border border-zinc-200 group-hover:border-[#8B6F5E] transition-all">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" className="text-zinc-600 group-hover:text-[#8B6F5E]">
-                                            <path d="M21 16V4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12l4-4Z"/><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h5"/>
-                                        </svg>
-                                    </div>
-                                    <div className="flex flex-col items-start translate-y-[1px]">
-                                        <span className="text-[10px] font-black tracking-[0.2em] text-[var(--color-text)] uppercase leading-none">VER GUÍA DE TALLES</span>
-                                        <span className="text-[8px] font-medium text-[var(--color-text-muted)] uppercase tracking-widest mt-1 opacity-60">CARTA OFICIAL DE {product.brand}</span>
-                                    </div>
-                                </button>
-                            </div>
-                        )}
 
                         <div className="mb-6">
                             <h4 className="text-[8px] font-black tracking-widest text-[var(--color-text-muted)] uppercase mb-2">Descripción</h4>
@@ -451,25 +459,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                     </div>
                 </div>
             </div>
-            {/* Size Guide Modal (Overlayed) */}
-            {showSizeGuide && product.brandCardUrl && (
-                <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 md:p-12 animate-in fade-in duration-300">
-                    <div className="absolute inset-0 bg-[#2C1810]/95 backdrop-blur-xl" onClick={() => setShowSizeGuide(false)} />
-                    <div className="relative w-full max-w-4xl max-h-full bg-white shadow-2xl overflow-auto rounded-none md:rounded-xl">
-                        <button 
-                            onClick={() => setShowSizeGuide(false)}
-                            className="absolute top-4 right-4 z-30 bg-black/50 hover:bg-black text-white p-3 rounded-none transition-all"
-                        >
-                            <X size={24} />
-                        </button>
-                        <img 
-                            src={product.brandCardUrl} 
-                            alt={`Guía de talles ${product.brand}`}
-                            className="w-full h-auto object-contain p-2 md:p-8"
-                        />
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

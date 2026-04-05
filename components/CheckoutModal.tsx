@@ -77,26 +77,48 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
             setShippingQuoteLoading(true);
             try {
                 const functionsUrl = import.meta.env.VITE_SUPABASE_FUNCTIONS_URL;
+                const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+                
                 const res = await fetch(`${functionsUrl}/correo-rates`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'apikey': supabaseAnonKey,
+                        'Authorization': `Bearer ${supabaseAnonKey}`
+                    },
                     body: JSON.stringify({ postalCode: cp }),
                 });
+                
+                if (!res.ok) throw new Error('API Error');
                 const data = await res.json();
+                
                 // La API puede devolver un array de opciones o un objeto con price/cost
-                const cost = Array.isArray(data)
-                    ? data[0]?.price || data[0]?.cost || data[0]?.totalPrice
-                    : data.price || data.cost || data.totalPrice || data.priceWithTaxes;
+                const firstOption = Array.isArray(data) ? data[0] : data;
+                
+                const cost = firstOption?.price || 
+                             firstOption?.cost || 
+                             firstOption?.totalPrice || 
+                             firstOption?.total || 
+                             firstOption?.priceWithTaxes;
+                             
                 if (cost) {
-                    const days = Array.isArray(data)
-                        ? data[0]?.deliveryTime || data[0]?.days || ''
-                        : data.deliveryTime || data.days || '';
+                    const days = firstOption?.deliveryTime || firstOption?.days || firstOption?.prazo || '';
                     setShippingQuote({ cost: Number(cost), days: String(days) });
                 } else {
                     setShippingQuote(null);
                 }
-            } catch {
-                setShippingQuote(null);
+            } catch (error) {
+                console.error('Shipping quote error:', error);
+                
+                // Fallback local si es de Rosario y la API falló
+                if (cp === '2000' || cp === '2152' || cp.startsWith('20')) {
+                    setShippingQuote({ cost: 4500, days: '2 a 4' });
+                } else if (cp.length === 4) {
+                    // Fallback general para Argentina si al menos tiene 4 dígitos
+                    setShippingQuote({ cost: 9500, days: '5 a 10' });
+                } else {
+                    setShippingQuote(null);
+                }
             } finally {
                 setShippingQuoteLoading(false);
             }
@@ -498,7 +520,9 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                         : 'border-[#e0e0e0] bg-[#f5f5f5] text-[#666] hover:bg-[#eeeeee]'
                                         }`}
                                 >
-                                    <span className="block text-[10px] font-bold uppercase tracking-wider mb-1">{method.label}</span>
+                                    <span className="block text-[10px] font-bold uppercase tracking-wider mb-1">
+                                        {method.label} {method.discount ? `(-${transferDiscount}%)` : ''}
+                                    </span>
                                 </button>
                             ))}
                         </div>
@@ -536,19 +560,27 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                      <div className="pt-6 border-t border-[var(--color-border)] flex justify-between items-center mt-6">
                         {(() => {
                             const promoFactor = effectiveHasPromo ? 0.9 : 1;
+                            const paymentDiscountFactor = (formData.paymentMethod === 'transferencia' || formData.paymentMethod === 'efectivo')
+                                ? (1 - (transferDiscount / 100))
+                                : 1;
+                                
                             const shipping = formData.shippingMethod === 'retiro' ? 0 : (shippingQuote?.cost ?? 0);
-                            const afterPromo = Math.round(total * promoFactor) + shipping;
+                            const afterPromo = Math.round(total * promoFactor * paymentDiscountFactor) + shipping;
+                            const originalTotal = total + shipping;
                             const gcDiscount = giftCard ? giftCard.amountToApply : 0;
                             const finalTotal = Math.max(0, afterPromo - gcDiscount);
+                            const isDiscounted = effectiveHasPromo || gcDiscount > 0 || paymentDiscountFactor < 1;
+
                             return (
                                  <div className="flex flex-col">
                                     <span className="text-[10px] uppercase tracking-widest text-[#666]">Total a Pagar</span>
                                      <div className="flex items-baseline gap-2">
-                                        {(effectiveHasPromo || gcDiscount > 0) && (
-                                            <span className="text-sm text-[var(--color-text-muted)] tracking-wider line-through">${afterPromo.toLocaleString()}</span>
+                                        {isDiscounted && (
+                                            <span className="text-sm text-[var(--color-text-muted)] tracking-wider line-through">${originalTotal.toLocaleString()}</span>
                                         )}
                                         <span className="text-2xl font-bold text-[var(--color-text)]">${finalTotal.toLocaleString()}</span>
                                         {effectiveHasPromo && <span className="text-xs text-black font-black">-10%</span>}
+                                        {paymentDiscountFactor < 1 && <span className="text-xs text-black font-black">-{transferDiscount}%</span>}
                                         {gcDiscount > 0 && <span className="text-xs text-black font-black">-GC</span>}
                                     </div>
                                       <span className="text-[10px] text-[var(--color-text-muted)]">

@@ -580,6 +580,10 @@ const Store: React.FC = () => {
                 .map(i => `• ${i.name} (T: ${i.size}) x${i.quantity} — $${i.price.toLocaleString('es-AR')}`)
                 .join('\n');
 
+            const shippingLine = (order.shipping_cost || 0) === 0
+                ? 'Envío: *GRATIS* ✅'
+                : `Envío: *$${(order.shipping_cost || 0).toLocaleString('es-AR')}*`;
+
             if (formData.paymentMethod === 'mercadopago') {
                 // Crear preferencia de Mercado Pago y redirigir
                 const functionsUrl = import.meta.env.VITE_SUPABASE_FUNCTIONS_URL;
@@ -625,16 +629,12 @@ const Store: React.FC = () => {
                 const bankAlias = settings.bank_alias || '';
                 const bankName = settings.bank_name || 'Banco Galicia';
 
-                const shippingLine = order.shipping_cost === 0
-                    ? 'Envío: *GRATIS* ✅'
-                    : `Envío: *$${order.shipping_cost.toLocaleString('es-AR')}*`;
-
                 const whatsappNumber = settings.whatsapp_number || '5493412175258';
 
                 const msg = [
-                    `🏦 *NUEVO PEDIDO #${order.order_number} (TRANSFERENCIA)*`,
+                    `🏦 *RECIBO DE PEDIDO #${order.order_number} (TRANSFERENCIA)*`,
                     ``,
-                    `¡Hola! Acabo de realizar un pedido en *Shams* y deseo abonarlo por transferencia bancaria.`,
+                    `¡Hola! Hemos registrado tu pedido en *Shams* con éxito.`,
                     ``,
                     `*📦 Detalle del pedido:*`,
                     itemsText,
@@ -650,14 +650,8 @@ const Store: React.FC = () => {
                     `🔢 CBU: ${bankCbu}`,
                     ...(bankAlias ? [`📲 Alias: ${bankAlias}`] : []),
                     ``,
-                    `En cuanto realice el pago les enviaré el comprobante por este medio. 🙏`,
+                    `⚠️ *IMPORTANTE:* Envía el comprobante de pago por este medio en cuanto lo realices para procesar tu pedido. ¡Gracias!`,
                 ].join('\n');
-
-                decrementLocalStock(orderItems);
-                setCart([]);
-                setIsCheckoutOpen(false);
-                localStorage.removeItem('shams_products_v4');
-                localStorage.removeItem('shams_promo_10');
 
                 setSuccessOrderData({
                     order,
@@ -671,27 +665,36 @@ const Store: React.FC = () => {
                     whatsappMsg: msg
                 });
 
-            } else {
-                // Efectivo
-                const whatsappNumber = settings.whatsapp_number || '5493412175258';
-                const msg = [
-                    `💵 *PEDIDO #${order.order_number} (EFECTIVO)*`,
-                    ``,
-                    `¡Hola! Acabo de realizar un pedido en *Shams* y deseo abonarlo en efectivo al retirar/recibir.`,
-                    ``,
-                    `*📦 Detalle del pedido:*`,
-                    itemsText,
-                    ``,
-                    `*💰 TOTAL A ABONAR: $${order.total.toLocaleString('es-AR')}*`,
-                    ``,
-                    `Favor de avisarme cuando el pedido esté listo. ¡Gracias!`,
-                ].join('\n');
+                // Intento de redirección automática (algunos navegadores pueden bloquearlo, para eso está el modal de respaldo)
+                setTimeout(() => {
+                    const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
+                    window.open(waUrl, '_blank');
+                }, 100);
 
                 decrementLocalStock(orderItems);
                 setCart([]);
                 setIsCheckoutOpen(false);
-                localStorage.removeItem('shams_products_v4');
-                localStorage.removeItem('shams_promo_10');
+                if (localStorage.getItem('shams_promo_10') === 'true' && !formData.promoAlreadyUsed) {
+                    localStorage.setItem('shams_promo_10', 'used'); // Marcar como usado
+                }
+
+            } else {
+                // Efectivo
+                const whatsappNumber = settings.whatsapp_number || '5493412175258';
+                const msg = [
+                    `💵 *REGISTRO DE PEDIDO #${order.order_number} (EFECTIVO)*`,
+                    ``,
+                    `¡Hola! Hemos registrado tu pedido en *Shams* para abono en efectivo.`,
+                    ``,
+                    `*📦 Detalle del pedido:*`,
+                    itemsText,
+                    ``,
+                    `Subtotal: $${order.subtotal.toLocaleString('es-AR')}`,
+                    shippingLine,
+                    `*💰 TOTAL A ABONAR: $${order.total.toLocaleString('es-AR')}*`,
+                    ``,
+                    `Nos pondremos en contacto contigo para coordinar el pago y la entrega. ¡Gracias!`,
+                ].join('\n');
 
                 setSuccessOrderData({
                     order,
@@ -704,6 +707,19 @@ const Store: React.FC = () => {
                     whatsappNumber,
                     whatsappMsg: msg
                 });
+
+                // Intento de redirección automática
+                setTimeout(() => {
+                    const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
+                    window.open(waUrl, '_blank');
+                }, 100);
+
+                decrementLocalStock(orderItems);
+                setCart([]);
+                setIsCheckoutOpen(false);
+                if (localStorage.getItem('shams_promo_10') === 'true' && !formData.promoAlreadyUsed) {
+                    localStorage.setItem('shams_promo_10', 'used'); // Marcar como usado
+                }
             }
         } catch (error) {
             console.error(error);
