@@ -152,6 +152,11 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemov
               )}
             </div>
 
+            <div className="flex items-center justify-between px-1 py-2.5 border border-dashed border-black/20 bg-black/[0.02] mb-3">
+              <span className="text-[9px] font-bold tracking-widest text-[var(--color-text-muted)] uppercase">Transferencia / Efectivo</span>
+              <span className="text-[9px] font-black tracking-widest text-black uppercase">-{transferDiscount}% OFF → ${Math.round(total * (1 - transferDiscount / 100)).toLocaleString()}</span>
+            </div>
+
              <div className="flex flex-col gap-3">
               <button
                 onClick={onCheckout}
