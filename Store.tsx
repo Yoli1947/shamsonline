@@ -116,16 +116,17 @@ const Store: React.FC = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [brands, setBrands] = useState<any[]>([]);
 
-    // Abrir producto automáticamente si la URL contiene /producto/:sku
-    useEffect(() => {
-        if (!skuParam || products.length === 0) return;
-        const found = products.find(p => p.sku === skuParam);
-        if (found) setSelectedProduct(found);
-        else navigate('/', { replace: true });
-    }, [skuParam, products]);
     const [categoriesByGender, setCategoriesByGender] = useState<{ Mujer: any[], Hombre: any[] }>({ Mujer: [], Hombre: [] });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // Abrir producto automáticamente cuando se entra por /producto/:sku
+    // Espera a que loading sea false para tener todos los productos
+    useEffect(() => {
+        if (!skuParam || loading || products.length === 0) return;
+        const found = products.find(p => p.sku === skuParam);
+        if (found) setSelectedProduct(found);
+    }, [skuParam, loading, products]);
 
 
     // Load products, brands and categories from Supabase
