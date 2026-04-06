@@ -47,13 +47,13 @@ const Store: React.FC = () => {
     const openProduct = (product: Product) => {
         setSelectedProduct(product);
         if (product.sku) {
-            navigate(`/producto/${product.sku}`, { replace: false });
+            window.history.pushState({}, '', `/producto/${product.sku}`);
         }
     };
 
     const closeProduct = () => {
         setSelectedProduct(null);
-        navigate('/', { replace: true });
+        window.history.pushState({}, '', '/');
     };
 
     useEffect(() => {
