@@ -1501,7 +1501,7 @@ const Store: React.FC = () => {
 
                     <div className="mt-24 pt-10 border-t border-[var(--color-border)] text-center space-y-3">
                         <p className="text-[10px] text-[var(--color-text-muted)] tracking-[0.4em] font-medium uppercase">
-                            TERUZ YOLANDA — CUIT: 27-05784065-5 — RESPONSABLE INSCRIPTO
+                            AGUSTIN MASOERO — CUIT: 20-29140387-6 — RESPONSABLE INSCRIPTO
                         </p>
                         <p className="text-[10px] text-[var(--color-text-muted)] tracking-[0.3em] font-medium uppercase">
                             Córdoba 1543, Rosario, Santa Fe
