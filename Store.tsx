@@ -43,6 +43,18 @@ const Store: React.FC = () => {
     const navigate = useNavigate();
     const { settings } = useSettings();
 
+    const openProduct = (product: Product) => {
+        setSelectedProduct(product);
+        if (product.sku) {
+            window.history.pushState({}, '', `/producto/${product.sku}`);
+        }
+    };
+
+    const closeProduct = () => {
+        setSelectedProduct(null);
+        window.history.pushState({}, '', '/');
+    };
+
     useEffect(() => {
         try {
             const storedFavorites = localStorage.getItem('shams_favorites');
@@ -102,6 +114,17 @@ const Store: React.FC = () => {
 
     const [products, setProducts] = useState<Product[]>([]);
     const [brands, setBrands] = useState<any[]>([]);
+
+    // Abrir producto automáticamente si la URL contiene /producto/SKU
+    useEffect(() => {
+        if (products.length === 0) return;
+        const match = window.location.pathname.match(/^\/producto\/(.+)$/);
+        if (!match) return;
+        const sku = decodeURIComponent(match[1]);
+        const found = products.find(p => p.sku === sku);
+        if (found) setSelectedProduct(found);
+        else window.history.replaceState({}, '', '/');
+    }, [products]);
     const [categoriesByGender, setCategoriesByGender] = useState<{ Mujer: any[], Hombre: any[] }>({ Mujer: [], Hombre: [] });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -167,7 +190,8 @@ const Store: React.FC = () => {
                     is_active: p.is_active,
                     sort_order: p.sort_order,
                     brandCardUrl: p.brand?.card_image_url,
-                    is_featured: p.is_featured
+                    is_featured: p.is_featured,
+                    sku: p.sku || null
                 };
             });
 
@@ -1360,7 +1384,7 @@ const Store: React.FC = () => {
                                     {filteredProducts.slice(0, 3).map(product => (
                                         <button
                                             key={product.id}
-                                            onClick={() => setSelectedProduct(product)}
+                                            onClick={() => openProduct(product)}
                                             className="group relative w-full aspect-[3/4] md:aspect-[4/5] overflow-hidden bg-[var(--color-background-alt)] block"
                                         >
                                             <img
@@ -1391,7 +1415,7 @@ const Store: React.FC = () => {
                                         </div>
                                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-0.5 sm:gap-6 gap-y-4 sm:gap-y-12 min-h-[50vh]">
                                             {filteredProducts.slice(3).map(product => (
-                                                <ProductCard key={product.id} product={product} onAddToCart={addToCart} onOpenDetail={(p) => setSelectedProduct(p)} isFavorite={favorites.includes(product.id)} onToggleFavorite={toggleFavorite} />
+                                                <ProductCard key={product.id} product={product} onAddToCart={addToCart} onOpenDetail={(p) => openProduct(p)} isFavorite={favorites.includes(product.id)} onToggleFavorite={toggleFavorite} />
                                             ))}
                                         </div>
                                     </div>
@@ -1421,7 +1445,7 @@ const Store: React.FC = () => {
                                 )}
                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-0.5 sm:gap-6 gap-y-4 sm:gap-y-12 min-h-[50vh]">
                                     {filteredProducts.map(product => (
-                                        <ProductCard key={product.id} product={product} onAddToCart={addToCart} onOpenDetail={(p) => setSelectedProduct(p)} isFavorite={favorites.includes(product.id)} onToggleFavorite={toggleFavorite} />
+                                        <ProductCard key={product.id} product={product} onAddToCart={addToCart} onOpenDetail={(p) => openProduct(p)} isFavorite={favorites.includes(product.id)} onToggleFavorite={toggleFavorite} />
                                     ))}
                                 </div>
                             </div>
@@ -1588,7 +1612,7 @@ const Store: React.FC = () => {
                 onClose={() => setIsFavoritesOpen(false)}
                 favorites={products.filter(p => favorites.includes(p.id))}
                 onRemoveFavorite={toggleFavorite}
-                onOpenDetail={(p) => setSelectedProduct(p)}
+                onOpenDetail={(p) => openProduct(p)}
             />
 
             {
@@ -1596,11 +1620,11 @@ const Store: React.FC = () => {
                     <ProductDetail
                         product={selectedProduct}
                         isOpen={!!selectedProduct}
-                        onClose={() => setSelectedProduct(null)}
+                        onClose={() => closeProduct()}
                         onAddToCart={(p, size, color) => {
                             addToCart(p, size, color);
                             setTimeout(() => {
-                                setSelectedProduct(null);
+                                closeProduct();
                                 setIsCartOpen(true);
                             }, 800);
                         }}

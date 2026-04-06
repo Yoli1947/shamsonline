@@ -9,16 +9,25 @@ export default function Customers() {
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
     const [refreshTrigger, setRefreshTrigger] = useState(0)
+    const [totalCount, setTotalCount] = useState(0)
 
     useEffect(() => {
-        loadCustomers()
-    }, [refreshTrigger])
+        const delayDebounceFn = setTimeout(() => {
+            loadCustomers()
+        }, 500)
+
+        return () => clearTimeout(delayDebounceFn)
+    }, [searchTerm, refreshTrigger])
 
     async function loadCustomers() {
         try {
             setLoading(true)
-            const { customers: data } = await getAllCustomers({ limit: 1000 })
+            const { customers: data, count } = await getAllCustomers({ 
+                limit: 200, // Menos registros por página para que sea más rápido
+                search: searchTerm 
+            })
             setCustomers(data)
+            setTotalCount(count || 0)
         } catch (error) {
             console.error('Error loading customers:', error)
         } finally {
@@ -26,11 +35,7 @@ export default function Customers() {
         }
     }
 
-    const filteredCustomers = customers.filter(c =>
-        (c.first_name + ' ' + c.last_name).toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (c.dni && c.dni.includes(searchTerm))
-    )
+    const filteredCustomers = customers
 
     const formatDate = (dateString) => {
         if (!dateString) return '-'
@@ -185,7 +190,10 @@ export default function Customers() {
                     </table>
                 </div>
                 <div className="admin-card__footer">
-                    Mostrando {filteredCustomers.length} de {customers.length} clientes
+                    {searchTerm 
+                        ? `Encontrados ${customers.length} de ${totalCount} clientes`
+                        : `Mostrando los últimos ${customers.length} de ${totalCount} clientes`
+                    }
                 </div>
             </div>
         </div>
