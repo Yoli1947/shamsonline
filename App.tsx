@@ -81,6 +81,7 @@ const App: React.FC = () => {
           <Routes>
             {/* Public Store Route */}
             <Route path="/" element={<Store />} />
+            <Route path="/producto/:sku" element={<Store />} />
             <Route path="/marcas" element={<BrandsPage />} />
             <Route path="/preview" element={<FuturistPreview />} />
             <Route path="/politicas-de-privacidad" element={<PrivacyPolicy />} />

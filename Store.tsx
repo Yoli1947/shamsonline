@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import BrandMarquee from './components/BrandMarquee';
@@ -41,18 +41,19 @@ const Store: React.FC = () => {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const { sku: skuParam } = useParams<{ sku?: string }>();
     const { settings } = useSettings();
 
     const openProduct = (product: Product) => {
         setSelectedProduct(product);
         if (product.sku) {
-            window.history.pushState({}, '', `/producto/${product.sku}`);
+            navigate(`/producto/${product.sku}`, { replace: false });
         }
     };
 
     const closeProduct = () => {
         setSelectedProduct(null);
-        window.history.pushState({}, '', '/');
+        navigate('/', { replace: true });
     };
 
     useEffect(() => {
@@ -115,16 +116,13 @@ const Store: React.FC = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [brands, setBrands] = useState<any[]>([]);
 
-    // Abrir producto automáticamente si la URL contiene /producto/SKU
+    // Abrir producto automáticamente si la URL contiene /producto/:sku
     useEffect(() => {
-        if (products.length === 0) return;
-        const match = window.location.pathname.match(/^\/producto\/(.+)$/);
-        if (!match) return;
-        const sku = decodeURIComponent(match[1]);
-        const found = products.find(p => p.sku === sku);
+        if (!skuParam || products.length === 0) return;
+        const found = products.find(p => p.sku === skuParam);
         if (found) setSelectedProduct(found);
-        else window.history.replaceState({}, '', '/');
-    }, [products]);
+        else navigate('/', { replace: true });
+    }, [skuParam, products]);
     const [categoriesByGender, setCategoriesByGender] = useState<{ Mujer: any[], Hombre: any[] }>({ Mujer: [], Hombre: [] });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
