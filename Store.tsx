@@ -1519,7 +1519,7 @@ const Store: React.FC = () => {
                         
                         <div className="flex justify-center pt-2">
                              <a
-                                href="https://qr.afip.gob.ar/?qr=27057840655"
+                                href="https://qr.afip.gob.ar/?qr=20291403876"
                                 target="_F960AFIPInfo"
                                 rel="noopener noreferrer"
                                 title="Datos Fiscales — ARCA"
