@@ -154,12 +154,14 @@ const Store: React.FC = () => {
 
             const mapped = dbProducts.map((p: any) => {
                 const GENDER_VALUES = ['Mujer', 'Hombre', 'Unisex'];
-                // Remove any gender already in features array to avoid conflicts
-                let features = (p.features || []).filter((f: string) => !GENDER_VALUES.includes(f));
+                let features = p.features || [];
                 if (p.gender) {
+                    // Si tiene género en DB, reemplazar cualquier género viejo en features
+                    features = features.filter((f: string) => !GENDER_VALUES.includes(f));
                     const normalizedGender = p.gender.charAt(0).toUpperCase() + p.gender.slice(1).toLowerCase();
                     features.push(normalizedGender);
                 }
+                // Si gender es null, conservar el género que ya estaba en features
 
                 const galleryImages: any[] = [];
                 if (p.images && p.images.length > 0) {
