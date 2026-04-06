@@ -611,9 +611,16 @@ const Store: React.FC = () => {
                     }),
                 });
 
-                const mpData = await res.json();
+                let mpData: any = {};
+                try {
+                    mpData = await res.json();
+                } catch {
+                    throw new Error(`Error HTTP ${res.status}: respuesta inválida del servidor`);
+                }
+                console.error('MP response:', res.status, mpData);
                 if (!mpData.init_point) {
-                    throw new Error(mpData.error || 'No se pudo crear el link de pago');
+                    const detail = mpData.detail ? JSON.stringify(mpData.detail) : '';
+                    throw new Error(mpData.error || `Error MP ${res.status}${detail ? ': ' + detail : ''}`);
                 }
 
                 decrementLocalStock(orderItems);
