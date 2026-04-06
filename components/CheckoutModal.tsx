@@ -358,8 +358,14 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                 <div className="mb-8">
                     <h2 className="text-2xl font-black text-[var(--color-text)] uppercase tracking-widest">Finalizar Compra</h2>
                     {hasPromo && (
-                        <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-none text-xs font-bold uppercase tracking-widest" style={{ backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', color: '#000' }}>
-                            <span>🎉 10% OFF APLICADO (Primera Compra)</span>
+                        <div className="mt-4 flex items-center gap-4 p-4 border border-black bg-black/5 animate-in slide-in-from-top-2">
+                             <div className="flex-shrink-0 w-10 h-10 bg-black flex items-center justify-center text-white">
+                                <span className="text-lg">🎉</span>
+                             </div>
+                             <div className="flex flex-col">
+                                <span className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Beneficio Shams APLICADO</span>
+                                <span className="text-[9px] font-bold text-[#666] uppercase tracking-widest">10% OFF EXTRA EN TU PRIMERA COMPRA</span>
+                             </div>
                         </div>
                     )}
                 </div>
@@ -523,26 +529,44 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                      {/* SELECCIÓN DE MÉTODO DE PAGO */}
                     <div className="space-y-3 pt-4 border-t border-[var(--color-border)]">
                         <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Medio de Pago</label>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-3 gap-3">
                             {[
-                                { id: 'mercadopago', label: 'Mercado Pago', discount: false },
-                                { id: 'transferencia', label: 'Transferencia', discount: true },
-                                { id: 'efectivo', label: 'Efectivo', discount: true }
-                            ].map(method => (
-                                <button
-                                    key={method.id}
-                                     type="button"
-                                    onClick={() => setFormData({ ...formData, paymentMethod: method.id })}
-                                    className={`p-3 rounded-none border text-left transition-all relative overflow-hidden ${formData.paymentMethod === method.id
-                                        ? 'border-black bg-black/5 text-black'
-                                        : 'border-[#e0e0e0] bg-[#f5f5f5] text-[#666] hover:bg-[#eeeeee]'
-                                        }`}
-                                >
-                                    <span className="block text-[10px] font-bold uppercase tracking-wider mb-1">
-                                        {method.label} {method.discount ? `(-${transferDiscount}%)` : ''}
-                                    </span>
-                                </button>
-                            ))}
+                                { id: 'mercadopago', label: 'Mercado Pago', desc: 'Tarjetas / Deb.', discount: false },
+                                { id: 'transferencia', label: 'Transferencia', desc: 'Depósito / CBU', discount: true },
+                                { id: 'efectivo', label: 'Efectivo', desc: 'En Sucursal', discount: true }
+                            ].map(method => {
+                                const isSelected = formData.paymentMethod === method.id;
+                                return (
+                                    <button
+                                        key={method.id}
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, paymentMethod: method.id })}
+                                        className={`p-4 rounded-none border-2 text-left transition-all relative overflow-hidden flex flex-col justify-between h-28 group ${isSelected
+                                            ? 'border-black bg-black text-white'
+                                            : 'border-[#e0e0e0] bg-white text-black hover:border-black'
+                                            }`}
+                                    >
+                                        <div>
+                                            <span className={`block text-[11px] font-black uppercase tracking-wider mb-1 ${isSelected ? 'text-white' : 'text-black'}`}>
+                                                {method.label}
+                                            </span>
+                                            <span className={`block text-[8px] uppercase tracking-widest opacity-60 font-bold ${isSelected ? 'text-white' : 'text-[#666]'}`}>
+                                                {method.desc}
+                                            </span>
+                                        </div>
+                                        {method.discount && (
+                                            <div className={`mt-auto inline-block text-center py-1 text-[9px] font-black uppercase tracking-widest transition-colors ${isSelected ? 'bg-white text-black' : 'bg-black text-white'}`}>
+                                                -{transferDiscount}% OFF
+                                            </div>
+                                        )}
+                                        {isSelected && (
+                                            <div className="absolute top-1 right-1">
+                                                <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                                            </div>
+                                        )}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 

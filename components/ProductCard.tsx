@@ -183,14 +183,21 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onOpenD
             const transferPrice = product.originalPrice > product.price ? product.price : Math.round((product.price || 0) * 0.85);
             const discountPct = Math.round((creditPrice - transferPrice) / creditPrice * 100);
             return (
-              <div className="flex flex-col items-start gap-0.5">
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] md:text-[12px] font-bold text-[var(--color-text)] tracking-tighter leading-none">
-                    ${transferPrice.toLocaleString()}
-                  </span>
-                  <span className="text-[9px] font-medium text-[var(--color-text-muted)] uppercase tracking-widest mt-0.5">
-                    TRANSFERENCIA {discountPct > 0 ? `${discountPct}% OFF` : ''}
-                  </span>
+              <div className="bg-black/[0.03] p-2 mt-1 -mx-2 flex flex-col gap-1 border-l-2 border-black/10 hover:border-black transition-colors group/discount">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[12px] md:text-[13px] font-black text-black tracking-tighter">
+                      ${transferPrice.toLocaleString()}
+                    </span>
+                    <span className="text-[8px] md:text-[9px] font-black text-black/40 uppercase tracking-[0.2em] group-hover/discount:text-black transition-colors">
+                      TRANSFERENCIA
+                    </span>
+                  </div>
+                  {discountPct > 0 && (
+                    <span className="text-[9px] font-black bg-black text-white px-1.5 py-0.5 tracking-tighter uppercase">
+                      -{discountPct}%
+                    </span>
+                  )}
                 </div>
               </div>
             );

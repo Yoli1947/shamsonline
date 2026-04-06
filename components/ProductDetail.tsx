@@ -321,28 +321,51 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                             </button>
                         </div>
 
-                        <div className="mb-4 space-y-2">
-                            <div className="flex items-center gap-4">
+                        <div className="flex flex-col gap-2 mb-2">
+                             <div className="flex items-center gap-3">
                                 <span className="text-lg md:text-xl font-black text-[var(--color-text)] tracking-tighter">
                                     ${(product.originalPrice > product.price ? product.originalPrice : (product.price || 0)).toLocaleString()}
                                 </span>
                                 <span className="text-[10px] font-black tracking-widest text-[var(--color-text-muted)] uppercase mt-auto pb-1">Crédito / Débito</span>
                             </div>
-                            {(() => {
-                                const creditPrice = product.originalPrice > product.price ? product.originalPrice : (product.price || 0);
-                                const transferPrice = product.originalPrice > product.price ? product.price : Math.round((product.price || 0) * 0.85);
-                                const discountPct = Math.round((creditPrice - transferPrice) / creditPrice * 100);
-                                return (
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-xl md:text-2xl font-black text-[var(--color-text)] tracking-tighter">
-                                            ${transferPrice.toLocaleString()}
-                                        </span>
-                                        <span className="text-[10px] font-black tracking-widest text-[var(--color-text-muted)] uppercase mt-auto pb-1">Transferencia</span>
-                                        <span className="bg-black/5 text-[var(--color-text)] border border-black/10 px-2 py-1 rounded-none text-[9px] font-black tracking-widest mt-auto mb-1">-{discountPct}%</span>
-                                    </div>
-                                );
-                            })()}
                         </div>
+
+                        {(() => {
+                            const creditPrice = product.originalPrice > product.price ? product.originalPrice : (product.price || 0);
+                            const transferPrice = product.originalPrice > product.price ? product.price : Math.round((product.price || 0) * (1 - transferDiscount / 100));
+                            const discountPct = Math.round((creditPrice - transferPrice) / creditPrice * 100);
+                            const saved = creditPrice - transferPrice;
+
+                            return (
+                                <div className="bg-black/[0.03] p-4 md:p-6 -mx-4 md:-mx-8 my-6 border-y border-black/5 relative overflow-hidden group">
+                                    {/* Accent line */}
+                                    <div className="absolute top-0 left-0 w-1 h-full bg-black scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-top"></div>
+                                    
+                                    <div className="flex items-center justify-between relative z-10">
+                                        <div>
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="text-[9px] font-black tracking-[0.2em] text-[#666] uppercase">PRECIO TRANSFERENCIA</span>
+                                                <span className="flex h-1.5 w-1.5 rounded-full bg-black animate-pulse"></span>
+                                            </div>
+                                            <span className="text-2xl md:text-3xl font-black text-black tracking-tighter">
+                                                ${transferPrice.toLocaleString()}
+                                            </span>
+                                        </div>
+                                        <div className="flex flex-col items-end">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] font-black bg-black text-white px-2 py-0.5 tracking-tighter uppercase mb-1">-{discountPct}% OFF</span>
+                                            </div>
+                                            {saved > 0 && (
+                                                <span className="text-[9px] font-bold text-black tracking-widest uppercase">
+                                                    AHORRÁS ${saved.toLocaleString()}
+                                                </span>
+                                            )}
+                                            <span className="text-[8px] font-bold text-[#999] uppercase tracking-[0.1em] mt-1">O EFECTIVO EN SUCURSAL</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })()}
 
                         {(() => {
                             const creditPrice = product.originalPrice > product.price ? product.originalPrice : (product.price || 0);

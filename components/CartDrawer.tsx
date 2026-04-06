@@ -141,20 +141,60 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemov
          {/* Footer */}
         {items.length > 0 && (
           <div className="p-8 border-t border-[var(--color-border)] bg-[var(--color-background)]/95 backdrop-blur-2xl">
-            <div className="flex flex-col gap-3 mb-6">
+            <div className="flex flex-col gap-4 mb-6">
               {/* Precio Total */}
-              <div className="flex justify-between items-center px-1">
-                <span className="text-[var(--color-text-muted)] text-[10px] tracking-[0.4em] font-black uppercase">Total</span>
-                <span className="text-[var(--color-text)] text-3xl font-bold tracking-tighter">${(total || 0).toLocaleString()}</span>
+              <div className="flex justify-between items-end px-1">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[var(--color-text-muted)] text-[10px] tracking-[0.3em] font-black uppercase">Total de Lista</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[var(--color-text)] text-3xl font-bold tracking-tighter">${(total || 0).toLocaleString()}</span>
+                    {hasPromo && (
+                      <span className="text-[9px] bg-black text-white px-2 py-0.5 font-bold tracking-widest uppercase">PROMO -10%</span>
+                    )}
+                  </div>
+                </div>
               </div>
-               {hasPromo && (
-                <span className="text-[10px] text-[var(--color-text-muted)] font-bold tracking-widest text-center uppercase">+ 10% OFF CÓDIGO PROMO APLICADO</span>
+              
+              {hasPromo && (
+                <p className="text-[9px] text-[var(--color-text-muted)] font-bold tracking-widest uppercase px-1">
+                  ✓ CÓDIGO PROMO APLICADO CORRECTAMENTE
+                </p>
               )}
             </div>
 
-            <div className="flex items-center justify-between px-1 py-2.5 border border-dashed border-black/20 bg-black/[0.02] mb-3">
-              <span className="text-[9px] font-bold tracking-widest text-[var(--color-text-muted)] uppercase">Transferencia / Efectivo</span>
-              <span className="text-[9px] font-black tracking-widest text-black uppercase">-{transferDiscount}% OFF → ${Math.round(total * (1 - transferDiscount / 100)).toLocaleString()}</span>
+            {/* Banner de Descuento por Transferencia - PREMIUM REDESIGN */}
+            <div className="relative overflow-hidden border-2 border-black p-4 mb-5 bg-white group hover:bg-black transition-all duration-300">
+              {/* Pantalla de fondo sutil solo visible en hover para efecto invertido si se desea, 
+                  pero mantendremos la legibilidad. Mejor un borde animado o acento. */}
+              <div className="absolute top-0 left-0 w-full h-[3px] bg-black"></div>
+              
+              <div className="flex justify-between items-center relative z-10">
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-black"></span>
+                    </span>
+                    <span className="text-[11px] font-black tracking-[0.2em] text-black uppercase">PÁGO POR TRANSFERENCIA</span>
+                  </div>
+                  <span className="text-[9px] font-bold tracking-widest text-[#666] uppercase">O EFECTIVO EN SUCURSAL</span>
+                </div>
+                
+                <div className="flex flex-col items-end">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-[18px] font-black text-black">-{transferDiscount}%</span>
+                    <span className="text-[11px] font-bold text-black uppercase">OFF</span>
+                  </div>
+                  <span className="text-[14px] font-black text-black tracking-tighter">
+                    ${Math.round(total * (1 - transferDiscount / 100)).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="mt-3 pt-3 border-t border-black/10 flex justify-between items-center">
+                <span className="text-[8px] font-bold tracking-[0.2em] text-[#666] uppercase">AHORRÁS EXTRA</span>
+                <span className="text-[10px] font-black text-black uppercase">-${Math.round(total * (transferDiscount / 100)).toLocaleString()}</span>
+              </div>
             </div>
 
              <div className="flex flex-col gap-3">
