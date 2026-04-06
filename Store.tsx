@@ -246,8 +246,8 @@ const Store: React.FC = () => {
 
                 // Actualizar caché al final del barrido completo
                 setProducts(current => {
-                    localStorage.setItem('shams_products_v4', JSON.stringify(current));
-                    localStorage.setItem('shams_cache_ts_v4', Date.now().toString());
+                    localStorage.setItem('shams_products_v5', JSON.stringify(current));
+                    localStorage.setItem('shams_cache_ts_v5', Date.now().toString());
                     return current;
                 });
 
@@ -270,7 +270,7 @@ const Store: React.FC = () => {
                 // 2. Verificar caché persistente (TTL: 15 minutos ó hasta que haya un sync nuevo)
                 const CACHE_TTL = 15 * 60 * 1000;
                 try {
-                    const cachedTs = localStorage.getItem('shams_cache_ts_v4');
+                    const cachedTs = localStorage.getItem('shams_cache_ts_v5');
                     const cachedTsNum = cachedTs ? parseInt(cachedTs) : 0;
                     
                     // Si el cache es más viejo que el último sync, INVALIDAR CACHE
@@ -279,7 +279,7 @@ const Store: React.FC = () => {
                     const isFresh = cachedTs && !isStaleBySync && !isExpiredByTime;
 
                     if (isFresh) {
-                        const cachedProducts = JSON.parse(localStorage.getItem('shams_products_v4') || '[]');
+                        const cachedProducts = JSON.parse(localStorage.getItem('shams_products_v5') || '[]');
                         const cachedBrands = JSON.parse(localStorage.getItem('shams_brands_v4') || '[]');
                         const cachedCategories = JSON.parse(localStorage.getItem('shams_categories_v4') || '[]');
                         
@@ -358,10 +358,10 @@ const Store: React.FC = () => {
                 if (isMounted) {
                     setProducts(sortedProducts);
                     try {
-                        localStorage.setItem('shams_products_v4', JSON.stringify(sortedProducts));
+                        localStorage.setItem('shams_products_v5', JSON.stringify(sortedProducts));
                         localStorage.setItem('shams_brands_v4', JSON.stringify(dbBrands));
                         localStorage.setItem('shams_categories_v4', JSON.stringify(dbCategories));
-                        localStorage.setItem('shams_cache_ts_v4', Date.now().toString());
+                        localStorage.setItem('shams_cache_ts_v5', Date.now().toString());
                     } catch (e) {
                         console.warn('Storage quota exceeded', e);
                     }
@@ -650,7 +650,7 @@ const Store: React.FC = () => {
                 decrementLocalStock(orderItems);
                 setCart([]);
                 setIsCheckoutOpen(false);
-                localStorage.removeItem('shams_products_v4');
+                localStorage.removeItem('shams_products_v5');
                 localStorage.removeItem('shams_promo_10');
                 window.location.href = mpData.init_point;
             } else if (formData.paymentMethod === 'transferencia') {
