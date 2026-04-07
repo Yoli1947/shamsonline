@@ -66,19 +66,21 @@ const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* BOTTOM ROW: Navigation Links (Desktop) and Actions */}
-        <div className="flex items-center justify-between w-full relative">
-          
-          {/* Mobile menu button (Hamburger) - Absolute left on mobile */}
-          <button
-            className="md:hidden hover:text-[var(--color-text)] transition-colors"
-            style={{ color: 'var(--color-text-muted)' }}
-            onClick={() => setIsMobileMenuOpen(true)}
-          >
-            <Menu size={22} />
-          </button>
+        <div className="flex items-center w-full">
+
+          {/* LEFT - Mobile hamburger / Desktop spacer */}
+          <div className="flex-1 flex items-center">
+            <button
+              className="md:hidden hover:text-[var(--color-text)] transition-colors"
+              style={{ color: 'var(--color-text-muted)' }}
+              onClick={() => setIsMobileMenuOpen(true)}
+            >
+              <Menu size={22} />
+            </button>
+          </div>
 
           {/* Desktop Links (Centered) */}
-          <div className="hidden md:flex items-center gap-8 lg:gap-12 absolute left-1/2 -translate-x-1/2">
+          <div className="hidden md:flex items-center gap-6 lg:gap-10">
             <button
               className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5"
               style={{ color: '#000000' }}
@@ -149,8 +151,8 @@ const Navbar: React.FC<NavbarProps> = ({
             )}
           </div>
 
-          {/* RIGHT - Actions (Desktop & Mobile) */}
-          <div className="flex items-center gap-3 lg:gap-5 justify-end flex-1 md:flex-none md:ml-auto">
+          {/* RIGHT - Actions */}
+          <div className="flex-1 flex items-center gap-3 lg:gap-5 justify-end">
             {/* Animated Search */}
             <div className="flex items-center">
               <div
