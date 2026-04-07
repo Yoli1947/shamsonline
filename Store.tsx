@@ -10,7 +10,7 @@ import FavoritesDrawer from './components/FavoritesDrawer';
 import ProductDetail from './components/ProductDetail';
 // import { PRODUCTS } from './constants'; // Removed static products
 // ... (previous imports)
-import { getAllProducts, getBrands, getCategories, getLastSyncDate } from './lib/admin'; // Import DB function
+import { getAllProducts, getBrands, getCategories, getLastSyncDate, getProductBySku } from './lib/admin'; // Import DB function
 import { supabase } from './lib/supabase';
 import { createOrder } from './lib/orders';
 import { Product, CartItem } from './types';
@@ -47,13 +47,13 @@ const Store: React.FC = () => {
     const openProduct = (product: Product) => {
         setSelectedProduct(product);
         if (product.sku) {
-            window.history.pushState({}, '', `/producto/${product.sku}`);
+            navigate(`/producto/${product.sku}`, { replace: true });
         }
     };
 
     const closeProduct = () => {
         setSelectedProduct(null);
-        window.history.pushState({}, '', '/');
+        navigate('/', { replace: true });
     };
 
     useEffect(() => {
@@ -120,14 +120,125 @@ const Store: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Abrir producto automáticamente cuando se entra por /producto/:sku
-    // Espera a que loading sea false para tener todos los productos
-    useEffect(() => {
-        if (!skuParam || loading || products.length === 0) return;
-        const found = products.find(p => p.sku === skuParam);
-        if (found) setSelectedProduct(found);
-    }, [skuParam, loading, products]);
+    // Función auxiliar para mapear base de datos a UI
+    const mapProductsToUI = (dbProducts: any[]) => {
+        const cleanProductName = (name: string) => {
+            if (!name) return 'Sin Nombre';
+            let cleaned = name;
+            cleaned = cleaned.replace(/\s*\d+X\d+\s*/gi, ' ');
+            cleaned = cleaned.replace(/\bPROMO\b|\bPROMOCIÓN\b|\bPROMOCION\b/gi, ' ');
+            cleaned = cleaned.replace(/\s*[\(\[]\s*([a-z0-9]{1,4})\s*[\)\]]\s*/gi, ' ');
+            return cleaned.replace(/\s+/g, ' ').trim();
+        };
 
+        const mapped = dbProducts.map((p: any) => {
+            const GENDER_VALUES = ['Mujer', 'Hombre', 'Unisex'];
+            let features = p.features || [];
+            if (p.gender) {
+                // Si tiene género en DB, reemplazar cualquier género viejo en features
+                features = features.filter((f: string) => !GENDER_VALUES.includes(f));
+                const normalizedGender = p.gender.charAt(0).toUpperCase() + p.gender.slice(1).toLowerCase();
+                features.push(normalizedGender);
+            }
+            // Si gender es null, conservar el género que ya estaba en features
+
+            const galleryImages: any[] = [];
+            if (p.images && p.images.length > 0) {
+                p.images.forEach((img: any) => galleryImages.push({ url: img.url, color: img.alt_text || 'Principal' }));
+            }
+
+            const legacyUrls = [p.image_url, p.image_url_2, p.image_url_3, p.image_url_4].filter(Boolean);
+            legacyUrls.forEach(url => {
+                if (!galleryImages.some(gi => gi.url === url)) {
+                    galleryImages.push({ url, color: 'Principal' });
+                }
+            });
+
+            return {
+                id: p.id,
+                name: cleanProductName(p.name),
+                brand: p.brand?.name || 'SHAMS',
+                price: p.sale_price && p.sale_price < p.price ? p.sale_price : p.price,
+                originalPrice: p.price,
+                image: galleryImages[0]?.url || 'https://via.placeholder.com/400x500?text=No+Image',
+                images: galleryImages.map(gi => gi.url),
+                imageObjects: galleryImages,
+                category: p.category?.name || 'General',
+                description: p.description || '',
+                features: features,
+                variants: p.variants,
+                is_published: p.is_published,
+                is_active: p.is_active,
+                sort_order: p.sort_order,
+                brandCardUrl: p.brand?.card_image_url,
+                is_featured: p.is_featured,
+                sku: p.sku || null
+            };
+        });
+
+        return mapped.sort((a, b) => {
+            const sortA = a.sort_order || 99999;
+            const sortB = b.sort_order || 99999;
+            if (sortA !== sortB) {
+                return sortA - sortB;
+            }
+            const nameA = a.name || '';
+            const nameB = b.name || '';
+            return nameA.localeCompare(nameB, 'es', { sensitivity: 'base' });
+        });
+    };
+
+    const [isProductDeepLinkLoading, setIsProductDeepLinkLoading] = useState(!!skuParam);
+
+    // Deep-linking: Handle deep links when SKU is in URL (instant load)
+    useEffect(() => {
+        if (!skuParam) {
+            setIsProductDeepLinkLoading(false);
+            return;
+        }
+        
+        // Si ya está cargado en el catálogo global (por ejemplo, desde caché), lo usamos de ahí
+        if (products.length > 0) {
+            const foundInCatalog = products.find(p => p.sku === skuParam);
+            if (foundInCatalog) {
+                console.log("Direct-link: Encontrado en catálogo local/caché", skuParam);
+                setSelectedProduct(foundInCatalog);
+                setIsProductDeepLinkLoading(false);
+                return;
+            }
+        }
+
+        // Si no está, lo buscamos específicamente por SKU de forma inmediata
+        async function fetchDeepLinkedProduct() {
+            console.log("Direct-link: Iniciando búsqueda en base de datos para SKU:", skuParam);
+            setIsProductDeepLinkLoading(true);
+            try {
+                const dbProd = await getProductBySku(skuParam!);
+                if (dbProd) {
+                    console.log("Direct-link: Producto encontrado en DB:", dbProd.name);
+                    const mapped = mapProductsToUI([dbProd]);
+                    const productToInject = mapped[0];
+                    setSelectedProduct(productToInject);
+                    
+                    // Inyectar el producto en el estado global para que no aparezca "vacío" el fondo
+                    setProducts(prev => {
+                        if (prev.some(p => p.id === productToInject.id)) return prev;
+                        return [productToInject, ...prev];
+                    });
+                } else {
+                    console.warn("Direct-link: Producto no encontrado en DB para SKU:", skuParam);
+                    // Si no existe, limpiamos la URL y dejamos que cargue la tienda normalmente
+                    navigate('/', { replace: true });
+                }
+            } catch (err) {
+                console.error("Direct-link: Error fetching product:", err);
+            } finally {
+                setIsProductDeepLinkLoading(false);
+            }
+        }
+
+        fetchDeepLinkedProduct();
+    }, [skuParam]); // SÓLO depende de skuParam para evitar bucles al inyectar productos
 
     // Load products, brands and categories from Supabase
     useEffect(() => {
@@ -139,74 +250,6 @@ const Store: React.FC = () => {
                 setLoading(false);
             }
         }, 8000); // 8s margin (much shorter)
-
-        // Función auxiliar para mapear base de datos a UI
-        const mapProductsToUI = (dbProducts: any[]) => {
-            const cleanProductName = (name: string) => {
-                if (!name) return 'Sin Nombre';
-                let cleaned = name;
-                cleaned = cleaned.replace(/\s*\d+X\d+\s*/gi, ' ');
-                cleaned = cleaned.replace(/\bPROMO\b|\bPROMOCIÓN\b|\bPROMOCION\b/gi, ' ');
-                cleaned = cleaned.replace(/\s*[\(\[]\s*([a-z0-9]{1,4})\s*[\)\]]\s*/gi, ' ');
-                return cleaned.replace(/\s+/g, ' ').trim();
-            };
-
-            const mapped = dbProducts.map((p: any) => {
-                const GENDER_VALUES = ['Mujer', 'Hombre', 'Unisex'];
-                let features = p.features || [];
-                if (p.gender) {
-                    // Si tiene género en DB, reemplazar cualquier género viejo en features
-                    features = features.filter((f: string) => !GENDER_VALUES.includes(f));
-                    const normalizedGender = p.gender.charAt(0).toUpperCase() + p.gender.slice(1).toLowerCase();
-                    features.push(normalizedGender);
-                }
-                // Si gender es null, conservar el género que ya estaba en features
-
-                const galleryImages: any[] = [];
-                if (p.images && p.images.length > 0) {
-                    p.images.forEach((img: any) => galleryImages.push({ url: img.url, color: img.alt_text || 'Principal' }));
-                }
-
-                const legacyUrls = [p.image_url, p.image_url_2, p.image_url_3, p.image_url_4].filter(Boolean);
-                legacyUrls.forEach(url => {
-                    if (!galleryImages.some(gi => gi.url === url)) {
-                        galleryImages.push({ url, color: 'Principal' });
-                    }
-                });
-
-                return {
-                    id: p.id,
-                    name: cleanProductName(p.name),
-                    brand: p.brand?.name || 'SHAMS',
-                    price: p.sale_price && p.sale_price < p.price ? p.sale_price : p.price,
-                    originalPrice: p.price,
-                    image: galleryImages[0]?.url || 'https://via.placeholder.com/400x500?text=No+Image',
-                    images: galleryImages.map(gi => gi.url),
-                    imageObjects: galleryImages,
-                    category: p.category?.name || 'General',
-                    description: p.description || '',
-                    features: features,
-                    variants: p.variants,
-                    is_published: p.is_published,
-                    is_active: p.is_active,
-                    sort_order: p.sort_order,
-                    brandCardUrl: p.brand?.card_image_url,
-                    is_featured: p.is_featured,
-                    sku: p.sku || null
-                };
-            });
-
-            return mapped.sort((a, b) => {
-                const sortA = a.sort_order || 99999;
-                const sortB = b.sort_order || 99999;
-                if (sortA !== sortB) {
-                    return sortA - sortB;
-                }
-                const nameA = a.name || '';
-                const nameB = b.name || '';
-                return nameA.localeCompare(nameB, 'es', { sensitivity: 'base' });
-            });
-        };
 
         async function fetchRemainingData(offset = 20, lastSyncTs = 0) {
             if (!isMounted) return;
@@ -264,20 +307,14 @@ const Store: React.FC = () => {
                 setLoading(true);
 
                 // --- CACHE-BUSTING DINÁMICO ---
-                // 1. Obtener la fecha del último sync desde Supabase (site_settings)
                 const lastSyncStr = await getLastSyncDate();
                 const lastSyncTs = lastSyncStr ? (isNaN(Number(lastSyncStr)) ? new Date(lastSyncStr).getTime() : parseInt(lastSyncStr)) : 0;
                 
-                // 2. Verificar caché persistente (TTL: 15 minutos ó hasta que haya un sync nuevo)
                 const CACHE_TTL = 15 * 60 * 1000;
                 try {
                     const cachedTs = localStorage.getItem('shams_cache_ts_v5');
                     const cachedTsNum = cachedTs ? parseInt(cachedTs) : 0;
-                    
-                    // Si el cache es más viejo que el último sync, INVALIDAR CACHE
-                    const isStaleBySync = lastSyncTs > 0 && cachedTsNum < lastSyncTs;
-                    const isExpiredByTime = (Date.now() - cachedTsNum) > CACHE_TTL;
-                    const isFresh = cachedTs && !isStaleBySync && !isExpiredByTime;
+                    const isFresh = cachedTs && (lastSyncTs === 0 || cachedTsNum >= lastSyncTs) && (Date.now() - cachedTsNum) < CACHE_TTL;
 
                     if (isFresh) {
                         const cachedProducts = JSON.parse(localStorage.getItem('shams_products_v5') || '[]');
@@ -285,7 +322,6 @@ const Store: React.FC = () => {
                         const cachedCategories = JSON.parse(localStorage.getItem('shams_categories_v4') || '[]');
                         
                         if (cachedProducts.length > 0) {
-                            console.log(`Tienda: [FLASH] Usando caché (${cachedProducts.length} productos).`);
                             setBrands(cachedBrands);
                             const mujerParent = cachedCategories.find((c: any) => c.name === 'MUJER');
                             const hombreParent = cachedCategories.find((c: any) => c.name === 'HOMBRE');
@@ -295,31 +331,22 @@ const Store: React.FC = () => {
                             });
                             setAvailableCategories(Array.from(new Set(cachedCategories.filter((c: any) => c.parent_id !== null).map((c: any) => c.name))));
                             setProducts(cachedProducts);
+                            setProducts(cachedProducts);
                             setLoading(false);
                             clearTimeout(timeout);
-
-                            // AUNQUE HAYA CACHÉ, ACTUALIZAMOS EN SEGUNDO PLANO PARA MANTENER FRESHNESS
                             setTimeout(() => fetchRemainingData(0, lastSyncTs), 1000);
                             return;
                         }
-                    } else if (isStaleBySync) {
-                        console.log("Tienda: [SYNC] Cache invalidada por nuevo sync en servidor.");
                     }
                 } catch (e) {
-                    console.warn('Error leyendo caché:', e);
+                    console.warn('Error reading cache:', e);
                 }
 
-                console.log("Optimizando carga inicial: Solicitando datos en paralelo...");
-
-                // CARGA EN PARALELO (Mucho más rápido)
                 const [productsRes, brandsRes, categoriesRes] = await Promise.all([
-                    getAllProducts(1, 40, '', 0, true, lastSyncTs), // Cargamos 40 de entrada para llenar la pantalla
+                    getAllProducts(1, 40, '', 0, true, lastSyncTs),
                     getBrands(lastSyncTs),
                     getCategories(lastSyncTs)
-                ]).catch(e => {
-                    console.error("Error en carga paralela:", e);
-                    throw e;
-                });
+                ]);
 
                 const dbProducts = productsRes.products || [];
                 const dbBrands = brandsRes || [];
@@ -328,78 +355,39 @@ const Store: React.FC = () => {
                 if (!isMounted) return;
 
                 setBrands(dbBrands);
-
-                // Group categories by gender
                 const mujerParent = dbCategories.find((c: any) => c.name === 'MUJER');
                 const hombreParent = dbCategories.find((c: any) => c.name === 'HOMBRE');
 
-                // Categorías a excluir de la navegación y filtros
                 setCategoriesByGender({
                     Mujer: dbCategories.filter((c: any) => c.parent_id === mujerParent?.id && !EXCLUDED_CATS.includes(c.name?.toLowerCase().trim())),
                     Hombre: dbCategories.filter((c: any) => c.parent_id === hombreParent?.id && !EXCLUDED_CATS.includes(c.name?.toLowerCase().trim()))
                 });
 
-                // Extract all unique categories from products (sin duplicados)
-                // Normalizar nombres antes de deduplicar para evitar duplicados por mayúsculas/espacios/tildes
-                const seenNames = new Set<string>();
-                const allCategories: string[] = [];
-                dbCategories
-                    .filter((c: any) => c.parent_id !== null && !EXCLUDED_CATS.includes(c.name?.toLowerCase().trim()))
-                    .forEach((c: any) => {
-                        const normalized = c.name?.trim();
-                        if (normalized && !seenNames.has(normalized.toLowerCase())) {
-                            seenNames.add(normalized.toLowerCase());
-                            allCategories.push(normalized);
-                        }
-                    });
+                const allCategories = Array.from(new Set(dbCategories.filter((c: any) => c.parent_id !== null && !EXCLUDED_CATS.includes(c.name?.toLowerCase().trim())).map((c: any) => c.name?.trim()))).filter(Boolean) as string[];
                 setAvailableCategories(allCategories);
 
                 const sortedProducts = mapProductsToUI(dbProducts);
+                setProducts(sortedProducts);
+                
+                localStorage.setItem('shams_products_v5', JSON.stringify(sortedProducts));
+                localStorage.setItem('shams_brands_v4', JSON.stringify(dbBrands));
+                localStorage.setItem('shams_categories_v4', JSON.stringify(dbCategories));
+                localStorage.setItem('shams_cache_ts_v5', Date.now().toString());
 
-                if (isMounted) {
-                    setProducts(sortedProducts);
-                    try {
-                        localStorage.setItem('shams_products_v5', JSON.stringify(sortedProducts));
-                        localStorage.setItem('shams_brands_v4', JSON.stringify(dbBrands));
-                        localStorage.setItem('shams_categories_v4', JSON.stringify(dbCategories));
-                        localStorage.setItem('shams_cache_ts_v5', Date.now().toString());
-                    } catch (e) {
-                        console.warn('Storage quota exceeded', e);
-                    }
+                setLoading(false);
+                clearTimeout(timeout);
+                setTimeout(() => fetchRemainingData(20, lastSyncTs), 500);
 
-                    // Apagamos el loading state principal ¡LA TIENDA YA SE PUEDE USAR!
-                    setLoading(false);
-                    clearTimeout(timeout);
-
-                    // Lanzamos silenciosamente la descarga del resto del catálogo
-                    setTimeout(() => {
-                        fetchRemainingData(20, lastSyncTs);
-                    }, 500);
-                }
             } catch (error: any) {
-                console.error('Error fetching initial data:', error);
-                const isAbortError = error.name === 'AbortError' || error.message?.toLowerCase().includes('aborted');
-
-                if (isAbortError && retries > 0) {
-                    console.log(`Retrying initial fetch... (${retries} retries left)`);
-                    setTimeout(() => isMounted && fetchInitialData(retries - 1), 1500);
-                    return;
-                }
-
-                if (isMounted) setError(error.message || 'Error al conectar con la base de datos');
+                console.error('Error fetching data:', error);
+                if (isMounted) setError(error.message);
             } finally {
-                if (isMounted) {
-                    setLoading(false);
-                    clearTimeout(timeout);
-                }
+                if (isMounted) setLoading(false);
             }
         }
 
         fetchInitialData();
-        return () => {
-            isMounted = false;
-            clearTimeout(timeout);
-        };
+        return () => { isMounted = false; clearTimeout(timeout); };
     }, []);
 
     // Scroll al inicio cuando cambian los filtros principales
@@ -417,7 +405,6 @@ const Store: React.FC = () => {
             setIsGenderFilterOpen(false);
             setIsOrderFilterOpen(false);
             
-            // Reemplazar la URL para limpiar el parámetro pero manteniendo el scroll
             const newParams = new URLSearchParams(searchParams);
             newParams.delete('openFilter');
             navigate(`/?${newParams.toString()}#new`, { replace: true });
@@ -930,12 +917,21 @@ const Store: React.FC = () => {
             />
 
             <main>
-                {!selectedBrand && !selectedGender && !selectedCategory && (
+                {(loading || (skuParam && !selectedProduct && isProductDeepLinkLoading)) && !selectedProduct ? (
+                    <div className="flex flex-col items-center justify-center py-20 min-h-[50vh]">
+                        <Loader className="animate-spin text-black mb-4" size={48} />
+                        <span className="text-[10px] font-black tracking-[0.5em] text-[#999] uppercase animate-pulse">
+                            {isProductDeepLinkLoading ? "Buscando artículo..." : "Sincronizando Inventario..."}
+                        </span>
+                    </div>
+                ) : (
                     <>
-                        <Hero />
-                        <div id="brands">
-                            <BrandMarquee />
-                        </div>
+                        {!selectedBrand && !selectedGender && !selectedCategory && !skuParam && !selectedProduct && !window.location.pathname.includes('/producto/') && (
+                            <>
+                                <Hero />
+                                <div id="brands">
+                                    <BrandMarquee />
+                                </div>
                         {brandDiscounts.length > 0 && (
                             <section className="py-10 px-4 md:px-12 max-w-screen-2xl mx-auto">
                                 <div className="mb-6 px-1">
@@ -1365,14 +1361,7 @@ const Store: React.FC = () => {
                         </div>
                     </div>
 
-                    {loading ? (
-                        <div className="flex flex-col items-center justify-center py-20 min-h-[50vh]">
-                            <Loader className="animate-spin text-black mb-4" size={48} />
-                            <span className="text-[10px] font-black tracking-[0.5em] text-[#999] uppercase animate-pulse">
-                                Sincronizando Inventario...
-                            </span>
-                        </div>
-                    ) : filteredProducts.length === 0 ? (
+                    {filteredProducts.length === 0 ? (
                         <div className="text-center py-32 opacity-50 min-h-[50vh]">
                             <p className="text-xl font-bold tracking-[0.2em] uppercase mb-4 text-[var(--color-text)]">No se encontraron productos</p>
                             <p className="text-[var(--color-text)] italic tracking-widest text-sm uppercase font-medium">Intenta con otros filtros de búsqueda.</p>
@@ -1453,6 +1442,9 @@ const Store: React.FC = () => {
                         )
                     )}
                 </section>
+                </>
+                )}
+            </main>
 
 
                 {/* Footer */}
@@ -1566,7 +1558,6 @@ const Store: React.FC = () => {
                         </div>
                     </div>
                 </footer>
-            </main>
 
             <CartDrawer
                 isOpen={isCartOpen}
