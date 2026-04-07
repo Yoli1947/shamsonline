@@ -311,41 +311,51 @@ const Store: React.FC = () => {
             try {
                 setLoading(true);
 
-                // --- CACHE-BUSTING DINÁMICO ---
-                const lastSyncStr = await getLastSyncDate();
-                const lastSyncTs = lastSyncStr ? (isNaN(Number(lastSyncStr)) ? new Date(lastSyncStr).getTime() : parseInt(lastSyncStr)) : 0;
-                
                 const CACHE_TTL = 15 * 60 * 1000;
+
+                // Mostrar caché INMEDIATAMENTE sin esperar red
                 try {
                     const cachedTs = localStorage.getItem('shams_cache_ts_v5');
                     const cachedTsNum = cachedTs ? parseInt(cachedTs) : 0;
-                    const isFresh = cachedTs && (lastSyncTs === 0 || cachedTsNum >= lastSyncTs) && (Date.now() - cachedTsNum) < CACHE_TTL;
+                    const cachedProducts = JSON.parse(localStorage.getItem('shams_products_v7') || '[]');
+                    const cachedBrands = JSON.parse(localStorage.getItem('shams_brands_v4') || '[]');
+                    const cachedCategories = JSON.parse(localStorage.getItem('shams_categories_v4') || '[]');
 
-                    if (isFresh) {
-                        const cachedProducts = JSON.parse(localStorage.getItem('shams_products_v7') || '[]');
-                        const cachedBrands = JSON.parse(localStorage.getItem('shams_brands_v4') || '[]');
-                        const cachedCategories = JSON.parse(localStorage.getItem('shams_categories_v4') || '[]');
-                        
-                        if (cachedProducts.length > 0) {
-                            setBrands(cachedBrands);
-                            const mujerParent = cachedCategories.find((c: any) => c.name === 'MUJER');
-                            const hombreParent = cachedCategories.find((c: any) => c.name === 'HOMBRE');
-                            setCategoriesByGender({
-                                Mujer: cachedCategories.filter((c: any) => c.parent_id === mujerParent?.id),
-                                Hombre: cachedCategories.filter((c: any) => c.parent_id === hombreParent?.id)
-                            });
-                            setAvailableCategories(Array.from(new Set(cachedCategories.filter((c: any) => c.parent_id !== null).map((c: any) => c.name))));
-                            setProducts(cachedProducts);
-                            setProducts(cachedProducts);
-                            setLoading(false);
-                            clearTimeout(timeout);
-                            setTimeout(() => fetchRemainingData(0, lastSyncTs), 1000);
-                            return;
+                    if (cachedProducts.length > 0) {
+                        setBrands(cachedBrands);
+                        const mujerParent = cachedCategories.find((c: any) => c.name === 'MUJER');
+                        const hombreParent = cachedCategories.find((c: any) => c.name === 'HOMBRE');
+                        setCategoriesByGender({
+                            Mujer: cachedCategories.filter((c: any) => c.parent_id === mujerParent?.id),
+                            Hombre: cachedCategories.filter((c: any) => c.parent_id === hombreParent?.id)
+                        });
+                        setAvailableCategories(Array.from(new Set(cachedCategories.filter((c: any) => c.parent_id !== null).map((c: any) => c.name))));
+                        setProducts(cachedProducts);
+                        setLoading(false);
+                        clearTimeout(timeout);
+
+                        // Validar en background si el caché sigue vigente
+                        if ((Date.now() - cachedTsNum) < CACHE_TTL) {
+                            const lastSyncStr = await getLastSyncDate();
+                            const lastSyncTs = lastSyncStr ? (isNaN(Number(lastSyncStr)) ? new Date(lastSyncStr).getTime() : parseInt(lastSyncStr)) : 0;
+                            if (cachedTsNum >= lastSyncTs) {
+                                setTimeout(() => fetchRemainingData(0, lastSyncTs), 1000);
+                                return;
+                            }
                         }
+                        // Caché viejo: recargar en background silencioso
+                        const lastSyncStr2 = await getLastSyncDate();
+                        const lastSyncTs2 = lastSyncStr2 ? (isNaN(Number(lastSyncStr2)) ? new Date(lastSyncStr2).getTime() : parseInt(lastSyncStr2)) : 0;
+                        setTimeout(() => fetchRemainingData(0, lastSyncTs2), 100);
+                        return;
                     }
                 } catch (e) {
                     console.warn('Error reading cache:', e);
                 }
+
+                // Sin caché: cargar desde red
+                const lastSyncStr = await getLastSyncDate();
+                const lastSyncTs = lastSyncStr ? (isNaN(Number(lastSyncStr)) ? new Date(lastSyncStr).getTime() : parseInt(lastSyncStr)) : 0;
 
                 const [productsRes, brandsRes, categoriesRes] = await Promise.all([
                     getAllProducts(1, 40, '', 0, true, lastSyncTs),
