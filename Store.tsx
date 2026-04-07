@@ -290,7 +290,7 @@ const Store: React.FC = () => {
 
                 // Actualizar caché al final del barrido completo
                 setProducts(current => {
-                    localStorage.setItem('shams_products_v5', JSON.stringify(current));
+                    localStorage.setItem('shams_products_v6', JSON.stringify(current));
                     localStorage.setItem('shams_cache_ts_v5', Date.now().toString());
                     return current;
                 });
@@ -317,7 +317,7 @@ const Store: React.FC = () => {
                     const isFresh = cachedTs && (lastSyncTs === 0 || cachedTsNum >= lastSyncTs) && (Date.now() - cachedTsNum) < CACHE_TTL;
 
                     if (isFresh) {
-                        const cachedProducts = JSON.parse(localStorage.getItem('shams_products_v5') || '[]');
+                        const cachedProducts = JSON.parse(localStorage.getItem('shams_products_v6') || '[]');
                         const cachedBrands = JSON.parse(localStorage.getItem('shams_brands_v4') || '[]');
                         const cachedCategories = JSON.parse(localStorage.getItem('shams_categories_v4') || '[]');
                         
@@ -369,7 +369,7 @@ const Store: React.FC = () => {
                 const sortedProducts = mapProductsToUI(dbProducts);
                 setProducts(sortedProducts);
                 
-                localStorage.setItem('shams_products_v5', JSON.stringify(sortedProducts));
+                localStorage.setItem('shams_products_v6', JSON.stringify(sortedProducts));
                 localStorage.setItem('shams_brands_v4', JSON.stringify(dbBrands));
                 localStorage.setItem('shams_categories_v4', JSON.stringify(dbCategories));
                 localStorage.setItem('shams_cache_ts_v5', Date.now().toString());
@@ -640,7 +640,7 @@ const Store: React.FC = () => {
                 decrementLocalStock(orderItems);
                 setCart([]);
                 setIsCheckoutOpen(false);
-                localStorage.removeItem('shams_products_v5');
+                localStorage.removeItem('shams_products_v6');
                 localStorage.removeItem('shams_promo_10');
                 window.location.href = mpData.init_point;
             } else if (formData.paymentMethod === 'transferencia') {
