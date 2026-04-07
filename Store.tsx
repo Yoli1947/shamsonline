@@ -685,7 +685,7 @@ const Store: React.FC = () => {
                     `──────────────────────`,
                     deliveryInfo,
                     ``,
-                    `⚠️ *Envianos el comprobante por este chat para procesar tu ${order.shipping_method === 'retiro' ? 'pedido' : 'envío'}. ¡Gracias!*`,
+                    `⚠️ *Por favor, primero confirmame si mi talle está en stock. Una vez que confirmes, hago la transferencia y te mando el comprobante por este chat. ¡Gracias!*`,
                 ].join('\n');
 
                 setSuccessOrderData({

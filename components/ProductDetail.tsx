@@ -387,7 +387,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                                 `🔢 *CBU:* ${settings.bank_cbu || '0070233320000006212542'}`,
                                 settings.bank_alias ? `📲 *Alias:* ${settings.bank_alias}` : ``,
                                 ``,
-                                `En cuanto realice el pago les enviaré el comprobante. 🙏`
+                                `⚠️ *Por favor, primero confirmame si mi talle está en stock. Una vez que confirmes, hago la transferencia y les mando el comprobante. ¡Gracias!*`
                             ].filter(Boolean).join('\n');
 
                             const whatsappNumber = settings.whatsapp_number || '5493412175258';
