@@ -168,7 +168,7 @@ const Navbar: React.FC<NavbarProps> = ({
                     }
                   }}
                   placeholder="BUSCAR..."
-                  className="bg-transparent border-b border-[var(--color-border)] text-[10px] uppercase font-bold tracking-widest focus:outline-none w-full pb-1"
+                  className="bg-transparent border-b border-[var(--color-border)] text-[13px] uppercase font-bold tracking-widest focus:outline-none w-full pb-1"
                   style={{ color: 'var(--color-text)' }}
                   autoFocus={isSearchOpen}
                 />
