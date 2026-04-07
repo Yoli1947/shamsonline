@@ -290,8 +290,7 @@ const Store: React.FC = () => {
 
                 // Actualizar caché al final del barrido completo
                 setProducts(current => {
-                    localStorage.setItem('shams_products_v7', JSON.stringify(current));
-                    localStorage.setItem('shams_cache_ts_v5', Date.now().toString());
+                    try { localStorage.setItem('shams_products_v7', JSON.stringify(current)); localStorage.setItem('shams_cache_ts_v5', Date.now().toString()); } catch {}
                     return current;
                 });
 
@@ -302,6 +301,12 @@ const Store: React.FC = () => {
 
         async function fetchInitialData(retries = 3) {
             if (!isMounted) return;
+
+            // Limpiar versiones viejas del caché para liberar espacio
+            ['v1','v2','v3','v4','v5','v6'].forEach(v => {
+                localStorage.removeItem(`shams_products_${v}`);
+                localStorage.removeItem(`shams_cache_ts_${v}`);
+            });
 
             try {
                 setLoading(true);
@@ -369,10 +374,12 @@ const Store: React.FC = () => {
                 const sortedProducts = mapProductsToUI(dbProducts);
                 setProducts(sortedProducts);
                 
-                localStorage.setItem('shams_products_v7', JSON.stringify(sortedProducts));
-                localStorage.setItem('shams_brands_v4', JSON.stringify(dbBrands));
-                localStorage.setItem('shams_categories_v4', JSON.stringify(dbCategories));
-                localStorage.setItem('shams_cache_ts_v5', Date.now().toString());
+                try {
+                    localStorage.setItem('shams_products_v7', JSON.stringify(sortedProducts));
+                    localStorage.setItem('shams_brands_v4', JSON.stringify(dbBrands));
+                    localStorage.setItem('shams_categories_v4', JSON.stringify(dbCategories));
+                    localStorage.setItem('shams_cache_ts_v5', Date.now().toString());
+                } catch {}
 
                 setLoading(false);
                 clearTimeout(timeout);
