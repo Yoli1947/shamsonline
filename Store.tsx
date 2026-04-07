@@ -592,9 +592,11 @@ const Store: React.FC = () => {
                 .map(i => `• ${i.name} (T: ${i.size}) x${i.quantity} — $${i.price.toLocaleString('es-AR')}`)
                 .join('\n');
 
-            const shippingLine = (order.shipping_cost || 0) === 0
-                ? 'Envío: *GRATIS* ✅'
-                : `Envío: *$${(order.shipping_cost || 0).toLocaleString('es-AR')}*`;
+            const shippingLine = order.shipping_method === 'retiro'
+                ? ''
+                : ((order.shipping_cost || 0) === 0
+                    ? 'Envío: *GRATIS* ✅'
+                    : `Envío: *$${(order.shipping_cost || 0).toLocaleString('es-AR')}*`);
 
             if (formData.paymentMethod === 'mercadopago') {
                 // Crear preferencia de Mercado Pago y redirigir
@@ -669,7 +671,7 @@ const Store: React.FC = () => {
                     `──────────────────────`,
                     `Subtotal: $${order.subtotal.toLocaleString('es-AR')}`,
                     ...(order.discount > 0 ? [`Descuento 15% transf.: -$${order.discount.toLocaleString('es-AR')}`] : []),
-                    shippingLine,
+                    ...(shippingLine ? [shippingLine] : []),
                     ``,
                     `💰 *TOTAL A ABONAR: $${order.total.toLocaleString('es-AR')}*`,
                     ``,
@@ -683,7 +685,7 @@ const Store: React.FC = () => {
                     `──────────────────────`,
                     deliveryInfo,
                     ``,
-                    `⚠️ *Envianos el comprobante por este chat para procesar tu pedido. ¡Gracias!*`,
+                    `⚠️ *Envianos el comprobante por este chat para procesar tu ${order.shipping_method === 'retiro' ? 'pedido' : 'envío'}. ¡Gracias!*`,
                 ].join('\n');
 
                 setSuccessOrderData({
@@ -723,10 +725,10 @@ const Store: React.FC = () => {
                     itemsText,
                     ``,
                     `Subtotal: $${order.subtotal.toLocaleString('es-AR')}`,
-                    shippingLine,
+                    ...(shippingLine ? [shippingLine] : []),
                     `*💰 TOTAL A ABONAR: $${order.total.toLocaleString('es-AR')}*`,
                     ``,
-                    `Nos pondremos en contacto contigo para coordinar el pago y la entrega. ¡Gracias!`,
+                    `Nos pondremos en contacto contigo para coordinar el pago y el ${order.shipping_method === 'retiro' ? 'retiro' : 'envío'}. ¡Gracias!`,
                 ].join('\n');
 
                 setSuccessOrderData({

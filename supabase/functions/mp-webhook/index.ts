@@ -105,8 +105,24 @@ Deno.serve(async (req) => {
 
     if (error) {
       console.error('Error actualizando pedido:', error);
-    } else {
-      console.log(`Pedido ${orderNumber} actualizado: payment_status=${paymentStatus}, status=${orderStatus}`);
+      return ok();
+    }
+
+    console.log(`Pedido ${orderNumber} actualizado: payment_status=${paymentStatus}, status=${orderStatus}`);
+
+    // Si el pago fue aprobado, enviar email de confirmación
+    if (paymentStatus === 'paid') {
+      const { data: orderData } = await supabase
+        .from('orders')
+        .select('*, items:order_items(*)')
+        .eq('order_number', orderNumber)
+        .single();
+
+      if (orderData) {
+        await supabase.functions.invoke('send-order-email', {
+          body: { order: orderData, items: orderData.items, payment_confirmed: true }
+        }).catch(e => console.error('Error enviando email de pago confirmado:', e));
+      }
     }
 
     return ok();

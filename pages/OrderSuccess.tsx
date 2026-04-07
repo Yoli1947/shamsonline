@@ -215,10 +215,12 @@ const OrderSuccess: React.FC = () => {
                                                 ? 'Cuando tu pedido esté listo, te avisamos para que pases a buscarlo.'
                                                 : 'Preparamos y despachamos tu pedido por Correo Argentino.'}</span>
                                         </div>
-                                        <div style={{ display: 'flex', gap: '12px' }}>
-                                            <span style={{ color: '#000', fontWeight: 900 }}>3.</span>
-                                            <span>Te enviamos el número de seguimiento cuando salga tu pedido.</span>
-                                        </div>
+                                        {order?.shipping_method !== 'retiro' && (
+                                            <div style={{ display: 'flex', gap: '12px' }}>
+                                                <span style={{ color: '#000', fontWeight: 900 }}>3.</span>
+                                                <span>Te enviamos el número de seguimiento cuando salga tu pedido.</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}

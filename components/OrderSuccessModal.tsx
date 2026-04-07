@@ -81,7 +81,7 @@ const OrderSuccessModal: React.FC<OrderSuccessProps> = ({ order, bankDetails, on
 
                     <div className="space-y-4">
                         <p className="text-[11px] font-medium text-zinc-500 text-center uppercase tracking-wider leading-relaxed">
-                            Por favor, una vez realizada la transferencia, envía el comprobante por WhatsApp para que podamos procesar tu envío.
+                            Por favor, una vez realizada la transferencia, envía el comprobante por WhatsApp para que podamos procesar tu {order.shipping_method === 'retiro' ? 'pedido' : 'envío'}.
                         </p>
                         
                         <a
