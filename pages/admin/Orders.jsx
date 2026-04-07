@@ -225,6 +225,7 @@ export default function Orders() {
             setOrders(data)
             setTotal(count || 0)
         } catch (e) {
+            if (e.name === 'AbortError') return
             setError(e.message)
         } finally {
             setLoading(false)
