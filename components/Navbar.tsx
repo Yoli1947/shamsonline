@@ -176,7 +176,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 className={`hover:text-black transition-colors p-2 ${isSearchOpen ? 'text-black' : ''}`}
                 style={{ color: 'var(--color-text)' }}
               >
-                <Search size={20} />
+                <Search size={24} />
               </button>
             </div>
 
