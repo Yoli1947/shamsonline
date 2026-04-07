@@ -821,16 +821,16 @@ const Store: React.FC = () => {
             p.brand?.toLowerCase() === selectedBrand.toLowerCase();
 
         // Filter by Gender
-        const matchesGender = isCafeteriaFilterActive || (
-            (!selectedGender || (
-                p.features?.includes(selectedGender) || 
-                p.features?.some(f => f?.toLowerCase() === selectedGender?.toLowerCase()) ||
-                (selectedGender === 'Mujer' && p.features?.some(f => f?.toLowerCase() === 'unisex')) ||
-                (selectedGender === 'Hombre' && p.features?.some(f => f?.toLowerCase() === 'unisex'))
-            )) &&
-            (!selectedGender || !isCafeteriaProduct) || 
-            (p.brand?.toLowerCase() === 'cibeles' && selectedGender === 'Mujer')
-        );
+        const productGenders = (p.features || []).map((f: string) => f?.toLowerCase());
+        const isUnisex = productGenders.includes('unisex');
+        const matchesGender = !selectedGender || isCafeteriaFilterActive || (() => {
+            if (isCafeteriaProduct) return false;
+            const g = selectedGender.toLowerCase();
+            // Unisex aparece en Hombre, Mujer y Unisex
+            if (isUnisex && (g === 'hombre' || g === 'mujer' || g === 'unisex')) return true;
+            // Coincidencia directa con el género seleccionado
+            return productGenders.includes(g);
+        })() || (p.brand?.toLowerCase() === 'cibeles' && selectedGender === 'Mujer');
 
         // Filter by Search Query
         const searchTerms = searchQuery.toLowerCase().trim().split(/\s+/);
