@@ -1,10 +1,12 @@
 
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Search, Mail, Phone, Calendar, User, Download, ExternalLink, RefreshCw } from 'lucide-react'
 import { getAllCustomers } from '../../lib/admin'
 import './Customers.css'
 
 export default function Customers() {
+    const navigate = useNavigate()
     const [customers, setCustomers] = useState([])
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
@@ -178,7 +180,11 @@ export default function Customers() {
                                                 >
                                                     <Mail size={16} />
                                                 </a>
-                                                <button className="admin-action-btn" title="Ver Pedidos">
+                                                <button
+                                                    className="admin-action-btn"
+                                                    title="Ver Pedidos"
+                                                    onClick={() => navigate(`/admin/pedidos?email=${encodeURIComponent(customer.email)}`)}
+                                                >
                                                     <ExternalLink size={16} />
                                                 </button>
                                             </div>

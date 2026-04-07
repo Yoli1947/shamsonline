@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { getAllOrders, updateOrderStatus, cancelOrder } from '../../lib/admin'
 import { Search, ChevronDown, ChevronUp, Package, Truck, CheckCircle, XCircle, Clock, RefreshCw } from 'lucide-react'
 
@@ -208,11 +209,12 @@ function OrderRow({ order, onStatusChange, onCancel }) {
 }
 
 export default function Orders() {
+    const [searchParams] = useSearchParams()
     const [orders, setOrders] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [filter, setFilter] = useState(null)
-    const [search, setSearch] = useState('')
+    const [search, setSearch] = useState(searchParams.get('email') || '')
     const [total, setTotal] = useState(0)
 
     const loadOrders = useCallback(async () => {
