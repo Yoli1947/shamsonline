@@ -1021,9 +1021,9 @@ const Store: React.FC = () => {
 
                 {/* Collection Section */}
                 <section 
-                    className={`pb-32 px-0.5 md:px-12 max-w-screen-2xl mx-auto ${(selectedBrand || selectedGender || selectedCategory) ? 'pt-24 md:pt-32' : 'pt-4'}`} 
+                    className={`pb-32 px-0.5 md:px-12 max-w-screen-2xl mx-auto ${(selectedBrand || selectedGender || selectedCategory) ? 'pt-44 md:pt-52' : 'pt-4'}`} 
                     id="new"
-                    style={{ scrollMarginTop: '160px' }}
+                    style={{ scrollMarginTop: '200px' }}
                 >
                     <div className="flex flex-col md:flex-row md:items-start justify-between mb-6 px-1.5 md:px-0 gap-6 md:gap-10">
                         <div className="pt-0">
@@ -1063,7 +1063,7 @@ const Store: React.FC = () => {
                     </div>
 
                     {/* Barra de Filtros Sticky y Compacta - Diseño Premium */}
-                    <div className="sticky top-[95px] md:top-[128px] z-[90] w-full bg-white/95 backdrop-blur-md py-4 px-3 md:px-6 mb-6 md:mb-8 border-y border-[var(--color-text)]/5 shadow-[0_15px_35px_rgba(0,0,0,0.04)]">
+                    <div className="sticky top-[105px] md:top-[130px] z-[90] w-full bg-white backdrop-blur-md py-4 px-3 md:px-6 mb-6 md:mb-8 border-y border-[var(--color-text)]/5 shadow-[0_15px_35px_rgba(0,0,0,0.04)]">
                         <div className="flex flex-col gap-2 md:gap-3">
                             <div className="flex flex-col xl:flex-row xl:items-center justify-end gap-3 md:gap-4">
                                 <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar w-full xl:w-auto relative [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
