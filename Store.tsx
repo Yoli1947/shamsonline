@@ -1310,9 +1310,11 @@ const Store: React.FC = () => {
                                                 const c = cat.toUpperCase();
                                                 const hasHombre = c.includes('HOMBRE');
                                                 const hasMujer = c.includes('MUJER');
-                                                if (selectedGender === 'Hombre') return hasHombre || (!hasHombre && !hasMujer);
+                                                // Categorías genéricas que son solo de mujer
+                                                const soloMujer = ['CAMISAS/BLUSAS/TOP','VESTIDOS, FALDAS Y MONOS','SACOS'].map(x => x.toUpperCase());
+                                                if (selectedGender === 'Hombre') return hasHombre || (!hasHombre && !hasMujer && !soloMujer.includes(c));
                                                 if (selectedGender === 'Mujer') return hasMujer || (!hasHombre && !hasMujer);
-                                                return !hasHombre && !hasMujer; // Unisex: solo genéricas
+                                                return !hasHombre && !hasMujer;
                                             }).map(category => (
                                                 <button
                                                     key={category}
