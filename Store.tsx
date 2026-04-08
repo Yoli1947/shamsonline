@@ -1305,7 +1305,15 @@ const Store: React.FC = () => {
                                             )}
                                         </div>
                                         <div className="flex flex-col gap-1.5 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                                            {availableCategories.map(category => (
+                                            {availableCategories.filter(cat => {
+                                                if (!selectedGender) return true;
+                                                const c = cat.toUpperCase();
+                                                const hasHombre = c.includes('HOMBRE');
+                                                const hasMujer = c.includes('MUJER');
+                                                if (selectedGender === 'Hombre') return hasHombre || (!hasHombre && !hasMujer);
+                                                if (selectedGender === 'Mujer') return hasMujer || (!hasHombre && !hasMujer);
+                                                return !hasHombre && !hasMujer; // Unisex: solo genéricas
+                                            }).map(category => (
                                                 <button
                                                     key={category}
                                                     onClick={() => {
