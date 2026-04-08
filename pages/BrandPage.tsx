@@ -24,7 +24,9 @@ const BrandPage: React.FC = () => {
                 // We limit to 500 to cover most active brands.
                 const { data: products } = await supabase
                     .from('products')
-                    .select('brand_id, image_url')
+                    .select('brand_id, image_url, name')
+                    .eq('is_published', true)
+                    .or('is_active.eq.true,is_active.is.null')
                     .not('image_url', 'is', null)
                     .neq('image_url', '')
                     .order('created_at', { ascending: false })
@@ -34,11 +36,13 @@ const BrandPage: React.FC = () => {
                 const imageMap: Record<string, string> = {};
                 if (products) {
                     products.forEach((p: any) => {
-                        if (p.brand_id && !imageMap[p.brand_id]) {
+                        const isTest = p.name?.toLowerCase().includes('prueba') || p.name?.toLowerCase().includes('test');
+                        if (p.brand_id && !imageMap[p.brand_id] && !isTest) {
                             imageMap[p.brand_id] = p.image_url;
                         }
                     });
                 }
+
 
                 setBrandImages(imageMap);
                 setBrands(dbBrands);

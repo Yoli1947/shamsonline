@@ -48,6 +48,21 @@ export default function UltimosIngresos() {
         }
     };
 
+    const updateSortOrder = async (product, value) => {
+        const order = value === '' ? null : parseInt(value);
+        setProducts(prev => prev.map(p => p.id === product.id ? { ...p, sort_order: order } : p));
+        setSaving(product.id);
+        try {
+            await updateProduct(product.id, { sortOrder: order });
+            setSavedId(product.id);
+            setTimeout(() => setSavedId(null), 1500);
+        } catch (e) {
+            alert('Error: ' + e.message);
+        } finally {
+            setSaving(null);
+        }
+    };
+
     const filtered = products.filter(p => {
         const q = search.toLowerCase();
         const matchSearch = !q || p.name?.toLowerCase().includes(q) || p.brand?.name?.toLowerCase().includes(q);
@@ -78,17 +93,28 @@ export default function UltimosIngresos() {
                 {featured.length === 0 ? (
                     <p className="text-[var(--color-text-muted)] text-xs">Ningún producto seleccionado. La tienda mostrará todos los productos.</p>
                 ) : (
-                    <div className="flex flex-wrap gap-2">
-                        {featured.map(p => (
-                            <button
-                                key={p.id}
-                                onClick={() => toggleFeatured(p)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-black text-white text-[11px] font-bold rounded-lg hover:bg-red-600 transition-all group"
-                                title="Click para quitar"
-                            >
-                                {p.name}
-                                <X size={10} className="opacity-60 group-hover:opacity-100" />
-                            </button>
+                    <div className="flex flex-wrap gap-3">
+                        {featured
+                            .sort((a,b) => (a.sort_order || 999) - (b.sort_order || 999))
+                            .map(p => (
+                            <div key={p.id} className="flex items-center gap-2 bg-black text-white p-1 pr-3 rounded-lg shadow-sm border border-black/20">
+                                <input 
+                                    type="number" 
+                                    value={p.sort_order || ''} 
+                                    onChange={(e) => updateSortOrder(p, e.target.value)}
+                                    placeholder="#"
+                                    className="w-10 h-8 bg-white/10 border-none text-center text-xs font-black text-white focus:outline-none focus:bg-white/20 rounded"
+                                    title="Orden de aparición"
+                                />
+                                <button
+                                    onClick={() => toggleFeatured(p)}
+                                    className="flex items-center gap-1.5 text-[11px] font-bold hover:text-red-400 transition-all group"
+                                    title="Quitar de destacados"
+                                >
+                                    {p.name}
+                                    <X size={10} className="opacity-60 group-hover:opacity-100" />
+                                </button>
+                            </div>
                         ))}
                     </div>
                 )}

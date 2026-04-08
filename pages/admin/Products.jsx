@@ -251,7 +251,8 @@ export default function Products() {
                 features: product.features || [],
                 gender: product.gender || null,
                 price: parseFloat(product.price),
-                salePrice: product.sale_price ? parseFloat(product.sale_price) : null
+                salePrice: product.sale_price ? parseFloat(product.sale_price) : null,
+                sortOrder: product.sort_order ? parseInt(product.sort_order) : null
             })
 
             // 2. Update variants if they exist
@@ -760,6 +761,7 @@ export default function Products() {
                                 />
                             </th>
                             <th style={{ width: '80px' }}>Imagen</th>
+                            <th style={{ width: '70px', textAlign: 'center' }}>Orden</th>
                             <th style={{ width: '250px' }}>Producto</th>
                             <th style={{ width: '130px' }}>Cód. Fábrica</th>
                             <th style={{ width: '150px' }}>Marca</th>
@@ -832,10 +834,28 @@ export default function Products() {
                                                 id={`upload-${product.id}`}
                                                 style={{ display: 'none' }}
                                                 accept="image/*"
-                                                onChange={(e) => handleImageUpload(e.target.files[0], product.id)}
                                             />
                                         </div>
                                     </div>
+                                </td>
+                                <td style={{ textAlign: 'center' }}>
+                                    <input
+                                        type="number"
+                                        className="inline-stock-input"
+                                        style={{ 
+                                            width: '45px', 
+                                            textAlign: 'center', 
+                                            fontSize: '0.8rem', 
+                                            fontWeight: 'bold', 
+                                            background: product.sort_order ? 'rgba(196, 149, 106, 0.1)' : 'rgba(255,255,255,0.03)',
+                                            color: product.sort_order ? '#c4956a' : 'inherit',
+                                            border: product.sort_order ? '1px solid rgba(196, 149, 106, 0.3)' : '1px solid rgba(255,255,255,0.1)'
+                                        }}
+                                        value={product.sort_order || ''}
+                                        onChange={(e) => handleInlineChange(product.id, 'sort_order', e.target.value)}
+                                        placeholder="-"
+                                        title="Orden de aparición (1, 2, 3...) - Los 3 primeros aparecen en el banner principal"
+                                    />
                                 </td>
                                 <td>
                                     <input

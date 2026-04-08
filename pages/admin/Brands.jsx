@@ -338,6 +338,50 @@ const Brands = () => {
         }
     };
 
+    const unifyOreiro = async () => {
+        if (!window.confirm('¿Deseas mover todos los productos de "LAS OREIRO" y del proveedor "ALLBRANDS" a "OREIRO LOVE"?')) return;
+        
+        setLoading(true);
+        try {
+            const { data: allBrands } = await supabase.from('brands').select('id, name');
+            const lasOreiro = allBrands.find(b => b.name.toUpperCase().includes('LAS OREIRO'));
+            const oreiroLove = allBrands.find(b => b.name.toUpperCase().includes('OREIRO LOVE'));
+
+            if (!oreiroLove) {
+                alert('No se encontró la marca "OREIRO LOVE".');
+                setLoading(false);
+                return;
+            }
+
+            let totalUpdated = 0;
+
+            // 1. Move by Brand ID
+            if (lasOreiro) {
+                const { count: c1 } = await supabase
+                    .from('products')
+                    .update({ brand_id: oreiroLove.id })
+                    .eq('brand_id', lasOreiro.id);
+                totalUpdated += (c1 || 0);
+
+                // Delete the old brand if it exists
+                await supabase.from('brands').delete().eq('id', lasOreiro.id);
+            }
+
+            // 2. Move by Provider Name (Case insensitive-ish using ilike)
+            const { count: c2 } = await supabase
+                .from('products')
+                .update({ brand_id: oreiroLove.id })
+                .or('provider.ilike.%OREIRO%,provider.ilike.%ALLBRAND%');
+            totalUpdated += (c2 || 0);
+            
+            alert(`¡Listo! Se unificaron ${totalUpdated} productos en OREIRO LOVE.`);
+            fetchBrands();
+        } catch (e) {
+            alert('Error al unificar: ' + e.message);
+            setLoading(false);
+        }
+    };
+
     const filteredBrands = brands.filter(b => b.name.toLowerCase().includes(search.toLowerCase()));
 
     return (
@@ -352,26 +396,36 @@ const Brands = () => {
                 </button>
             </div>
 
-            <div className="mb-6">
-                <div className="relative max-w-md">
-                    <Search className="absolute left-3 top-3 text-[var(--color-text-muted)]" size={20} />
-                    <input
-                        type="text"
-                        placeholder="Buscar marca..."
-                        className="w-full pl-10 p-2 border rounded-lg bg-white border-[var(--color-border)] text-[var(--color-text)] focus:border-[#DCDCDC] outline-none"
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                    />
-                </div>
-                {search && (
-                    <p className="mt-2 text-xs text-[var(--color-text-muted)] italic">* El reordenamiento está desactivado mientras buscas.</p>
-                )}
-            </div>
-
             {loading ? (
                 <div className="flex justify-center p-12"><Loader className="animate-spin text-[#DCDCDC]" size={48} /></div>
             ) : (
                 <div className="bg-white rounded-xl overflow-hidden border border-[var(--color-border)] shadow-xl">
+                    <div className="p-4 bg-zinc-50 border-b border-zinc-100 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={unifyOreiro}
+                                className="bg-black text-[#c4956a] px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest border-2 border-[#c4956a]/30 hover:bg-[#c4956a] hover:text-black transition-all shadow-lg transform hover:scale-105 active:scale-95"
+                            >
+                                🚀 Unificar Oreiro Love
+                            </button>
+                            <p className="text-[10px] text-zinc-500 font-bold uppercase max-w-[200px] leading-tight">
+                                Mueve artículos de "Las Oreiro" y proveedores "Allbrands" a Oreiro Love.
+                            </p>
+                        </div>
+                        <div className="flex-1 max-w-xs ml-auto">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-2.5 text-zinc-400" size={16} />
+                                <input
+                                    type="text"
+                                    placeholder="Buscar marca..."
+                                    className="w-full pl-9 p-2 border rounded-lg bg-white border-zinc-200 text-xs focus:border-black outline-none"
+                                    value={search}
+                                    onChange={e => setSearch(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
                     <DndContext
                         sensors={sensors}
                         collisionDetection={closestCenter}

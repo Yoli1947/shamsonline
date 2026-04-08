@@ -15,7 +15,7 @@ call npm run build
 
 echo 3. Guardando cambios en Git...
 git add .
-git commit -m "Fix accesorios, titulos por seccion, outlet gris, sin duplicados en categorias, carta de talles"
+git commit -m "Fix filtros moviles sticky final"
 
 echo 4. Subiendo a GitHub para el servidor...
 git push

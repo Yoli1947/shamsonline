@@ -328,7 +328,7 @@ const Store: React.FC = () => {
                 try {
                     const cachedTs = localStorage.getItem('shams_cache_ts_v5');
                     const cachedTsNum = cachedTs ? parseInt(cachedTs) : 0;
-                    const cachedProducts = JSON.parse(localStorage.getItem('shams_products_v8') || '[]');
+                    const cachedProducts = JSON.parse(localStorage.getItem('shams_products_v9') || '[]');
                     const cachedBrands = JSON.parse(localStorage.getItem('shams_brands_v4') || '[]');
                     const cachedCategories = JSON.parse(localStorage.getItem('shams_categories_v4') || '[]');
 
@@ -396,7 +396,7 @@ const Store: React.FC = () => {
                 setProducts(sortedProducts);
                 
                 try {
-                    localStorage.setItem('shams_products_v8', JSON.stringify(sortedProducts));
+                    localStorage.setItem('shams_products_v9', JSON.stringify(sortedProducts));
                     localStorage.setItem('shams_brands_v4', JSON.stringify(dbBrands));
                     localStorage.setItem('shams_categories_v4', JSON.stringify(dbCategories));
                     localStorage.setItem('shams_cache_ts_v5', Date.now().toString());
