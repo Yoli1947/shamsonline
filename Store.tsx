@@ -218,7 +218,18 @@ const Store: React.FC = () => {
                     console.log("Direct-link: Producto encontrado en DB:", dbProd.name);
                     const mapped = mapProductsToUI([dbProd]);
                     const productToInject = mapped[0];
+
+                    // Validar que no sea un producto de prueba
+                    const isTestProduct = productToInject.name?.toLowerCase().includes('prueba') || productToInject.name?.toLowerCase().includes('test');
+                    if (isTestProduct) {
+                        console.warn("Direct-link: Intento de acceder a producto de prueba bloqueado.");
+                        navigate('/', { replace: true });
+                        setIsProductDeepLinkLoading(false);
+                        return;
+                    }
+
                     setSelectedProduct(productToInject);
+
                     
                     // Inyectar el producto en el estado global para que no aparezca "vacío" el fondo
                     setProducts(prev => {
@@ -317,7 +328,7 @@ const Store: React.FC = () => {
                 try {
                     const cachedTs = localStorage.getItem('shams_cache_ts_v5');
                     const cachedTsNum = cachedTs ? parseInt(cachedTs) : 0;
-                    const cachedProducts = JSON.parse(localStorage.getItem('shams_products_v7') || '[]');
+                    const cachedProducts = JSON.parse(localStorage.getItem('shams_products_v8') || '[]');
                     const cachedBrands = JSON.parse(localStorage.getItem('shams_brands_v4') || '[]');
                     const cachedCategories = JSON.parse(localStorage.getItem('shams_categories_v4') || '[]');
 
@@ -385,7 +396,7 @@ const Store: React.FC = () => {
                 setProducts(sortedProducts);
                 
                 try {
-                    localStorage.setItem('shams_products_v7', JSON.stringify(sortedProducts));
+                    localStorage.setItem('shams_products_v8', JSON.stringify(sortedProducts));
                     localStorage.setItem('shams_brands_v4', JSON.stringify(dbBrands));
                     localStorage.setItem('shams_categories_v4', JSON.stringify(dbCategories));
                     localStorage.setItem('shams_cache_ts_v5', Date.now().toString());
@@ -811,6 +822,14 @@ const Store: React.FC = () => {
         // Filter: Solo productos publicados y activos
         if (p.is_published === false || p.is_active === false) return false;
 
+        // Filter: Ocultar productos de prueba o test
+        const testKeywords = ['prueba', 'test', 'demo', 'asdf', 'qwer', 'aaaa', 'zxcv'];
+        const isTestProduct = testKeywords.some(kw => p.name?.toLowerCase().includes(kw));
+        const isDummyPrice = (p.price || 0) < 50; // Productos con precio simbólico
+        if (isTestProduct || isDummyPrice) return false;
+
+
+
         // Filter: Ocultar productos sin stock o sin variantes cargadas
         if (!p.variants || p.variants.length === 0) return false;
         const totalStock = p.variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0);
@@ -868,9 +887,9 @@ const Store: React.FC = () => {
 
         if (!(finalImageCheck && matchesCategory && matchesBrand && matchesGender && matchesSearch && matchesSize)) return false;
 
-        // Cuando no hay filtros activos, mostrar solo productos destacados (is_featured)
+        // Cuando no hay filtros activos, mostrar solo productos marcados en admin (is_featured)
         const noFilters = !selectedCategory && !selectedBrand && !selectedGender && !searchQuery && !selectedSize;
-        if (noFilters && p.is_featured === false) return false;
+        if (noFilters && !p.is_featured) return false;
 
         return true;
     }).sort((a, b) => {
