@@ -301,7 +301,7 @@ const Store: React.FC = () => {
 
                 // Actualizar caché al final del barrido completo
                 setProducts(current => {
-                    try { localStorage.setItem('shams_products_v9', JSON.stringify(current)); localStorage.setItem('shams_cache_ts_v5', Date.now().toString()); } catch {}
+                    try { localStorage.setItem('shams_products_v10', JSON.stringify(current)); localStorage.setItem('shams_cache_ts_v5', Date.now().toString()); } catch {}
                     return current;
                 });
 
@@ -328,7 +328,7 @@ const Store: React.FC = () => {
                 try {
                     const cachedTs = localStorage.getItem('shams_cache_ts_v5');
                     const cachedTsNum = cachedTs ? parseInt(cachedTs) : 0;
-                    const cachedProducts = JSON.parse(localStorage.getItem('shams_products_v9') || '[]');
+                    const cachedProducts = JSON.parse(localStorage.getItem('shams_products_v10') || '[]');
                     const cachedBrands = JSON.parse(localStorage.getItem('shams_brands_v4') || '[]');
                     const cachedCategories = JSON.parse(localStorage.getItem('shams_categories_v4') || '[]');
 
@@ -396,7 +396,7 @@ const Store: React.FC = () => {
                 setProducts(sortedProducts);
                 
                 try {
-                    localStorage.setItem('shams_products_v9', JSON.stringify(sortedProducts));
+                    localStorage.setItem('shams_products_v10', JSON.stringify(sortedProducts));
                     localStorage.setItem('shams_brands_v4', JSON.stringify(dbBrands));
                     localStorage.setItem('shams_categories_v4', JSON.stringify(dbCategories));
                     localStorage.setItem('shams_cache_ts_v5', Date.now().toString());
@@ -668,7 +668,7 @@ const Store: React.FC = () => {
                 decrementLocalStock(orderItems);
                 setCart([]);
                 setIsCheckoutOpen(false);
-                localStorage.removeItem('shams_products_v9');
+                localStorage.removeItem('shams_products_v10');
                 localStorage.removeItem('shams_promo_10');
                 window.location.href = mpData.init_point;
             } else if (formData.paymentMethod === 'transferencia') {
@@ -1415,7 +1415,10 @@ const Store: React.FC = () => {
                             <div className="flex flex-col gap-6 md:gap-16">
                                 {/* Featured Products Large Cards (admin-selected) */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-0.5 sm:gap-2">
-                                    {filteredProducts.filter(p => p.is_featured).slice(0, 3).map(product => (
+                                    {(filteredProducts.filter(p => p.is_featured).length > 0
+                                        ? filteredProducts.filter(p => p.is_featured).slice(0, 3)
+                                        : filteredProducts.slice(0, 3)
+                                    ).map(product => (
                                         <button
                                             key={product.id}
                                             onClick={() => openProduct(product)}
