@@ -1491,7 +1491,16 @@ const Store: React.FC = () => {
                                     </div>
                                 )}
                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-0.5 sm:gap-6 gap-y-4 sm:gap-y-12 min-h-[50vh]">
-                                    {filteredProducts.map(product => (
+                                    {filteredProducts.sort((a, b) => {
+                                        const isAccessoryOrFootwear = (p: any) => {
+                                            const cat = (p.category?.name || '').toUpperCase();
+                                            return cat.includes('ACCESORIO') || cat.includes('CALZADO') || cat.includes('BOLSO') || cat.includes('CARTERA') ? 1 : 0;
+                                        };
+                                        const aIsBottom = isAccessoryOrFootwear(a);
+                                        const bIsBottom = isAccessoryOrFootwear(b);
+                                        if (aIsBottom !== bIsBottom) return aIsBottom - bIsBottom;
+                                        return (b.price || 0) - (a.price || 0);
+                                    }).map(product => (
                                         <ProductCard key={product.id} product={product} onAddToCart={addToCart} onOpenDetail={(p) => openProduct(p)} isFavorite={favorites.includes(product.id)} onToggleFavorite={toggleFavorite} />
                                     ))}
                                 </div>
