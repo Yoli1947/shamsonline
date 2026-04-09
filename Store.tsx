@@ -887,10 +887,6 @@ const Store: React.FC = () => {
 
         if (!(finalImageCheck && matchesCategory && matchesBrand && matchesGender && matchesSearch && matchesSize)) return false;
 
-        // Cuando no hay filtros activos, mostrar solo productos marcados en admin (is_featured)
-        const noFilters = !selectedCategory && !selectedBrand && !selectedGender && !searchQuery && !selectedSize;
-        if (noFilters && !p.is_featured) return false;
-
         return true;
     }).sort((a, b) => {
         if (!selectedOrder) return 0;
@@ -1417,9 +1413,9 @@ const Store: React.FC = () => {
                     ) : (
                         (!selectedBrand && !selectedGender && !selectedCategory && !searchQuery) ? (
                             <div className="flex flex-col gap-6 md:gap-16">
-                                {/* 3 Featured Products Large Cards */}
+                                {/* Featured Products Large Cards (admin-selected) */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-0.5 sm:gap-2">
-                                    {filteredProducts.slice(0, 3).map(product => (
+                                    {filteredProducts.filter(p => p.is_featured).map(product => (
                                         <button
                                             key={product.id}
                                             onClick={() => openProduct(product)}
@@ -1444,7 +1440,7 @@ const Store: React.FC = () => {
                                 </div>
                                 
                                 {/* Rest of the Catalog */}
-                                {filteredProducts.length > 3 && (
+                                {filteredProducts.filter(p => !p.is_featured).length > 0 && (
                                     <div>
                                         <div className="flex items-center justify-center mb-8 mt-4 md:mt-0">
                                             <span className="text-[var(--color-text)] uppercase tracking-[0.4em] text-[10px] md:text-xs block font-bold px-8 py-2 border-y border-[var(--color-text)]/20">
@@ -1452,7 +1448,7 @@ const Store: React.FC = () => {
                                             </span>
                                         </div>
                                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-0.5 sm:gap-6 gap-y-4 sm:gap-y-12 min-h-[50vh]">
-                                            {filteredProducts.slice(3).map(product => (
+                                            {filteredProducts.filter(p => !p.is_featured).map(product => (
                                                 <ProductCard key={product.id} product={product} onAddToCart={addToCart} onOpenDetail={(p) => openProduct(p)} isFavorite={favorites.includes(product.id)} onToggleFavorite={toggleFavorite} />
                                             ))}
                                         </div>
