@@ -1415,7 +1415,7 @@ const Store: React.FC = () => {
                             <div className="flex flex-col gap-6 md:gap-16">
                                 {/* Featured Products Large Cards (admin-selected) */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-0.5 sm:gap-2">
-                                    {filteredProducts.filter(p => p.is_featured).map(product => (
+                                    {filteredProducts.filter(p => p.is_featured).slice(0, 3).map(product => (
                                         <button
                                             key={product.id}
                                             onClick={() => openProduct(product)}
