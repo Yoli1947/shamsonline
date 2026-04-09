@@ -120,7 +120,6 @@ export default function AdminLayout() {
             )}
 
             {/* Main Content */}
-            <div className={`admin-main ${!sidebarOpen ? 'full-width' : ''}`}>
                 <header className="admin-header">
                     <button
                         className="admin-header__menu"
@@ -145,7 +144,7 @@ export default function AdminLayout() {
                     </div>
                 </header>
 
-
+                <AutoUnifyOreiro user={user} />
 
                 <main className="admin-content">
                     <Outlet />
@@ -154,3 +153,40 @@ export default function AdminLayout() {
         </div>
     )
 }
+
+// Componente auxiliar para unificar marcas en segundo plano sin intervención del usuario
+const AutoUnifyOreiro = ({ user }) => {
+    useEffect(() => {
+        const runUnify = async () => {
+            if (localStorage.getItem('shams_oreiro_unified_v2')) return;
+            if (!user || user.role !== 'admin') return;
+            
+            try {
+                const { data: allBrands } = await supabase.from('brands').select('id, name');
+                const lasOreiro = allBrands?.find(b => b.name.toUpperCase().includes('LAS OREIRO'));
+                const oreiroLove = allBrands?.find(b => b.name.toUpperCase().includes('OREIRO LOVE'));
+
+                if (oreiroLove) {
+                   // 1. Unificar por Marca
+                   if (lasOreiro) {
+                       await supabase.from('products').update({ brand_id: oreiroLove.id }).eq('brand_id', lasOreiro.id);
+                       await supabase.from('brands').delete().eq('id', lasOreiro.id);
+                   }
+                   
+                   // 2. Unificar por Proveedor (ALLBRANDS / OREIRO)
+                   await supabase.from('products')
+                    .update({ brand_id: oreiroLove.id })
+                    .or('provider.ilike.%OREIRO%,provider.ilike.%ALLBRAND%');
+                   
+                   localStorage.setItem('shams_oreiro_unified_v2', 'true');
+                   console.log('✅ Unificación de Oreiro Love completada automáticamente.');
+                }
+            } catch (e) {
+                console.error('Error in auto-unification:', e);
+            }
+        };
+        runUnify();
+    }, [user]);
+
+    return null;
+};
