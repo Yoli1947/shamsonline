@@ -761,8 +761,8 @@ export default function Products() {
                                 />
                             </th>
                             <th style={{ width: '80px' }}>Imagen</th>
-                            <th style={{ width: '70px', textAlign: 'center' }}>Orden</th>
-                            <th style={{ width: '250px' }}>Producto</th>
+                            <th style={{ width: '45px', textAlign: 'center' }}>Orden</th>
+                            <th style={{ width: '320px' }}>Producto</th>
                             <th style={{ width: '130px' }}>Cód. Fábrica</th>
                             <th style={{ width: '150px' }}>Marca</th>
                             <th style={{ width: '150px' }}>Categoría</th>
