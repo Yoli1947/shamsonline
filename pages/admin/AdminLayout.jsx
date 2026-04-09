@@ -1,4 +1,4 @@
-import { Outlet, NavLink, Navigate, useNavigate, useLocation } from 'react-router-dom'
+import { Outlet, NavLink, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard,
     Package,
@@ -18,36 +18,36 @@ import {
     Plus,
     Star,
     User
-} from 'lucide-react'
-import { Link } from 'react-router-dom'
-import { useAuth } from '../../context/AuthContext'
-import { useState, useEffect } from 'react'
-import './AdminLayout.css'
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { useState, useEffect } from 'react';
+import { supabase } from '../../lib/supabase';
+import './AdminLayout.css';
 
 export default function AdminLayout() {
-    const { user, logout, loading } = useAuth()
-    const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024)
-    const navigate = useNavigate()
-    const location = useLocation()
+    const { user, logout, loading } = useAuth();
+    const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
+    const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
-        document.querySelector('.admin-content')?.scrollTo({ top: 0, behavior: 'instant' })
-    }, [location.pathname])
+        const content = document.querySelector('.admin-content');
+        if (content) content.scrollTo({ top: 0, behavior: 'instant' });
+    }, [location.pathname]);
 
-    // Mostrar loading mientras se verifica la sesión
     if (loading) {
-        return <div className="admin-loading">Cargando...</div>
+        return <div className="admin-loading">Cargando...</div>;
     }
 
-    // Proteger ruta - redirigir si no está autenticado o no es admin
     if (!user || user.role !== 'admin') {
-        return <Navigate to="/admin/login" replace />
+        return <Navigate to="/admin/login" replace />;
     }
 
     const handleLogout = async () => {
-        await logout()
-        navigate('/admin/login')
-    }
+        await logout();
+        navigate('/admin/login');
+    };
 
     const navItems = [
         { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -66,19 +66,15 @@ export default function AdminLayout() {
         { path: '/admin/ultimos-ingresos', icon: Star, label: 'Últimos Ingresos' },
         { path: '/admin/imagenes-marcas', icon: Camera, label: 'Imágenes Marcas' },
         { path: '/admin/configuracion', icon: Settings, label: 'Configuración' },
-    ]
+    ];
 
     return (
         <div className="admin-layout">
-            {/* Sidebar */}
             <aside className={`admin-sidebar ${sidebarOpen ? 'admin-sidebar--open' : 'desktop-closed'}`}>
                 <div className="admin-sidebar__header">
                     <h1 className="admin-sidebar__logo" style={{ fontWeight: 900, letterSpacing: '0.5em' }}>SHAMS</h1>
                     <span className="admin-sidebar__badge">ADMIN</span>
-                    <button
-                        className="admin-sidebar__close"
-                        onClick={() => setSidebarOpen(false)}
-                    >
+                    <button className="admin-sidebar__close" onClick={() => setSidebarOpen(false)}>
                         <X size={24} />
                     </button>
                 </div>
@@ -88,14 +84,8 @@ export default function AdminLayout() {
                         <NavLink
                             key={item.path}
                             to={item.path}
-                            className={({ isActive }) =>
-                                `admin-sidebar__link ${isActive ? 'admin-sidebar__link--active' : ''}`
-                            }
-                            onClick={() => {
-                                // On mobile, close always. On desktop, user asked for Full Screen when clicking buttons.
-                                // We'll toggle it closed.
-                                setSidebarOpen(false)
-                            }}
+                            className={({ isActive }) => `admin-sidebar__link ${isActive ? 'admin-sidebar__link--active' : ''}`}
+                            onClick={() => setSidebarOpen(false)}
                         >
                             <item.icon size={20} />
                             <span>{item.label}</span>
@@ -111,30 +101,17 @@ export default function AdminLayout() {
                 </div>
             </aside>
 
-            {/* Overlay for mobile (only if open and screen is small) */}
             {sidebarOpen && (
-                <div
-                    className="admin-overlay md:hidden"
-                    onClick={() => setSidebarOpen(false)}
-                />
+                <div className="admin-overlay md:hidden" onClick={() => setSidebarOpen(false)} />
             )}
 
-            {/* Main Content */}
+            <div className={`admin-main ${!sidebarOpen ? 'full-width' : ''}`}>
                 <header className="admin-header">
-                    <button
-                        className="admin-header__menu"
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                    >
-                        <Menu size={24} color="var(--color-text)" />
+                    <button className="admin-header__menu" onClick={() => setSidebarOpen(!sidebarOpen)}>
+                        <Menu size={24} />
                     </button>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <a
-                            href="/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="admin-header__view-store"
-                            title="Ver Tienda Online"
-                        >
+                        <a href="/" target="_blank" rel="noopener noreferrer" className="admin-header__view-store">
                             <Eye size={18} />
                             <span>Ver Tienda</span>
                         </a>
@@ -151,42 +128,33 @@ export default function AdminLayout() {
                 </main>
             </div>
         </div>
-    )
+    );
 }
 
-// Componente auxiliar para unificar marcas en segundo plano sin intervención del usuario
 const AutoUnifyOreiro = ({ user }) => {
     useEffect(() => {
         const runUnify = async () => {
-            if (localStorage.getItem('shams_oreiro_unified_v2')) return;
+            if (localStorage.getItem('shams_oreiro_unified_v3')) return;
             if (!user || user.role !== 'admin') return;
             
             try {
                 const { data: allBrands } = await supabase.from('brands').select('id, name');
-                const lasOreiro = allBrands?.find(b => b.name.toUpperCase().includes('LAS OREIRO'));
                 const oreiroLove = allBrands?.find(b => b.name.toUpperCase().includes('OREIRO LOVE'));
+                const lasOreiro = allBrands?.find(b => b.name.toUpperCase().includes('LAS OREIRO'));
 
                 if (oreiroLove) {
-                   // 1. Unificar por Marca
                    if (lasOreiro) {
                        await supabase.from('products').update({ brand_id: oreiroLove.id }).eq('brand_id', lasOreiro.id);
                        await supabase.from('brands').delete().eq('id', lasOreiro.id);
                    }
-                   
-                   // 2. Unificar por Proveedor (ALLBRANDS / OREIRO)
-                   await supabase.from('products')
-                    .update({ brand_id: oreiroLove.id })
-                    .or('provider.ilike.%OREIRO%,provider.ilike.%ALLBRAND%');
-                   
-                   localStorage.setItem('shams_oreiro_unified_v2', 'true');
-                   console.log('✅ Unificación de Oreiro Love completada automáticamente.');
+                   await supabase.from('products').update({ brand_id: oreiroLove.id }).or('provider.ilike.%OREIRO%,provider.ilike.%ALLBRAND%');
+                   localStorage.setItem('shams_oreiro_unified_v3', 'true');
                 }
             } catch (e) {
-                console.error('Error in auto-unification:', e);
+                console.error('Auto-unify error:', e);
             }
         };
         runUnify();
     }, [user]);
-
     return null;
 };
