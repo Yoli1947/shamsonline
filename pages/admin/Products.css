@@ -703,8 +703,14 @@
 
 .admin-table th:nth-child(3),
 .admin-table td:nth-child(3) {
+    width: 50px !important;
+    min-width: 50px;
+}
+
+.admin-table th:nth-child(4),
+.admin-table td:nth-child(4) {
     width: 350px !important;
-    min-width: 300px;
+    min-width: 280px;
 }
 
 /* INLINE EDITING - TEXT/SELECT */
