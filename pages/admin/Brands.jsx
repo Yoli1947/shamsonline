@@ -399,7 +399,7 @@ const Brands = () => {
             {loading ? (
                 <div className="flex justify-center p-12"><Loader className="animate-spin text-[#DCDCDC]" size={48} /></div>
             ) : (
-                <div className="bg-white rounded-xl overflow-hidden border border-[var(--color-border)] shadow-xl">
+                <div className="bg-white rounded-xl overflow-x-auto border border-[var(--color-border)] shadow-xl">
                     <div className="p-4 bg-zinc-50 border-b border-zinc-100 flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <button

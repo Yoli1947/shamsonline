@@ -858,14 +858,36 @@ export default function Products() {
                                     />
                                 </td>
                                 <td>
-                                    <input
-                                        className="inline-text-input"
-                                        value={product.name}
-                                        onChange={(e) => handleInlineChange(product.id, 'name', e.target.value)}
-                                        placeholder="Nombre..."
-                                    />
-                                    <div style={{ fontSize: '0.65rem', color: '#666', marginTop: '2px' }}>
-                                        SKU: {product.sku || product.code || 'S/N'}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <input
+                                            className="inline-text-input"
+                                            value={product.name}
+                                            onChange={(e) => handleInlineChange(product.id, 'name', e.target.value)}
+                                            placeholder="Nombre..."
+                                            style={{ flex: 1 }}
+                                        />
+                                        <button 
+                                            onClick={() => openEditProduct(product)}
+                                            className="admin-edit-shortcut"
+                                            style={{ 
+                                                background: 'rgba(0,0,0,0.03)', 
+                                                border: '1px solid rgba(0,0,0,0.05)', 
+                                                color: '#666', 
+                                                cursor: 'pointer', 
+                                                padding: '4px',
+                                                borderRadius: '4px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                transition: 'all 0.2s'
+                                            }}
+                                            title="Editar detalles completos"
+                                        >
+                                            <Maximize2 size={14} />
+                                        </button>
+                                    </div>
+                                    <div style={{ fontSize: '0.65rem', color: '#666', marginTop: '2px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span>SKU: {product.sku || product.code || 'S/N'}</span>
                                     </div>
                                 </td>
                                 <td>

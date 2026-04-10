@@ -567,7 +567,7 @@
 .admin-table-container {
     background: #FFFFFF;
     border-radius: 1rem;
-    overflow: hidden;
+    overflow-x: auto;
     border: 1px solid #E5E7EB;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
