@@ -174,7 +174,7 @@ html {
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
+    overflow-x: clip;
 }
 
 body {
@@ -185,7 +185,7 @@ body {
     color: var(--color-text);
     background-color: var(--color-background);
     min-height: 100vh;
-    overflow-x: hidden;
+    overflow-x: clip;
 }
 
 /* === Typography === */
