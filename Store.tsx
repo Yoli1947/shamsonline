@@ -281,14 +281,19 @@ const Store: React.FC = () => {
 
                     const mappedChunk = mapProductsToUI(chunk);
                     setProducts(prev => {
-                        const prevIds = new Set(prev.map(p => p.id));
-                        const uniqueNew = mappedChunk.filter(p => !prevIds.has(p.id));
-                        if (uniqueNew.length === 0) return prev;
-                        
-                        // Si ya tenemos muchos productos cargados, append es mucho más ligero
-                        // que volver a ordenar toda la colección de 1000+ items.
-                        // La BD ya garantiza sort_order.
-                        return [...prev, ...uniqueNew];
+                        const prevMap = new Map(prev.map(p => [p.id, p]));
+                        let changed = false;
+                        const updated = prev.map(p => {
+                            const fresh = mappedChunk.find(x => x.id === p.id);
+                            if (fresh && (fresh.is_featured !== p.is_featured || fresh.sort_order !== p.sort_order)) {
+                                changed = true;
+                                return fresh;
+                            }
+                            return p;
+                        });
+                        const newOnes = mappedChunk.filter(p => !prevMap.has(p.id));
+                        if (newOnes.length > 0) { changed = true; updated.push(...newOnes); }
+                        return changed ? updated : prev;
                     });
 
                     currentOffset += CHUNK_SIZE;
