@@ -403,7 +403,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     {renderInput('dni', '30123456', 'DNI', 'off')}
-                                    {renderInput('cuit', '20-30123456-7', 'CUIT', 'off', 'text', false)}
+                                    {renderInput('cuit', '20-30123456-7', 'CUIT (Opcional)', 'off', 'text', false)}
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
