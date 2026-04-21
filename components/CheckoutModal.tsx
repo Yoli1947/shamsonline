@@ -40,6 +40,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
             postalCode: saved.postalCode || '',
             dni: saved.dni || '',
             cuit: saved.cuit || '',
+            company: saved.company || '',
             floor: saved.floor || '',
             apartment: saved.apartment || '',
             shippingMethod: 'envio',
@@ -397,6 +398,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                     {renderInput('firstName', 'Juan', 'Nombre', 'given-name')}
                                     {renderInput('lastName', 'Pérez', 'Apellido', 'family-name')}
                                 </div>
+                                {renderInput('company', 'Ej: Mi Empresa S.A.', 'Nombre de la empresa (Opcional)', 'organization', 'text', false)}
                                 <div className="grid grid-cols-2 gap-4">
                                     {renderInput('email', 'juan@email.com', 'Correo electrónico', 'email', 'email')}
                                     {renderInput('phone', '341-1234567', 'Teléfono', 'tel')}
