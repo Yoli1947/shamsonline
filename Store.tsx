@@ -631,7 +631,46 @@ const Store: React.FC = () => {
                     ? 'Envío: *GRATIS* ✅'
                     : `Envío: *$${(order.shipping_cost || 0).toLocaleString('es-AR')}*`);
 
-            if (formData.paymentMethod === 'mercadopago') {
+            if (formData.paymentMethod === 'nave') {
+                // Pago con Nave (Naranja X / Banco Galicia)
+                const functionsUrl = import.meta.env.VITE_SUPABASE_FUNCTIONS_URL;
+                const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+                const res = await fetch(`${functionsUrl}/create-nave-preference`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': supabaseAnonKey,
+                        'Authorization': `Bearer ${supabaseAnonKey}`,
+                    },
+                    body: JSON.stringify({
+                        order_id: order.id,
+                        order_number: order.order_number,
+                        customer: {
+                            firstName: formData.firstName,
+                            lastName: formData.lastName,
+                            email: formData.email,
+                            phone: formData.phone,
+                            dni: formData.dni,
+                        },
+                        total: order.total,
+                        items: orderItems,
+                    }),
+                });
+
+                let naveData: any = {};
+                try { naveData = await res.json(); } catch { throw new Error(`Error HTTP ${res.status}: respuesta inválida del servidor`); }
+                if (!naveData.checkout_url) {
+                    throw new Error(naveData.error || `Error Nave ${res.status}`);
+                }
+
+                decrementLocalStock(orderItems);
+                setCart([]);
+                setIsCheckoutOpen(false);
+                localStorage.removeItem('shams_products_v14');
+                localStorage.removeItem('shams_promo_10');
+                window.location.href = naveData.checkout_url;
+
+            } else if (formData.paymentMethod === 'mercadopago' || formData.paymentMethod === 'mercadopago_saldo') {
                 // Crear preferencia de Mercado Pago y redirigir
                 const functionsUrl = import.meta.env.VITE_SUPABASE_FUNCTIONS_URL;
 

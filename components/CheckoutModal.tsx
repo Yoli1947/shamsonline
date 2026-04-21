@@ -584,8 +584,9 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                     {[
                                         { id: 'transferencia', label: `${transferDiscount}% OFF — Transferencia / Depósito bancario`, desc: `Realizá tu pago por transferencia y obtenés un ${transferDiscount}% de descuento. Usá el número de pedido como referencia.` },
                                         { id: 'efectivo', label: `${transferDiscount}% OFF — Efectivo en sucursal`, desc: `Abonás en el local al retirar tu pedido y obtenés un ${transferDiscount}% de descuento.` },
-                                        { id: 'mercadopago_saldo', label: 'Mercado Pago — Saldo o Tarjetas Guardadas', desc: null, mpOption: 'saldo' },
-                                        { id: 'mercadopago', label: 'Mercado Pago — Tarjeta de Crédito o Débito', desc: null, mpOption: 'tarjeta' },
+                                        { id: 'mercadopago_saldo', label: 'Mercado Pago — Saldo o Tarjetas Guardadas', desc: null },
+                                        { id: 'mercadopago', label: 'Mercado Pago — Tarjeta de Crédito o Débito', desc: null },
+                                        { id: 'nave', label: 'Nave (Naranja X / Galicia) — Tarjeta de Crédito o Débito', desc: 'Pagá con tu tarjeta a través de Nave, la plataforma de pagos de Banco Galicia y NaranjaX.' },
                                     ].map(method => {
                                         const isSelected = formData.paymentMethod === method.id;
                                         return (
