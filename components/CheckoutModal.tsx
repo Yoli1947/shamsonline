@@ -308,10 +308,12 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
         }
     };
 
-    // Helper para input con validación
+    // Helper para input con validación — estilo WooCommerce (label visible arriba)
     const renderInput = (name: keyof typeof formData, placeholder: string, label: string, autoComplete: string, type: string = "text", required: boolean = true) => (
         <div className="space-y-1">
-            <label htmlFor={name} className="sr-only">{label}</label>
+            <label htmlFor={name} className="block text-[11px] font-semibold text-[#333] uppercase tracking-wider">
+                {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+            </label>
             <div className="relative">
                 <input
                     id={name}
@@ -320,331 +322,303 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                     autoComplete={autoComplete}
                     required={required}
                     placeholder={placeholder}
-                    className={`w-full bg-[#f5f5f5] text-black rounded-none p-4 outline-none transition-all border ${errors[name] && touched[name]
+                    className={`w-full bg-white text-black p-3 outline-none transition-all border text-sm ${errors[name] && touched[name]
                         ? 'border-red-400'
                         : touched[name] && !errors[name] && formData[name]
                             ? 'border-black'
-                            : 'border-[#e0e0e0] focus:border-black'
+                            : 'border-[#ccc] focus:border-black'
                         }`}
                     value={formData[name]}
                     onChange={handleChange}
                     onBlur={handleBlur}
                 />
-                {/* Indicador visual de estado */}
                 {touched[name] && (
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                         {errors[name] ? (
                             <span className="text-red-500 text-xs font-bold">!</span>
                         ) : formData[name] ? (
-                            <span className="text-black text-xs font-bold">✓</span>
+                            <span className="text-green-600 text-xs font-bold">✓</span>
                         ) : null}
                     </div>
                 )}
             </div>
             {errors[name] && touched[name] && (
-                <p className="text-red-500 text-[10px] pl-2 font-medium tracking-wide animate-in slide-in-from-left-1">{errors[name]}</p>
+                <p className="text-red-500 text-[10px] font-medium">{errors[name]}</p>
             )}
         </div>
     );
 
+    const PROVINCES = ['Buenos Aires','CABA','Catamarca','Chaco','Chubut','Córdoba','Corrientes','Entre Ríos','Formosa','Jujuy','La Pampa','La Rioja','Mendoza','Misiones','Neuquén','Río Negro','Salta','San Juan','San Luis','Santa Cruz','Santa Fe','Santiago del Estero','Tierra del Fuego','Tucumán'];
+
+    // Calcular totales
+    const promoFactor = effectiveHasPromo ? 0.9 : 1;
+    const paymentDiscountFactor = (formData.paymentMethod === 'transferencia' || formData.paymentMethod === 'efectivo') ? (1 - transferDiscount / 100) : 1;
+    const shipping = formData.shippingMethod === 'retiro' ? 0 : (shippingQuote?.cost ?? 0);
+    const subtotal = total;
+    const afterDiscounts = Math.round(subtotal * promoFactor * paymentDiscountFactor);
+    const gcDiscount = giftCard ? giftCard.amountToApply : 0;
+    const finalTotal = Math.max(0, afterDiscounts + shipping - gcDiscount);
+    const paymentDesc = formData.paymentMethod === 'transferencia'
+        ? `${transferDiscount}% OFF - Transferencia / Depósito bancario`
+        : formData.paymentMethod === 'efectivo'
+        ? `${transferDiscount}% OFF - Efectivo en sucursal`
+        : null;
+
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-            <div className="absolute inset-0 backdrop-blur-sm" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={onClose} />
-            <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-none p-8 shadow-2xl animate-in fade-in zoom-in duration-300" style={{ backgroundColor: '#ffffff', border: '1px solid #e0e0e0' }}>
-                <button onClick={onClose} className="absolute top-6 right-6 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">
-                    <X size={24} />
-                </button>
-
-                <div className="mb-8">
-                    <h2 className="text-2xl font-black text-[var(--color-text)] uppercase tracking-widest">Finalizar Compra</h2>
-                    {hasPromo && (
-                        <div className="mt-4 flex items-center gap-4 p-4 border border-black bg-black/5 animate-in slide-in-from-top-2">
-                             <div className="flex-shrink-0 w-10 h-10 bg-black flex items-center justify-center text-white">
-                                <span className="text-lg">🎉</span>
-                             </div>
-                             <div className="flex flex-col">
-                                <span className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Beneficio Shams APLICADO</span>
-                                <span className="text-[9px] font-bold text-[#666] uppercase tracking-widest">10% OFF EXTRA EN TU PRIMERA COMPRA</span>
-                             </div>
-                        </div>
-                    )}
-                </div>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        {renderInput('firstName', 'Nombre (Ej: Juan)', 'Nombre', 'given-name')}
-                        {renderInput('lastName', 'Apellido (Ej: Perez)', 'Apellido', 'family-name')}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        {renderInput('phone', 'Teléfono (Ej: 341-1234567)', 'Teléfono', 'tel')}
-                        {renderInput('dni', 'DNI (Ej: 30123456)', 'DNI', 'off')}
-                    </div>
-
-                    {renderInput('email', 'Email (Ej: juan.perez@email.com)', 'Email', 'email', 'email')}
-
-
-                    {/* SELECCIÓN DE MÉTODO DE ENVÍO */}
-                    <div className="space-y-3">
-                        <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Forma de Envío</label>
-                        <div className="grid grid-cols-2 gap-3">
-                            <button
-                                type="button"
-                                onClick={() => setFormData({ ...formData, shippingMethod: 'envio' })}
-                                className={`p-4 rounded-none border text-left transition-all ${formData.shippingMethod === 'envio'
-                                    ? 'border-black bg-black/5 text-black'
-                                    : 'border-[#e0e0e0] bg-[#f5f5f5] text-[#666] hover:bg-[#eeeeee]'
-                                    }`}
-                            >
-                                <span className="block text-xs font-bold uppercase tracking-wider mb-1">Envío a Domicilio</span>
-                                <span className="text-[10px] opacity-70 block">Correo Argentino</span>
-                                <span className="text-[10px] opacity-50">5 a 10 días hábiles</span>
-                            </button>
-                             <button
-                                type="button"
-                                onClick={() => setFormData({ ...formData, shippingMethod: 'retiro' })}
-                                className={`p-4 rounded-none border text-left transition-all relative overflow-hidden ${formData.shippingMethod === 'retiro'
-                                    ? 'border-black bg-black/5 text-black'
-                                    : 'border-[#e0e0e0] bg-[#f5f5f5] text-[#666] hover:bg-[#eeeeee]'
-                                    }`}
-                            >
-                                <span className="block text-xs font-bold uppercase tracking-wider mb-1">Retiro en Local</span>
-                                <span className="text-[10px] opacity-70 block mb-1">Pasá a buscarlo por nuestros locales</span>
-                                <span className="text-[10px] font-black text-black uppercase tracking-widest inline-block mt-1">
-                                    GRATIS
-                                </span>
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* CAMPOS DE DIRECCIÓN (SOLO SI ES ENVÍO) */}
-                    {formData.shippingMethod === 'envio' ? (
-                        <div className="space-y-4 animate-in fade-in slide-in-from-top-4">
-                            <div className="grid grid-cols-3 gap-4">
-                                <div className="col-span-2">
-                                    {renderInput('address', 'Calle (Ej: Av. Santa Fe)', 'Calle', 'street-address')}
-                                </div>
-                                {renderInput('addressNumber', 'N°', 'Número', 'off')}
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                {renderInput('floor', 'Piso (Opcional)', 'Piso', 'off', 'text', false)}
-                                {renderInput('apartment', 'Depto (Opcional)', 'Departamento', 'off', 'text', false)}
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                {renderInput('city', 'Ciudad (Ej: Rosario)', 'Ciudad', 'address-level2')}
-                                <div className="grid grid-cols-2 gap-2">
-                                    {renderInput('province', 'Provincia', 'Provincia', 'address-level1')}
-                                    {renderInput('postalCode', 'CP', 'CP', 'postal-code')}
-                                </div>
-                            </div>
-
-                             {/* Cotización Correo Argentino */}
-                            <div className="flex items-start gap-3 bg-[var(--color-background-alt)] border border-[var(--color-border)] rounded-none p-4">
-                                <span className="text-lg mt-0.5">📦</span>
-                                <div className="space-y-1 flex-1">
-                                    <p className="text-[11px] font-bold text-[var(--color-text)] uppercase tracking-wider">Envío por Correo Argentino</p>
-                                    {shippingQuoteLoading && (
-                                        <p className="text-[10px] text-zinc-400 flex items-center gap-1">
-                                            <span className="inline-block w-3 h-3 border border-zinc-400 border-t-transparent rounded-none animate-spin" />
-                                            Calculando costo de envío...
-                                        </p>
-                                    )}
-                                     {!shippingQuoteLoading && shippingQuote && (
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <span className="text-[13px] font-black text-black">${shippingQuote.cost.toLocaleString()}</span>
-                                            <span className="text-[10px] text-[#666]">costo de envío</span>
-                                            {shippingQuote.days && (
-                                                <span className="text-[9px] text-[#666] bg-[#f0f0f0] px-2 py-0.5 rounded-none">{shippingQuote.days} días hábiles</span>
-                                            )}
-                                        </div>
-                                    )}
-                                    {!shippingQuoteLoading && !shippingQuote && formData.postalCode.length >= 4 && (
-                                        <p className="text-[10px] text-zinc-500">No se pudo obtener el costo. Te contactaremos.</p>
-                                    )}
-                                    {!shippingQuoteLoading && formData.postalCode.length < 4 && (
-                                        <p className="text-[10px] text-zinc-500">Ingresá tu código postal para ver el costo de envío.</p>
-                                    )}
-                                    <p className="text-[10px] text-zinc-500 mt-1">Te enviamos el número de seguimiento por WhatsApp o email.</p>
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                         /* SELECCIÓN DE PUNTO DE RETIRO */
-                        <div className="space-y-3 animate-in fade-in slide-in-from-top-4">
-                            <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Punto de Retiro</label>
-                            <div className="space-y-3">
-                                {PICKUP_LOCATIONS.map(location => {
-                                    const isSelected = formData.pickupLocationId === location.id;
-                                    return (
-                                        <div
-                                            key={location.id}
-                                             onClick={() => setFormData({ ...formData, pickupLocationId: location.id })}
-                                            className={`p-4 rounded-none border transition-all cursor-pointer ${isSelected
-                                                ? 'border-black bg-black/5 text-black'
-                                                : 'border-[#e0e0e0] bg-[#f5f5f5] hover:bg-[#eeeeee] text-[#666]'
-                                                }`}
-                                        >
-                                            <div className="flex items-start gap-3">
-                                                {/* Indicador seleccionado */}
-                                                 <div className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-none border-2 flex items-center justify-center transition-all ${isSelected
-                                                    ? 'border-black bg-black'
-                                                    : 'border-[#e0e0e0] bg-transparent'
-                                                    }`}>
-                                                    {isSelected && (
-                                                        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                                                            <path d="M1 4L3.5 6.5L9 1" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                        </svg>
-                                                    )}
-                                                </div>
-                                                <div className="flex-1">
-                                                     <div className="flex justify-between items-start">
-                                                        <div>
-                                                            <h4 className={`text-sm font-bold uppercase tracking-wider mb-1 flex items-center gap-2 transition-colors ${isSelected ? 'text-black' : 'text-[#666]'}`}>
-                                                                 <MapPin size={14} /> {location.name}
-                                                            </h4>
-                                                            <p className="text-xs text-[var(--color-text)] font-medium mb-1">{location.address}</p>
-                                                            <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wide">{location.schedule}</p>
-                                                        </div>
-                                                         <a
-                                                            href={location.mapUrl}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            onClick={e => e.stopPropagation()}
-                                                            className="flex items-center gap-1 text-[10px] font-bold text-[#666] hover:text-black uppercase tracking-widest border border-[#e0e0e0] px-3 py-1.5 rounded-none hover:bg-[#f0f0f0] transition-all"
-                                                        >
-                                                            Ver Mapa <ExternalLink size={10} />
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
-
-                     {/* SELECCIÓN DE MÉTODO DE PAGO */}
-                    <div className="space-y-3 pt-4 border-t border-[var(--color-border)]">
-                        <label className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Medio de Pago</label>
-                        <div className="grid grid-cols-3 gap-3">
-                            {[
-                                { id: 'mercadopago', label: 'Mercado Pago', desc: 'Tarjetas / Deb.', discount: false },
-                                { id: 'transferencia', label: 'Transferencia', desc: 'Depósito / CBU', discount: true },
-                                { id: 'efectivo', label: 'Efectivo', desc: 'En Sucursal', discount: true }
-                            ].map(method => {
-                                const isSelected = formData.paymentMethod === method.id;
-                                return (
-                                    <button
-                                        key={method.id}
-                                        type="button"
-                                        onClick={() => setFormData({ ...formData, paymentMethod: method.id })}
-                                        className={`p-4 rounded-none border-2 text-left transition-all relative overflow-hidden flex flex-col justify-between h-28 group ${isSelected
-                                            ? 'border-black bg-black text-white'
-                                            : 'border-[#e0e0e0] bg-white text-black hover:border-black'
-                                            }`}
-                                    >
-                                        <div>
-                                            <span className={`block text-[11px] font-black uppercase tracking-wider mb-1 ${isSelected ? 'text-white' : 'text-black'}`}>
-                                                {method.label}
-                                            </span>
-                                            <span className={`block text-[8px] uppercase tracking-widest opacity-60 font-bold ${isSelected ? 'text-white' : 'text-[#666]'}`}>
-                                                {method.desc}
-                                            </span>
-                                        </div>
-                                        {method.discount && (
-                                            <div className={`mt-auto inline-block text-center py-1 text-[9px] font-black uppercase tracking-widest transition-colors ${isSelected ? 'bg-white text-black' : 'bg-black text-white'}`}>
-                                                -{transferDiscount}% OFF
-                                            </div>
-                                        )}
-                                        {isSelected && (
-                                            <div className="absolute top-1 right-1">
-                                                <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                                            </div>
-                                        )}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    {/* Advertencia descuento ya usado */}
-                    {promoAlreadyUsed && (
-                        <div className="mt-4 p-3 rounded-none bg-red-500/10 border border-red-500/30 text-center">
-                            <p className="text-xs font-bold text-red-400">
-                                ❌ El descuento de primera compra ya fue utilizado con estos datos.
-                            </p>
-                        </div>
-                    )}
-                    {checkingPromo && hasPromo && (
-                        <div className="mt-2 text-center text-[10px] text-zinc-500">Verificando beneficio...</div>
-                    )}
-
-                    {/* GIFT CARD */}
-                    <div className="pt-4 border-t border-[#e0e0e0]">
-                        {(() => {
-                            const promoFactor = effectiveHasPromo ? 0.9 : 1;
-                            const shipping = formData.shippingMethod === 'retiro' ? 0 : (shippingQuote?.cost ?? 0);
-                            const totalAfterPromo = Math.round(total * promoFactor) + shipping;
-                            return (
-                                <GiftCardInput
-                                    orderTotal={totalAfterPromo}
-                                    applied={giftCard}
-                                    onApply={(data) => setGiftCard(data)}
-                                    onRemove={() => setGiftCard(null)}
-                                />
-                            );
-                        })()}
-                    </div>
-
-                     <div className="pt-6 border-t border-[var(--color-border)] flex justify-between items-center mt-6">
-                        {(() => {
-                            const promoFactor = effectiveHasPromo ? 0.9 : 1;
-                            const paymentDiscountFactor = (formData.paymentMethod === 'transferencia' || formData.paymentMethod === 'efectivo')
-                                ? (1 - (transferDiscount / 100))
-                                : 1;
-                                
-                            const shipping = formData.shippingMethod === 'retiro' ? 0 : (shippingQuote?.cost ?? 0);
-                            const afterPromo = Math.round(total * promoFactor * paymentDiscountFactor) + shipping;
-                            const originalTotal = total + shipping;
-                            const gcDiscount = giftCard ? giftCard.amountToApply : 0;
-                            const finalTotal = Math.max(0, afterPromo - gcDiscount);
-                            const isDiscounted = effectiveHasPromo || gcDiscount > 0 || paymentDiscountFactor < 1;
-
-                            return (
-                                 <div className="flex flex-col">
-                                    <span className="text-[10px] uppercase tracking-widest text-[#666]">Total a Pagar</span>
-                                     <div className="flex items-baseline gap-2">
-                                        {isDiscounted && (
-                                            <span className="text-sm text-[var(--color-text-muted)] tracking-wider line-through">${originalTotal.toLocaleString()}</span>
-                                        )}
-                                        <span className="text-2xl font-bold text-[var(--color-text)]">${finalTotal.toLocaleString()}</span>
-                                        {effectiveHasPromo && <span className="text-xs text-black font-black">-10%</span>}
-                                        {paymentDiscountFactor < 1 && <span className="text-xs text-black font-black">-{transferDiscount}%</span>}
-                                        {gcDiscount > 0 && <span className="text-xs text-black font-black">-GC</span>}
-                                    </div>
-                                      <span className="text-[10px] text-[var(--color-text-muted)]">
-                                        {formData.shippingMethod === 'retiro'
-                                            ? 'Retiro sin cargo'
-                                            : shippingQuote
-                                                ? `+ Envío Correo Argentino $${shippingQuote.cost.toLocaleString()}`
-                                                : formData.postalCode.length >= 4
-                                                    ? 'Calculando envío...'
-                                                    : '+ Envío (ingresá tu CP)'}
-                                    </span>
-                                </div>
-                            );
-                        })()}
-                         <button type="submit" disabled={loading} className="bg-black text-white font-black uppercase tracking-widest px-8 py-4 rounded-none hover:bg-zinc-800 transition-all flex items-center gap-2 disabled:opacity-50">
-                            {loading ? <Loader className="animate-spin" size={20} /> : 'Confirmar Pedido'}
+        <div className="fixed inset-0 z-[200] overflow-y-auto" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+            <div className="min-h-full flex items-start justify-center py-8 px-4">
+                <div className="relative w-full max-w-5xl bg-white shadow-2xl animate-in fade-in zoom-in duration-300">
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-8 py-5 border-b border-[#e0e0e0]">
+                        <h2 className="text-xl font-black uppercase tracking-widest text-black">Finalizar Compra</h2>
+                        <button onClick={onClose} className="text-[#999] hover:text-black transition-colors">
+                            <X size={22} />
                         </button>
                     </div>
-                </form>
+
+                    {hasPromo && (
+                        <div className="mx-8 mt-4 flex items-center gap-3 p-3 border border-black bg-black/5">
+                            <span className="text-base">🎉</span>
+                            <span className="text-[11px] font-black uppercase tracking-widest text-black">10% OFF EXTRA EN TU PRIMERA COMPRA — BENEFICIO APLICADO</span>
+                        </div>
+                    )}
+
+                    <form onSubmit={handleSubmit}>
+                        <div className="flex flex-col lg:flex-row">
+
+                            {/* ── COLUMNA IZQUIERDA: Formulario ── */}
+                            <div className="flex-1 px-8 py-6 space-y-5 border-r border-[#e0e0e0]">
+
+                                {/* Detalles personales */}
+                                <h3 className="text-sm font-black uppercase tracking-widest text-black border-b border-[#e0e0e0] pb-2">Detalles personales</h3>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    {renderInput('firstName', 'Juan', 'Nombre', 'given-name')}
+                                    {renderInput('lastName', 'Pérez', 'Apellido', 'family-name')}
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {renderInput('email', 'juan@email.com', 'Correo electrónico', 'email', 'email')}
+                                    {renderInput('phone', '341-1234567', 'Teléfono', 'tel')}
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {renderInput('dni', '30123456', 'DNI', 'off')}
+                                    <div className="space-y-1">
+                                        <label className="block text-[11px] font-semibold text-[#333] uppercase tracking-wider">País / Región</label>
+                                        <div className="w-full border border-[#ccc] p-3 bg-[#f9f9f9] text-sm text-[#555]">Argentina</div>
+                                    </div>
+                                </div>
+
+                                {/* Envío */}
+                                <h3 className="text-sm font-black uppercase tracking-widest text-black border-b border-[#e0e0e0] pb-2 pt-2">Envío</h3>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button type="button" onClick={() => setFormData({ ...formData, shippingMethod: 'envio' })}
+                                        className={`p-3 border text-left transition-all flex items-start gap-2 ${formData.shippingMethod === 'envio' ? 'border-black bg-black/5' : 'border-[#ccc] hover:border-black'}`}>
+                                        <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${formData.shippingMethod === 'envio' ? 'border-black' : 'border-[#ccc]'}`}>
+                                            {formData.shippingMethod === 'envio' && <div className="w-2 h-2 rounded-full bg-black" />}
+                                        </div>
+                                        <div>
+                                            <span className="block text-xs font-bold text-black">Envío a domicilio</span>
+                                            <span className="text-[10px] text-[#666]">Correo Argentino · 5-10 días hábiles</span>
+                                        </div>
+                                    </button>
+                                    <button type="button" onClick={() => setFormData({ ...formData, shippingMethod: 'retiro' })}
+                                        className={`p-3 border text-left transition-all flex items-start gap-2 ${formData.shippingMethod === 'retiro' ? 'border-black bg-black/5' : 'border-[#ccc] hover:border-black'}`}>
+                                        <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${formData.shippingMethod === 'retiro' ? 'border-black' : 'border-[#ccc]'}`}>
+                                            {formData.shippingMethod === 'retiro' && <div className="w-2 h-2 rounded-full bg-black" />}
+                                        </div>
+                                        <div>
+                                            <span className="block text-xs font-bold text-black">Retiro en local</span>
+                                            <span className="text-[10px] text-[#666]">Pasá a buscarlo · </span>
+                                            <span className="text-[10px] font-black text-black">GRATIS</span>
+                                        </div>
+                                    </button>
+                                </div>
+
+                                {/* Campos de dirección */}
+                                {formData.shippingMethod === 'envio' && (
+                                    <div className="space-y-4 animate-in fade-in">
+                                        <div className="grid grid-cols-3 gap-3">
+                                            <div className="col-span-2">{renderInput('address', 'Av. Santa Fe', 'Calle', 'street-address')}</div>
+                                            {renderInput('addressNumber', '1234', 'Número', 'off')}
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {renderInput('floor', 'Ej: 3', 'Piso', 'off', 'text', false)}
+                                            {renderInput('apartment', 'Ej: B', 'Departamento', 'off', 'text', false)}
+                                        </div>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            {renderInput('city', 'Rosario', 'Ciudad / Población', 'address-level2')}
+                                            <div className="space-y-1">
+                                                <label className="block text-[11px] font-semibold text-[#333] uppercase tracking-wider">Provincia <span className="text-red-500">*</span></label>
+                                                <select
+                                                    name="province"
+                                                    required
+                                                    value={formData.province}
+                                                    onChange={e => setFormData(prev => ({ ...prev, province: e.target.value }))}
+                                                    className="w-full border border-[#ccc] p-3 text-sm focus:border-black outline-none bg-white"
+                                                >
+                                                    <option value="">Seleccioná...</option>
+                                                    {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
+                                                </select>
+                                            </div>
+                                            {renderInput('postalCode', '2000', 'Código Postal', 'postal-code')}
+                                        </div>
+                                        {/* Cotización Correo */}
+                                        <div className="flex items-start gap-3 bg-[#f9f9f9] border border-[#e0e0e0] p-3">
+                                            <span className="text-base">📦</span>
+                                            <div className="flex-1 text-xs">
+                                                <p className="font-bold text-black">Costo de envío — Correo Argentino</p>
+                                                {shippingQuoteLoading && <p className="text-[#888] mt-1">Calculando...</p>}
+                                                {!shippingQuoteLoading && shippingQuote && (
+                                                    <p className="mt-1 font-black text-black">${shippingQuote.cost.toLocaleString()} <span className="font-normal text-[#666]">· {shippingQuote.days} días hábiles</span></p>
+                                                )}
+                                                {!shippingQuoteLoading && !shippingQuote && formData.postalCode.length < 4 && (
+                                                    <p className="text-[#888] mt-1">Ingresá tu código postal para calcular el envío.</p>
+                                                )}
+                                                {!shippingQuoteLoading && !shippingQuote && formData.postalCode.length >= 4 && (
+                                                    <p className="text-[#888] mt-1">No se pudo calcular. Te contactaremos.</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Puntos de retiro */}
+                                {formData.shippingMethod === 'retiro' && (
+                                    <div className="space-y-2 animate-in fade-in">
+                                        <p className="text-[11px] font-semibold text-[#333] uppercase tracking-wider">Seleccioná un local</p>
+                                        {PICKUP_LOCATIONS.map(location => {
+                                            const isSelected = formData.pickupLocationId === location.id;
+                                            return (
+                                                <div key={location.id} onClick={() => setFormData({ ...formData, pickupLocationId: location.id })}
+                                                    className={`p-3 border cursor-pointer transition-all flex items-start gap-3 ${isSelected ? 'border-black bg-black/5' : 'border-[#ccc] hover:border-black'}`}>
+                                                    <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${isSelected ? 'border-black' : 'border-[#ccc]'}`}>
+                                                        {isSelected && <div className="w-2 h-2 rounded-full bg-black" />}
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <div className="flex justify-between items-start">
+                                                            <div>
+                                                                <p className="text-xs font-bold text-black flex items-center gap-1"><MapPin size={11} />{location.name}</p>
+                                                                <p className="text-[11px] text-[#555] mt-0.5">{location.address}</p>
+                                                                <p className="text-[10px] text-[#888]">{location.schedule}</p>
+                                                            </div>
+                                                            <a href={location.mapUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+                                                                className="text-[10px] text-[#666] hover:text-black border border-[#ccc] px-2 py-1 flex items-center gap-1 hover:border-black transition-all">
+                                                                Ver mapa <ExternalLink size={9} />
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* ── COLUMNA DERECHA: Resumen + Pago ── */}
+                            <div className="w-full lg:w-[380px] px-8 py-6 space-y-5 bg-[#f9f9f9]">
+
+                                {/* Tu pedido */}
+                                <h3 className="text-sm font-black uppercase tracking-widest text-black border-b border-[#e0e0e0] pb-2">Tu pedido</h3>
+                                <table className="w-full text-xs border border-[#e0e0e0]">
+                                    <thead>
+                                        <tr className="border-b border-[#e0e0e0]">
+                                            <th className="text-left p-2 font-bold text-[#333]">Producto</th>
+                                            <th className="text-right p-2 font-bold text-[#333]">Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr className="border-b border-[#e0e0e0]">
+                                            <td className="p-2 text-[#555]">Subtotal productos</td>
+                                            <td className="p-2 text-right font-semibold">${subtotal.toLocaleString()}</td>
+                                        </tr>
+                                        <tr className="border-b border-[#e0e0e0]">
+                                            <td className="p-2 text-[#555]">Envío</td>
+                                            <td className="p-2 text-right font-semibold">
+                                                {formData.shippingMethod === 'retiro' ? <span className="text-green-600 font-bold">GRATIS</span>
+                                                    : shippingQuote ? `$${shippingQuote.cost.toLocaleString()}`
+                                                    : <span className="text-[#888] italic">Ingresá tu dirección</span>}
+                                            </td>
+                                        </tr>
+                                        {paymentDesc && (
+                                            <tr className="border-b border-[#e0e0e0]">
+                                                <td className="p-2 text-[#555]">{paymentDesc}</td>
+                                                <td className="p-2 text-right font-semibold text-green-700">-${(subtotal - afterDiscounts).toLocaleString()}</td>
+                                            </tr>
+                                        )}
+                                        {effectiveHasPromo && (
+                                            <tr className="border-b border-[#e0e0e0]">
+                                                <td className="p-2 text-[#555]">10% OFF Primera compra</td>
+                                                <td className="p-2 text-right font-semibold text-green-700">-${Math.round(subtotal * 0.1).toLocaleString()}</td>
+                                            </tr>
+                                        )}
+                                        {gcDiscount > 0 && (
+                                            <tr className="border-b border-[#e0e0e0]">
+                                                <td className="p-2 text-[#555]">Gift Card</td>
+                                                <td className="p-2 text-right font-semibold text-green-700">-${gcDiscount.toLocaleString()}</td>
+                                            </tr>
+                                        )}
+                                        <tr className="bg-white">
+                                            <td className="p-2 font-black text-black text-sm">TOTAL</td>
+                                            <td className="p-2 text-right font-black text-black text-sm">${finalTotal.toLocaleString()}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                {/* Gift Card */}
+                                <div>
+                                    {(() => {
+                                        const totalAfterPromo = Math.round(subtotal * promoFactor) + shipping;
+                                        return <GiftCardInput orderTotal={totalAfterPromo} applied={giftCard} onApply={setGiftCard} onRemove={() => setGiftCard(null)} />;
+                                    })()}
+                                </div>
+
+                                {/* Métodos de pago */}
+                                <h3 className="text-sm font-black uppercase tracking-widest text-black border-b border-[#e0e0e0] pb-2">Medio de pago</h3>
+                                <div className="space-y-2">
+                                    {[
+                                        { id: 'transferencia', label: `${transferDiscount}% OFF — Transferencia / Depósito bancario`, desc: `Realizá tu pago por transferencia y obtenés un ${transferDiscount}% de descuento. Usá el número de pedido como referencia.` },
+                                        { id: 'efectivo', label: `${transferDiscount}% OFF — Efectivo en sucursal`, desc: `Abonás en el local al retirar tu pedido y obtenés un ${transferDiscount}% de descuento.` },
+                                        { id: 'mercadopago_saldo', label: 'Mercado Pago — Saldo o Tarjetas Guardadas', desc: null, mpOption: 'saldo' },
+                                        { id: 'mercadopago', label: 'Mercado Pago — Tarjeta de Crédito o Débito', desc: null, mpOption: 'tarjeta' },
+                                    ].map(method => {
+                                        const isSelected = formData.paymentMethod === method.id;
+                                        return (
+                                            <div key={method.id}>
+                                                <label className={`flex items-start gap-3 p-3 border cursor-pointer transition-all ${isSelected ? 'border-black bg-white' : 'border-[#ccc] hover:border-black bg-white'}`}
+                                                    onClick={() => setFormData({ ...formData, paymentMethod: method.id })}>
+                                                    <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${isSelected ? 'border-black' : 'border-[#ccc]'}`}>
+                                                        {isSelected && <div className="w-2 h-2 rounded-full bg-black" />}
+                                                    </div>
+                                                    <span className="text-xs font-semibold text-black">{method.label}</span>
+                                                </label>
+                                                {isSelected && method.desc && (
+                                                    <div className="border border-t-0 border-[#ccc] bg-[#f0f0f0] p-3 text-[11px] text-[#555]">{method.desc}</div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                {promoAlreadyUsed && (
+                                    <div className="p-3 bg-red-50 border border-red-300 text-xs text-red-600 font-bold">
+                                        ❌ El descuento de primera compra ya fue utilizado con estos datos.
+                                    </div>
+                                )}
+                                {checkingPromo && hasPromo && (
+                                    <p className="text-[10px] text-[#888]">Verificando beneficio...</p>
+                                )}
+
+                                <button type="submit" disabled={loading}
+                                    className="w-full bg-black text-white font-black uppercase tracking-widest py-4 hover:bg-zinc-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-sm">
+                                    {loading ? <Loader className="animate-spin" size={18} /> : 'Realizar el pedido'}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    )
+    );
 }
 
 export default CheckoutModal;
