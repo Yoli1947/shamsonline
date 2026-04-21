@@ -39,6 +39,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
             province: saved.province || '',
             postalCode: saved.postalCode || '',
             dni: saved.dni || '',
+            cuit: saved.cuit || '',
             floor: saved.floor || '',
             apartment: saved.apartment || '',
             shippingMethod: 'envio',
@@ -402,6 +403,9 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     {renderInput('dni', '30123456', 'DNI', 'off')}
+                                    {renderInput('cuit', '20-30123456-7', 'CUIT', 'off', 'text', false)}
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
                                         <label className="block text-[11px] font-semibold text-[#333] uppercase tracking-wider">País / Región</label>
                                         <div className="w-full border border-[#ccc] p-3 bg-[#f9f9f9] text-sm text-[#555]">Argentina</div>
