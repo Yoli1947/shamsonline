@@ -1366,15 +1366,13 @@ const Store: React.FC = () => {
                                         <div className="flex flex-col gap-1.5 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
                                             {availableCategories.filter(cat => {
                                                 if (!selectedGender) return true;
-                                                const c = cat.toUpperCase();
-                                                const hasHombre = c.includes('HOMBRE');
-                                                const hasMujer = c.includes('MUJER');
-                                                // Categorías que no pertenecen a ningún género
-                                                const soloMujer = ['CAMISAS/BLUSAS/TOP','VESTIDOS, FALDAS Y MONOS','SACOS'].map(x => x.toUpperCase());
-                                                const sinGenero = ['ACCESORIOS'].map(x => x.toUpperCase());
-                                                if (selectedGender === 'Hombre') return hasHombre || (!hasHombre && !hasMujer && !soloMujer.includes(c) && !sinGenero.includes(c));
-                                                if (selectedGender === 'Mujer') return hasMujer || (!hasHombre && !hasMujer && !sinGenero.includes(c));
-                                                return !hasHombre && !hasMujer;
+                                                // Solo mostrar categorías que tengan al menos un producto del género seleccionado
+                                                return products.some(p => {
+                                                    const catMatch = (p.category as any)?.name?.trim() === cat;
+                                                    if (!catMatch) return false;
+                                                    const g = selectedGender.toLowerCase();
+                                                    return p.features?.some((f: string) => f?.toLowerCase() === g);
+                                                });
                                             }).map(category => (
                                                 <button
                                                     key={category}
