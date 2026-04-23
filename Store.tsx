@@ -1368,7 +1368,7 @@ const Store: React.FC = () => {
                                                 if (!selectedGender) return true;
                                                 // Solo mostrar categorías que tengan al menos un producto del género seleccionado
                                                 return products.some(p => {
-                                                    const catMatch = (p.category as any)?.name?.trim() === cat;
+                                                    const catMatch = (p.category as any)?.trim() === cat;
                                                     if (!catMatch) return false;
                                                     const g = selectedGender.toLowerCase();
                                                     return p.features?.some((f: string) => f?.toLowerCase() === g);
