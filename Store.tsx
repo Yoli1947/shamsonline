@@ -1580,7 +1580,7 @@ const Store: React.FC = () => {
                                         <span className="text-[10px] font-medium tracking-[0.2em] text-[var(--color-text-muted)] group-hover:text-[var(--color-text)] transition-colors uppercase">Locales</span>
                                     </button>
 
-                                    <a href="https://instagram.com/shamsrosario" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group">
+                                    <a href="https://www.instagram.com/shams.storeonline/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group">
                                         <Instagram size={16} strokeWidth={1.5} className="text-[var(--color-text-muted)] group-hover:text-[#E4405F] transition-colors" />
                                         <span className="text-[10px] font-medium tracking-[0.2em] text-[var(--color-text-muted)] group-hover:text-[var(--color-text)] transition-colors uppercase">Instagram</span>
                                     </a>
