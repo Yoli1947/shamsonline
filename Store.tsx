@@ -350,6 +350,28 @@ const Store: React.FC = () => {
                         setLoading(false);
                         clearTimeout(timeout);
 
+                        // Actualizar is_featured desde la DB sin esperar el sync completo
+                        supabase
+                            .from('products')
+                            .select('id, is_featured')
+                            .eq('is_published', true)
+                            .then(({ data: featuredData }) => {
+                                if (!featuredData || !isMounted) return;
+                                const featuredSet = new Map(featuredData.map((p: any) => [p.id, p.is_featured]));
+                                setProducts(prev => {
+                                    let changed = false;
+                                    const updated = prev.map(p => {
+                                        const dbFeatured = featuredSet.get(p.id);
+                                        if (dbFeatured !== undefined && dbFeatured !== p.is_featured) {
+                                            changed = true;
+                                            return { ...p, is_featured: dbFeatured };
+                                        }
+                                        return p;
+                                    });
+                                    return changed ? updated : prev;
+                                });
+                            });
+
                         // Validar en background si el caché sigue vigente
                         if ((Date.now() - cachedTsNum) < CACHE_TTL) {
                             const lastSyncStr = await getLastSyncDate();
