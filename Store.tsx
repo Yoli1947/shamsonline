@@ -1105,7 +1105,7 @@ const Store: React.FC = () => {
 
                 {/* Collection Section */}
                 <section 
-                    className={`pb-32 px-0.5 md:px-12 max-w-screen-2xl mx-auto ${(selectedBrand || selectedGender || selectedCategory) ? 'pt-44 md:pt-52' : 'pt-4'}`} 
+                    className={`pb-32 px-0.5 md:px-12 max-w-screen-2xl mx-auto ${(selectedBrand || selectedGender || selectedCategory) ? 'pt-6 md:pt-8' : 'pt-4'}`}
                     id="new"
                     style={{ scrollMarginTop: '200px' }}
                 >
