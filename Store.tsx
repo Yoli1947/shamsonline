@@ -1389,38 +1389,62 @@ const Store: React.FC = () => {
                                             )}
                                         </div>
                                         <div className="flex flex-col gap-1.5 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                                            {availableCategories.filter(cat => {
-                                                if (!selectedGender) return true;
-                                                // Solo mostrar categorías que tengan al menos un producto del género seleccionado
-                                                return products.some(p => {
-                                                    const catMatch = (p.category as any)?.trim() === cat;
-                                                    if (!catMatch) return false;
-                                                    const g = selectedGender.toLowerCase();
-                                                    return p.features?.some((f: string) => f?.toLowerCase() === g);
-                                                });
-                                            }).map(category => (
-                                                <button
-                                                    key={category}
-                                                    onClick={() => {
-                                                        const newCat = selectedCategory === category ? '' : category;
-                                                        const params = new URLSearchParams(searchParams);
-                                                        if (newCat) params.set('categoria', newCat);
-                                                        else params.delete('categoria');
-                                                        navigate(`/?${params.toString()}`, { replace: true, preventScrollReset: true });
-                                                        setIsCategoryFilterOpen(false);
-                                                    }}
-                                                    className={`w-full px-4 py-2.5 flex items-center justify-between rounded-none text-[10px] font-black border transition-all uppercase tracking-[0.15em] group ${selectedCategory === category
-                                                        ? 'bg-black text-white border-black'
-                                                        : 'bg-black/5 text-[var(--color-text)] border-[var(--color-text)]/10 hover:border-black/30 hover:bg-black/10'
-                                                        }`}
-                                                >
-                                                    <span>{category}</span>
-                                                    {selectedCategory === category && <X size={12} />}
-                                                    {selectedCategory !== category && (
-                                                        <div className="w-1.5 h-1.5 rounded-none bg-black opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                    )}
-                                                </button>
-                                            ))}
+                                            {selectedCategory?.toLowerCase() === 'cafeteria' ? (
+                                                ['BIALETTI', 'STANLEY'].map(brand => {
+                                                    const isActive = selectedBrand?.toUpperCase() === brand;
+                                                    return (
+                                                        <button
+                                                            key={brand}
+                                                            onClick={() => {
+                                                                const params = new URLSearchParams(searchParams);
+                                                                if (isActive) params.delete('marca');
+                                                                else params.set('marca', brand);
+                                                                navigate(`/?${params.toString()}`, { replace: true, preventScrollReset: true });
+                                                                setIsCategoryFilterOpen(false);
+                                                            }}
+                                                            className={`w-full px-4 py-2.5 flex items-center justify-between rounded-none text-[10px] font-black border transition-all uppercase tracking-[0.15em] group ${isActive
+                                                                ? 'bg-black text-white border-black'
+                                                                : 'bg-black/5 text-[var(--color-text)] border-[var(--color-text)]/10 hover:border-black/30 hover:bg-black/10'
+                                                            }`}
+                                                        >
+                                                            <span>{brand}</span>
+                                                            {isActive ? <X size={12} /> : <div className="w-1.5 h-1.5 rounded-none bg-black opacity-0 group-hover:opacity-100 transition-opacity" />}
+                                                        </button>
+                                                    );
+                                                })
+                                            ) : (
+                                                availableCategories.filter(cat => {
+                                                    if (!selectedGender) return true;
+                                                    return products.some(p => {
+                                                        const catMatch = (p.category as any)?.trim() === cat;
+                                                        if (!catMatch) return false;
+                                                        const g = selectedGender.toLowerCase();
+                                                        return p.features?.some((f: string) => f?.toLowerCase() === g);
+                                                    });
+                                                }).map(category => (
+                                                    <button
+                                                        key={category}
+                                                        onClick={() => {
+                                                            const newCat = selectedCategory === category ? '' : category;
+                                                            const params = new URLSearchParams(searchParams);
+                                                            if (newCat) params.set('categoria', newCat);
+                                                            else params.delete('categoria');
+                                                            navigate(`/?${params.toString()}`, { replace: true, preventScrollReset: true });
+                                                            setIsCategoryFilterOpen(false);
+                                                        }}
+                                                        className={`w-full px-4 py-2.5 flex items-center justify-between rounded-none text-[10px] font-black border transition-all uppercase tracking-[0.15em] group ${selectedCategory === category
+                                                            ? 'bg-black text-white border-black'
+                                                            : 'bg-black/5 text-[var(--color-text)] border-[var(--color-text)]/10 hover:border-black/30 hover:bg-black/10'
+                                                            }`}
+                                                    >
+                                                        <span>{category}</span>
+                                                        {selectedCategory === category && <X size={12} />}
+                                                        {selectedCategory !== category && (
+                                                            <div className="w-1.5 h-1.5 rounded-none bg-black opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                        )}
+                                                    </button>
+                                                ))
+                                            )}
                                         </div>
                                     </div>
                                 )}
