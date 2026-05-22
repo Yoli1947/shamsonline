@@ -5,6 +5,15 @@ import { Product } from '../types';
 import { COLOR_MAP } from '../lib/constants';
 import { useSettings } from '../context/SettingsContext';
 
+const SUPABASE_URL = 'https://rsvcgduyogqljwzbohkz.supabase.co';
+function getOptimizedUrl(url: string, width = 600): string {
+  if (!url) return url;
+  if (url.includes(`${SUPABASE_URL}/storage/v1/object/public/`)) {
+    return url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/') + `?width=${width}&quality=75&format=webp`;
+  }
+  return url;
+}
+
 interface ProductCardProps {
   product: Product;
   onAddToCart: (p: Product) => void;
@@ -74,12 +83,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onOpenD
         }}
       >
         <img
-          src={images[hoverIndex]}
+          src={getOptimizedUrl(images[hoverIndex], 600)}
           alt={product.name}
           loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover object-top transition-all duration-700 group-hover:scale-110"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
+            const original = images[hoverIndex];
+            if (target.src !== original) {
+              target.src = original;
+              return;
+            }
             target.style.display = 'none';
             const parent = target.parentElement as HTMLElement;
             if (parent && !parent.querySelector('.fallback-img')) {
