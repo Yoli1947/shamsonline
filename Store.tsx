@@ -1540,9 +1540,11 @@ const Store: React.FC = () => {
                         ) : (
                             <div>
                                 {selectedCategory?.toLowerCase() === 'cafeteria' && (
-                                    <div style={{ position: 'relative', width: '100%', minHeight: '180px', marginBottom: '2rem', background: '#1a2a1a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem', gap: '1.5rem' }}>
-                                        <img src="/IMG_3793.PNG" alt="Monacle Speciality Coffee" style={{ maxHeight: '100px', maxWidth: '80%', objectFit: 'contain' }} />
-                                        <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                    <>
+                                        <div style={{ position: 'relative', width: '100%', minHeight: '180px', marginBottom: '1.5rem', background: '#1a2a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem' }}>
+                                            <img src="/IMG_3793.PNG" alt="Monacle Speciality Coffee" style={{ maxHeight: '120px', maxWidth: '80%', objectFit: 'contain' }} />
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem', paddingLeft: '0.25rem' }}>
                                             {['Todas', 'BIALETTI', 'STANLEY'].map(brand => {
                                                 const isActive = brand === 'Todas' ? !selectedBrand : selectedBrand?.toUpperCase() === brand;
                                                 return (
@@ -1555,15 +1557,15 @@ const Store: React.FC = () => {
                                                             setSearchParams(params);
                                                         }}
                                                         style={{
-                                                            padding: '0.4rem 1.2rem',
+                                                            padding: '0.5rem 1.4rem',
                                                             fontSize: '0.7rem',
                                                             letterSpacing: '0.15em',
                                                             fontWeight: 700,
                                                             textTransform: 'uppercase',
-                                                            border: '1px solid',
-                                                            borderColor: isActive ? 'white' : 'rgba(255,255,255,0.3)',
-                                                            background: isActive ? 'white' : 'transparent',
-                                                            color: isActive ? '#1a2a1a' : 'white',
+                                                            border: '1.5px solid',
+                                                            borderColor: isActive ? '#1a2a1a' : '#ccc',
+                                                            background: isActive ? '#1a2a1a' : 'transparent',
+                                                            color: isActive ? 'white' : '#555',
                                                             cursor: 'pointer',
                                                             borderRadius: '2px',
                                                             transition: 'all 0.2s',
@@ -1574,7 +1576,7 @@ const Store: React.FC = () => {
                                                 );
                                             })}
                                         </div>
-                                    </div>
+                                    </>
                                 )}
                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-0.5 sm:gap-6 gap-y-4 sm:gap-y-12 min-h-[50vh]">
                                     {filteredProducts.sort((a, b) => {
