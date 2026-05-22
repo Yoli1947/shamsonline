@@ -908,15 +908,18 @@ const Store: React.FC = () => {
             p.image !== 'https://via.placeholder.com/400x500?text=No+Image';
 
         // Categoría Cafetería check
-        const isCafeteriaProduct = p.category?.toLowerCase() === 'cafeteria';
+        const CAFETERIA_BRANDS = ['bialetti', 'stanley'];
+        const isCafeteriaProduct = p.category?.toLowerCase() === 'cafeteria' ||
+            CAFETERIA_BRANDS.includes((p.brand || '').toLowerCase());
         const isCafeteriaFilterActive = selectedCategory?.toLowerCase() === 'cafeteria';
 
         // Filter by Category
         const matchesCategory = !selectedCategory || selectedCategory === 'Todos' ||
-            p.category?.toLowerCase() === selectedCategory.toLowerCase();
-        
+            p.category?.toLowerCase() === selectedCategory.toLowerCase() ||
+            (isCafeteriaFilterActive && CAFETERIA_BRANDS.includes((p.brand || '').toLowerCase()));
+
         // Excluir categorías de la lista negra global SOLO si no hay un filtro de marca o categoría activo
-        if (!selectedCategory && !selectedBrand && p.category && EXCLUDED_CATS.includes(p.category.toLowerCase().trim())) {
+        if (!selectedCategory && !selectedBrand && isCafeteriaProduct) {
             return false;
         }
 
