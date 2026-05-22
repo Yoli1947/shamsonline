@@ -1537,23 +1537,8 @@ const Store: React.FC = () => {
                         ) : (
                             <div>
                                 {selectedCategory?.toLowerCase() === 'cafeteria' && (
-                                    <div style={{ position: 'relative', width: '100%', minHeight: '180px', marginBottom: '2rem', background: '#1a2a1a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', fontFamily: "'Playfair Display', Georgia, serif", color: 'white', fontSize: 'clamp(2.2rem, 10vw, 4rem)', fontWeight: 400, letterSpacing: '0.15em' }}>
-                                            <span>M</span>
-                                            <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                <span>O</span>
-                                                <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                                                    <svg viewBox="0 0 40 40" width="48%" height="48%" fill="none">
-                                                        <ellipse cx="20" cy="20" rx="14" ry="10" fill="white" transform="rotate(-30 20 20)"/>
-                                                        <path d="M20 10.5 Q26 20 20 29.5" stroke="#1a2a1a" strokeWidth="2" fill="none" strokeLinecap="round" transform="rotate(-30 20 20)"/>
-                                                    </svg>
-                                                </span>
-                                            </span>
-                                            <span>NACLE</span>
-                                        </div>
-                                        <div style={{ fontFamily: "'Playfair Display', Georgia, serif", color: 'rgba(255,255,255,0.7)', fontSize: 'clamp(0.55rem, 2.5vw, 0.8rem)', letterSpacing: '0.4em', marginTop: '0.5rem' }}>
-                                            SPECIALITY COFFEE
-                                        </div>
+                                    <div style={{ position: 'relative', width: '100%', minHeight: '180px', marginBottom: '2rem', background: '#1a2a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem' }}>
+                                        <img src="/IMG_3793.PNG" alt="Monacle Speciality Coffee" style={{ maxHeight: '120px', maxWidth: '80%', objectFit: 'contain' }} />
                                     </div>
                                 )}
                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-0.5 sm:gap-6 gap-y-4 sm:gap-y-12 min-h-[50vh]">
