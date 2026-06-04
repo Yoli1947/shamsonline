@@ -3,11 +3,15 @@ import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const slides = [
   {
-    image: "/banner laste.jpg",
-    title: "SHAMS / PERRAMUS",
-    subtitle: "COLECCIÓN FW26",
-    description: "Calidad y diseño de vanguardia. Descubrí lo último de Perramus en nuestra tienda.",
-    objectPosition: "center"
+    image: "/banners/image_fe129540_1.png",
+    title: "SHAMS / DÍA DEL PADRE",
+    subtitle: "🎁 DÍA DEL PADRE",
+    description: "Celebremos juntos su día con el estilo y la calidad de Perramus, Hunter, Nautica, Stanley y Bialetti. Mirá todas las opciones y elegí el regalo perfecto.",
+    objectPosition: "center",
+    objectFit: "contain",
+    bgColor: "bg-black",
+    noOverlay: true,
+    heroTitle: "¡Papá se merece lo mejor!"
   },
   {
     image: "/armesto banner.jpg",
@@ -96,29 +100,47 @@ const Hero: React.FC = () => {
       ))}
 
       {/* Content Area */}
-      <div className="relative z-[60] text-center px-4 md:px-6 max-w-5xl mt-12 md:mt-16">
-        
-        {/* Animated Slide Content */}
-        <div key={currentSlide} className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
-          
-          {/* Tag */}
-          <div className="inline-block px-5 py-2 border border-white/30 rounded-none mb-8 backdrop-blur-md bg-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.1)]">
-            <span className="text-[10px] tracking-[0.5em] uppercase text-white font-black flex items-center gap-3">
-              {slides[currentSlide].subtitle}
-            </span>
+      {!(slides[currentSlide] as any).noOverlay && (
+        <div className="relative z-[60] text-center px-4 md:px-6 max-w-5xl mt-12 md:mt-16">
+
+          {/* Animated Slide Content */}
+          <div key={currentSlide} className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
+
+            {/* Tag */}
+            <div className="inline-block px-5 py-2 border border-white/30 rounded-none mb-8 backdrop-blur-md bg-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.1)]">
+              <span className="text-[10px] tracking-[0.5em] uppercase text-white font-black flex items-center gap-3">
+                {slides[currentSlide].subtitle}
+              </span>
+            </div>
+
+            {/* Title */}
+            <h2 className={`font-heading font-black mb-6 leading-tight text-white drop-shadow-2xl ${
+              (slides[currentSlide] as any).heroTitle
+                ? 'text-4xl md:text-7xl tracking-[0.05em] uppercase'
+                : 'text-4xl md:text-8xl tracking-[0.3em] uppercase'
+            }`}>
+              {(slides[currentSlide] as any).heroTitle ?? slides[currentSlide].title.split(' / ')[1]}
+            </h2>
+
+            {/* Description */}
+            <p className="text-white/90 text-sm md:text-xl max-w-2xl mx-auto mb-12 font-light leading-relaxed tracking-widest drop-shadow-xl italic">
+              {slides[currentSlide].description}
+            </p>
+
+            {/* Button */}
+            <button
+              onClick={scrollToCollection}
+              className="bg-white text-black px-12 py-4 md:px-16 md:py-5 rounded-none font-bold text-[11px] md:text-xs tracking-[0.5em] hover:bg-black hover:text-white transition-all flex items-center gap-4 mx-auto shadow-2xl uppercase border border-white/20 group relative z-[70] cursor-pointer"
+            >
+              VER COLECCIÓN <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
+            </button>
           </div>
+        </div>
+      )}
 
-          {/* Title */}
-          <h2 className="font-heading text-4xl md:text-8xl font-black mb-6 leading-tight tracking-[0.3em] text-white uppercase drop-shadow-2xl">
-            {slides[currentSlide].title.split(' / ')[1]}
-          </h2>
-
-          {/* Description */}
-          <p className="text-white/90 text-sm md:text-xl max-w-2xl mx-auto mb-12 font-light leading-relaxed tracking-widest drop-shadow-xl italic">
-            {slides[currentSlide].description}
-          </p>
-
-          {/* Button */}
+      {/* Button for no-overlay slides */}
+      {(slides[currentSlide] as any).noOverlay && (
+        <div key={currentSlide} className="relative z-[60] animate-in fade-in duration-1000" style={{ position: 'absolute', bottom: '80px' }}>
           <button
             onClick={scrollToCollection}
             className="bg-white text-black px-12 py-4 md:px-16 md:py-5 rounded-none font-bold text-[11px] md:text-xs tracking-[0.5em] hover:bg-black hover:text-white transition-all flex items-center gap-4 mx-auto shadow-2xl uppercase border border-white/20 group relative z-[70] cursor-pointer"
@@ -126,7 +148,7 @@ const Hero: React.FC = () => {
             VER COLECCIÓN <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
           </button>
         </div>
-      </div>
+      )}
 
       {/* Manual Transition Controls */}
       <button 
