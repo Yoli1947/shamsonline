@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(grep -rn \"shamsoutlet\\\\|shams outlet\\\\|Shams Outlet\" /c/Users/marma/OneDrive/Escritorio/shamsonline/ --include=*.tsx --include=*.jsx --include=*.ts --include=*.js)"
+      "Bash(grep -rn \"shamsoutlet\\\\|shams outlet\\\\|Shams Outlet\" /c/Users/marma/OneDrive/Escritorio/shamsonline/ --include=*.tsx --include=*.jsx --include=*.ts --include=*.js)",
+      "PowerShell(ssh root@76.13.234.137 \"cd /var/www/shamsonline && git pull origin master && npm run build\")"
     ]
   }
 }

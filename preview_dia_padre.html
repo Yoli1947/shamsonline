@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Previsualización – Día del Padre | Shams</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #111;
+      font-family: 'Inter', sans-serif;
+      color: white;
+    }
+
+    .label-top {
+      background: #333;
+      color: #aaa;
+      text-align: center;
+      padding: 10px;
+      font-size: 13px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    /* ─── OPCIÓN A: Texto reemplaza el slide ─── */
+    .section-title {
+      background: #1a1a1a;
+      color: #666;
+      font-size: 11px;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      padding: 20px 40px 10px;
+    }
+
+    .banner {
+      position: relative;
+      width: 100%;
+      height: 92vh;
+      overflow: hidden;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Imagen de fondo simulada con gradient oscuro */
+    .banner-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.55) 100%),
+        url('/banner laste.jpg') center/cover no-repeat;
+      filter: contrast(1.08) brightness(1.05) saturate(1.02);
+    }
+
+    /* Overlay festivo sutil */
+    .overlay-glow {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(180,130,60,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .banner-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 0 24px;
+      max-width: 860px;
+      animation: fadeUp 0.8s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Tag superior */
+    .tag {
+      display: inline-block;
+      padding: 8px 24px;
+      border: 1px solid rgba(255,255,255,0.3);
+      backdrop-filter: blur(12px);
+      background: rgba(255,255,255,0.08);
+      margin-bottom: 28px;
+      font-size: 10px;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      font-weight: 900;
+      color: white;
+    }
+
+    /* Título grande */
+    .banner-title {
+      font-size: clamp(2.4rem, 7vw, 6rem);
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      line-height: 1.05;
+      color: white;
+      text-shadow: 0 4px 32px rgba(0,0,0,0.7);
+      margin-bottom: 22px;
+    }
+
+    /* Texto descriptivo */
+    .banner-desc {
+      font-size: clamp(0.85rem, 1.6vw, 1.1rem);
+      color: rgba(255,255,255,0.88);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.75;
+      letter-spacing: 0.08em;
+      max-width: 640px;
+      margin: 0 auto 40px;
+      text-shadow: 0 2px 16px rgba(0,0,0,0.6);
+    }
+
+    /* Botón */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      background: white;
+      color: black;
+      padding: 18px 52px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      border: 1px solid rgba(255,255,255,0.2);
+      cursor: pointer;
+      transition: background 0.25s, color 0.25s, transform 0.2s;
+      text-decoration: none;
+    }
+    .btn:hover {
+      background: black;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    /* Progress dots */
+    .dots {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
+      z-index: 20;
+    }
+    .dot {
+      height: 2px;
+      background: rgba(255,255,255,0.2);
+      width: 32px;
+      transition: all 0.5s;
+    }
+    .dot.active {
+      width: 56px;
+      background: white;
+    }
+
+    /* Side text */
+    .side-text {
+      position: absolute;
+      left: 28px;
+      bottom: 80px;
+      font-size: 9px;
+      letter-spacing: 0.7em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      font-weight: 900;
+      writing-mode: vertical-rl;
+    }
+
+    /* ─── NOTA COMPARATIVA ─── */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      background: #111;
+    }
+    .compare-panel {
+      padding: 32px 40px;
+      border-top: 1px solid #222;
+    }
+    .compare-panel + .compare-panel {
+      border-left: 1px solid #222;
+    }
+    .compare-label {
+      font-size: 10px;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: #555;
+      margin-bottom: 14px;
+    }
+    .compare-text {
+      font-size: 14px;
+      color: #ccc;
+      line-height: 1.7;
+    }
+    .compare-text strong {
+      color: white;
+      font-size: 17px;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .highlight { color: #c8a96e; }
+
+    .note {
+      background: #0d0d0d;
+      border-top: 1px solid #222;
+      padding: 20px 40px;
+      font-size: 12px;
+      color: #444;
+      text-align: center;
+      letter-spacing: 0.1em;
+    }
+    .note span { color: #c8a96e; }
+  </style>
+</head>
+<body>
+
+  <div class="label-top">🔍 PREVISUALIZACIÓN — Día del Padre · Banner Perramus · Shams Online</div>
+
+  <!-- ═══════════════ BANNER CON TEXTO DÍA DEL PADRE ═══════════════ -->
+  <div class="banner">
+    <div class="banner-bg"></div>
+    <div class="overlay-glow"></div>
+
+    <div class="banner-content">
+      <!-- Tag -->
+      <div class="tag">🎁 &nbsp; DÍA DEL PADRE</div>
+
+      <!-- Título -->
+      <h1 class="banner-title">¡Papá se merece<br>lo mejor!</h1>
+
+      <!-- Descripción -->
+      <p class="banner-desc">
+        Celebremos juntos su día con el estilo y la calidad de<br>
+        <strong style="font-style:normal; font-weight:700; color:white;">Perramus, Hunter, Nautica, Stanley y Bialetti.</strong><br>
+        Mirá todas las opciones y elegí el regalo perfecto.
+      </p>
+
+      <!-- Botón -->
+      <a href="#" class="btn">VER COLECCIÓN &nbsp;→</a>
+    </div>
+
+    <!-- Dots -->
+    <div class="dots">
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+
+    <!-- Side text -->
+    <div class="side-text">FW / COLLECTION / 2026</div>
+  </div>
+
+  <!-- ═══════════════ COMPARATIVA ═══════════════ -->
+  <div class="compare">
+    <div class="compare-panel">
+      <div class="compare-label">📌 Texto ACTUAL (Perramus)</div>
+      <div class="compare-text">
+        <strong>PERRAMUS</strong>
+        <em>COLECCIÓN FW26</em><br><br>
+        "Calidad y diseño de vanguardia. Descubrí lo último de Perramus en nuestra tienda."
+      </div>
+    </div>
+    <div class="compare-panel">
+      <div class="compare-label">🎁 Texto PROPUESTO (Día del Padre)</div>
+      <div class="compare-text">
+        <strong class="highlight">¡Papá se merece lo mejor! 🎁</strong>
+        "Celebremos juntos su día con el estilo y la calidad de Perramus, Hunter, Nautica, Stanley y Bialetti. Mirá todas las opciones y elegí el regalo perfecto."
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    Esta es una previsualización — la imagen de fondo real es <span>/banner laste.jpg</span> · Confirmá para aplicar los cambios al código
+  </div>
+
+</body>
+</html>

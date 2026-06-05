@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Previsualización Banner Día del Padre – Shams</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0a; font-family: 'Inter', sans-serif; color: white; }
+
+    .top-bar {
+      background: #111;
+      text-align: center;
+      padding: 10px;
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      color: #555;
+      text-transform: uppercase;
+      border-bottom: 1px solid #1e1e1e;
+    }
+
+    .banner {
+      position: relative;
+      width: 100%;
+      height: 95vh;
+      overflow: hidden;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .banner-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      filter: brightness(0.72) contrast(1.08) saturate(0.95);
+    }
+
+    .banner-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.15) 0%,
+        rgba(0,0,0,0.45) 50%,
+        rgba(0,0,0,0.75) 100%
+      );
+    }
+
+    .banner-glow {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center 55%, rgba(200,160,80,0.12) 0%, transparent 65%);
+    }
+
+    .banner-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 0 24px;
+      max-width: 900px;
+      animation: fadeUp 0.9s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 28px;
+      border: 1px solid rgba(255,255,255,0.25);
+      backdrop-filter: blur(14px);
+      background: rgba(255,255,255,0.07);
+      margin-bottom: 30px;
+      font-size: 10px;
+      letter-spacing: 0.55em;
+      text-transform: uppercase;
+      font-weight: 900;
+      color: white;
+    }
+
+    .banner-title {
+      font-size: clamp(2.6rem, 6.5vw, 5.5rem);
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      line-height: 1.05;
+      color: white;
+      text-shadow: 0 4px 40px rgba(0,0,0,0.8);
+      margin-bottom: 24px;
+    }
+
+    .banner-desc {
+      font-size: clamp(0.85rem, 1.4vw, 1.05rem);
+      color: rgba(255,255,255,0.85);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.8;
+      letter-spacing: 0.07em;
+      max-width: 680px;
+      margin: 0 auto 44px;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.7);
+    }
+
+    .banner-desc strong {
+      font-style: normal;
+      font-weight: 700;
+      color: white;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      background: white;
+      color: black;
+      padding: 18px 54px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.25s, color 0.25s, transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .btn:hover {
+      background: #000;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .brand-pills {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .pill {
+      padding: 5px 16px;
+      border: 1px solid rgba(255,255,255,0.2);
+      font-size: 9px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+      backdrop-filter: blur(8px);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .dots {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 18px;
+      z-index: 20;
+    }
+    .dot { height: 2px; background: rgba(255,255,255,0.2); width: 30px; }
+    .dot.active { width: 54px; background: white; }
+
+    .side-text {
+      position: absolute;
+      left: 28px;
+      bottom: 90px;
+      font-size: 9px;
+      letter-spacing: 0.65em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      font-weight: 900;
+      writing-mode: vertical-rl;
+      z-index: 20;
+    }
+
+    .info-panel {
+      background: #111;
+      border-top: 1px solid #1e1e1e;
+      padding: 24px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .info-panel p { font-size: 12px; color: #444; letter-spacing: 0.08em; }
+    .info-panel p span { color: #c8a96e; }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">🔍 Previsualización &nbsp;·&nbsp; Día del Padre &nbsp;·&nbsp; Banner Principal &nbsp;·&nbsp; Shams Online</div>
+
+  <div class="banner">
+    <img
+      class="banner-img"
+      src="banner_dia_padre_marcas.png"
+      alt="Banner Día del Padre – Bialetti, Stanley, Perramus, Hunter"
+    />
+    <div class="banner-overlay"></div>
+    <div class="banner-glow"></div>
+
+    <div class="banner-content">
+      <div class="tag">🎁 &nbsp; DÍA DEL PADRE</div>
+      <h1 class="banner-title">¡Papá se merece lo mejor!</h1>
+      <p class="banner-desc">
+        Celebremos juntos su día con el estilo y la calidad de<br>
+        <strong>Perramus, Hunter, Nautica, Stanley y Bialetti.</strong><br>
+        Mirá todas las opciones y elegí el regalo perfecto.
+      </p>
+      <a href="#" class="btn">VER COLECCIÓN &nbsp;→</a>
+    </div>
+
+    <div class="brand-pills">
+      <div class="pill">Perramus</div>
+      <div class="pill">Hunter</div>
+      <div class="pill">Nautica</div>
+      <div class="pill">Stanley</div>
+      <div class="pill">Bialetti</div>
+    </div>
+
+    <div class="dots">
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+
+    <div class="side-text">DÍA DEL PADRE / 2026</div>
+  </div>
+
+  <div class="info-panel">
+    <p>Imagen: <span>Bialetti + Stanley + Perramus + Hunter</span> · Doble clic para abrir en el navegador</p>
+  </div>
+
+</body>
+</html>
