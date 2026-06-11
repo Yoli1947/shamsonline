@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
                 // Verificar sesión actual con timeout
                 const { data: { session }, error } = await Promise.race([
                     supabase.auth.getSession(),
-                    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout Session')), 5000))
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout Session')), 15000))
                 ]).catch(err => {
                     console.warn("Auth: [TIMEOUT] Sesión lenta, continuando como invitado.");
                     return { data: { session: null }, error: err };
@@ -77,13 +77,13 @@ export function AuthProvider({ children }) {
             }
         }
 
-        // Timeout de seguridad mucho más corto: 4s
+        // Timeout de seguridad: 20s para conexiones lentas
         const authTimeout = setTimeout(() => {
             if (isMounted && loading) {
-                console.warn("Auth: [TIMEOUT] Forzando fin de carga rápido.");
+                console.warn("Auth: [TIMEOUT] Forzando fin de carga.");
                 setLoading(false);
             }
-        }, 4000)
+        }, 20000)
 
         // Llamada principal
         initAuth()
