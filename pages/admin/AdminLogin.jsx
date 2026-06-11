@@ -13,7 +13,9 @@ export default function AdminLogin() {
     const { user, login } = useAuth()
     const navigate = useNavigate()
     const location = useLocation()
-    const from = location.state?.from?.pathname + (location.state?.from?.search || '') || '/admin/dashboard'
+    const from = location.state?.from
+        ? (location.state.from.pathname || '/admin/dashboard') + (location.state.from.search || '')
+        : '/admin/dashboard'
 
     useEffect(() => {
         if (user && user.role === 'admin') {
