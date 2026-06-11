@@ -95,6 +95,7 @@ const App: React.FC = () => {
 
             {/* Admin Login */}
             <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/login/*" element={<Navigate to="/admin/login" replace />} />
 
             {/* Admin Routes (Protected) */}
             <Route path="/admin" element={<AdminLayout />}>
