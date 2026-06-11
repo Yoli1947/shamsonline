@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search, Mail, Phone, Calendar, User, Download, ExternalLink, RefreshCw } from 'lucide-react'
-import { getAllCustomers } from '../../lib/admin'
+import { getAllCustomers, syncCustomersFromOrders } from '../../lib/admin'
 import './Customers.css'
 
 export default function Customers() {
@@ -12,6 +12,23 @@ export default function Customers() {
     const [searchTerm, setSearchTerm] = useState('')
     const [refreshTrigger, setRefreshTrigger] = useState(0)
     const [totalCount, setTotalCount] = useState(0)
+    const [syncing, setSyncing] = useState(false)
+    const [syncMsg, setSyncMsg] = useState(null)
+
+    const handleSync = async () => {
+        setSyncing(true)
+        setSyncMsg(null)
+        try {
+            const count = await syncCustomersFromOrders()
+            setSyncMsg(`✓ ${count} clientes sincronizados desde pedidos`)
+            setRefreshTrigger(t => t + 1)
+        } catch (e) {
+            setSyncMsg(`Error: ${e.message}`)
+        } finally {
+            setSyncing(false)
+            setTimeout(() => setSyncMsg(null), 5000)
+        }
+    }
 
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
@@ -91,6 +108,16 @@ export default function Customers() {
                     <p>Gestioná la base de datos de usuarios de tu tienda.</p>
                 </div>
                 <div className="admin-page__actions">
+                    {syncMsg && (
+                        <span style={{ fontSize: 13, color: syncMsg.startsWith('Error') ? '#EF4444' : '#10B981', fontWeight: 600 }}>
+                            {syncMsg}
+                        </span>
+                    )}
+                    <button className="admin-btn admin-btn--secondary" onClick={handleSync} disabled={syncing}
+                        title="Importar clientes desde pedidos existentes">
+                        <RefreshCw size={18} style={{ animation: syncing ? 'spin 1s linear infinite' : 'none' }} />
+                        {syncing ? 'Sincronizando...' : 'Sincronizar desde pedidos'}
+                    </button>
                     <button className="admin-btn admin-btn--secondary" onClick={exportToCSV}>
                         <Download size={18} />
                         Exportar CSV

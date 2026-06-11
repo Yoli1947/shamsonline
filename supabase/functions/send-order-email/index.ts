@@ -1,6 +1,48 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
+const TELEGRAM_CHAT_ID = Deno.env.get("TELEGRAM_CHAT_ID");
+
+async function sendTelegramNotification(order: any, items: any[]) {
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
+
+  const paymentLabel: Record<string, string> = {
+    transferencia: "💳 Transferencia",
+    mercadopago: "🔵 MercadoPago",
+    nave: "🟣 Nave",
+    efectivo: "💵 Efectivo",
+  };
+
+  const itemLines = items
+    .map((i: any) => `  • ${i.product_name} (T: ${i.size}) x${i.quantity}`)
+    .join("\n");
+
+  const msg = [
+    `🛍️ *NUEVA COMPRA — #${order.order_number}*`,
+    ``,
+    `👤 ${order.customer_first_name} ${order.customer_last_name || ""}`,
+    `📧 ${order.customer_email}`,
+    `📱 ${order.customer_phone || "-"}`,
+    ``,
+    `*Productos:*`,
+    itemLines,
+    ``,
+    `💰 *Total: $${Number(order.total).toLocaleString("es-AR")}*`,
+    `${paymentLabel[order.payment_method] || order.payment_method}`,
+    `📦 ${order.shipping_method === "retiro" ? "Retiro en local" : `Envío a ${order.shipping_city}`}`,
+  ].join("\n");
+
+  await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: TELEGRAM_CHAT_ID,
+      text: msg,
+      parse_mode: "Markdown",
+    }),
+  }).catch((e) => console.error("Telegram error:", e));
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -146,6 +188,9 @@ serve(async (req) => {
       console.error("Resend API error:", data);
       throw new Error("Error al enviar el email vía Resend");
     }
+
+    // Notificación Telegram al dueño
+    await sendTelegramNotification(order, items);
 
     return new Response(JSON.stringify({ success: true, data }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

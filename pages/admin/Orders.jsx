@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { getAllOrders, updateOrderStatus, cancelOrder } from '../../lib/admin'
+import { getAllOrders, updateOrderStatus, cancelOrder, removeOrderItem, updatePaymentStatus, deleteCancelledOrders } from '../../lib/admin'
 import { Search, ChevronDown, ChevronUp, Package, Truck, CheckCircle, XCircle, Clock, RefreshCw } from 'lucide-react'
 
 const STATUS_CONFIG = {
@@ -41,11 +41,39 @@ function StatusBadge({ status }) {
     )
 }
 
-function OrderRow({ order, onStatusChange, onCancel }) {
+function OrderRow({ order, onStatusChange, onCancel, onItemRemoved }) {
     const [expanded, setExpanded] = useState(false)
     const [changingStatus, setChangingStatus] = useState(false)
     const [cancelling, setCancelling] = useState(false)
     const [confirmCancel, setConfirmCancel] = useState(false)
+    const [removingItemId, setRemovingItemId] = useState(null)
+    const [removeError, setRemoveError] = useState(null)
+    const [updatingPayment, setUpdatingPayment] = useState(false)
+
+    const handlePaymentStatus = async (e, newStatus) => {
+        e.stopPropagation()
+        setUpdatingPayment(true)
+        try {
+            await updatePaymentStatus(order.id, newStatus)
+            onItemRemoved()
+        } finally {
+            setUpdatingPayment(false)
+        }
+    }
+
+    const handleRemoveItem = async (e, itemId) => {
+        e.stopPropagation()
+        setRemovingItemId(itemId)
+        setRemoveError(null)
+        try {
+            await removeOrderItem(order.id, itemId)
+            onItemRemoved()
+        } catch (err) {
+            setRemoveError(err.message)
+        } finally {
+            setRemovingItemId(null)
+        }
+    }
 
     const canCancel = !['cancelled', 'refunded', 'delivered'].includes(order.status)
 
@@ -100,48 +128,142 @@ function OrderRow({ order, onStatusChange, onCancel }) {
             </tr>
 
             {expanded && (
-                <tr style={{ background: 'rgba(0,0,0,0.3)' }}>
-                    <td colSpan={7} style={{ padding: '0 16px 20px' }}>
-                        {/* Items */}
-                        <div style={{ marginTop: 12, marginBottom: 16 }}>
-                            <div style={{ fontSize: 11, color: '#6b7280', fontWeight: 700, letterSpacing: '0.1em', marginBottom: 8 }}>ARTÍCULOS</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                {order.items?.map((item, i) => (
-                                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '8px 12px' }}>
-                                        {item.product_image && (
-                                            <img src={item.product_image} alt={item.product_name} style={{ width: 40, height: 50, objectFit: 'cover', borderRadius: 4 }} loading="lazy" />
-                                        )}
-                                        <div style={{ flex: 1 }}>
-                                            <div style={{ fontWeight: 600, fontSize: 13 }}>{item.product_name}</div>
-                                            <div style={{ color: '#9ca3af', fontSize: 11 }}>
-                                                {item.product_brand} {item.size && `· Talle ${item.size}`} {item.color && `· ${item.color}`}
+                <tr style={{ background: '#f1f3f5' }}>
+                    <td colSpan={7} style={{ padding: '12px 16px 20px' }}>
+
+                        {/* Fila superior: artículos + totales */}
+                        <div style={{ display: 'flex', gap: 12, marginBottom: 12, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+
+                            {/* Artículos */}
+                            <div style={{ flex: 2, minWidth: 260 }}>
+                                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', color: '#6b7280', marginBottom: 6 }}>ARTÍCULOS</div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                    {removeError && (
+                                        <div style={{ background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 6, padding: '6px 12px', marginBottom: 6, fontSize: 12, color: '#b91c1c' }}>
+                                            {removeError}
+                                        </div>
+                                    )}
+                                    {order.items?.map((item, i) => (
+                                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '8px 12px', opacity: removingItemId === item.id ? 0.5 : 1, transition: 'opacity 0.2s' }}>
+                                            {item.product_image && (
+                                                <img src={item.product_image} alt={item.product_name} style={{ width: 36, height: 46, objectFit: 'cover', borderRadius: 4 }} loading="lazy" />
+                                            )}
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ fontWeight: 700, fontSize: 13, color: '#111827' }}>{item.product_name}</div>
+                                                <div style={{ color: '#6b7280', fontSize: 11 }}>
+                                                    {item.product_brand} {item.size && `· Talle ${item.size}`} {item.color && `· ${item.color}`}
+                                                </div>
                                             </div>
+                                            <div style={{ textAlign: 'right', fontSize: 13 }}>
+                                                <div style={{ fontWeight: 700, color: '#111827' }}>{fmt(item.subtotal)}</div>
+                                                <div style={{ color: '#6b7280', fontSize: 11 }}>x{item.quantity} · {fmt(item.unit_price)} c/u</div>
+                                            </div>
+                                            <button
+                                                onClick={(e) => handleRemoveItem(e, item.id)}
+                                                disabled={removingItemId !== null}
+                                                title="Eliminar artículo"
+                                                style={{
+                                                    marginLeft: 8, background: 'rgba(239,68,68,0.1)', color: '#EF4444',
+                                                    border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6,
+                                                    width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    cursor: removingItemId !== null ? 'not-allowed' : 'pointer', fontSize: 16, fontWeight: 700, flexShrink: 0
+                                                }}
+                                            >×</button>
                                         </div>
-                                        <div style={{ textAlign: 'right', fontSize: 13 }}>
-                                            <div style={{ fontWeight: 700 }}>{fmt(item.subtotal)}</div>
-                                            <div style={{ color: '#9ca3af', fontSize: 11 }}>x{item.quantity} · {fmt(item.unit_price)} c/u</div>
-                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Totales */}
+                            <div style={{ flex: 1, minWidth: 200, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '12px 16px' }}>
+                                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', color: '#6b7280', marginBottom: 10 }}>RESUMEN</div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 13 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <span style={{ color: '#6b7280' }}>Subtotal</span>
+                                        <span style={{ color: '#111827', fontWeight: 600 }}>{fmt(order.subtotal || order.total)}</span>
                                     </div>
-                                ))}
+                                    {Number(order.discount) > 0 && (
+                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                            <span style={{ color: '#10B981' }}>Descuento</span>
+                                            <span style={{ color: '#10B981', fontWeight: 700 }}>− {fmt(order.discount)}</span>
+                                        </div>
+                                    )}
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <span style={{ color: '#6b7280' }}>Envío</span>
+                                        <span style={{ color: '#111827', fontWeight: 600 }}>{Number(order.shipping_cost) > 0 ? fmt(order.shipping_cost) : 'Sin cargo'}</span>
+                                    </div>
+                                    <div style={{ borderTop: '2px solid #111827', marginTop: 4, paddingTop: 8, display: 'flex', justifyContent: 'space-between' }}>
+                                        <span style={{ color: '#111827', fontWeight: 800, fontSize: 14 }}>TOTAL</span>
+                                        <span style={{ color: '#111827', fontWeight: 800, fontSize: 16 }}>{fmt(order.total)}</span>
+                                    </div>
+                                    <div style={{ marginTop: 6, paddingTop: 8, borderTop: '1px solid #e5e7eb' }}>
+                                        <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', color: '#6b7280', marginBottom: 4 }}>MÉTODO DE PAGO</div>
+                                        <div style={{ fontWeight: 700, fontSize: 14, color: '#111827', textTransform: 'capitalize' }}>{order.payment_method}</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Info envío */}
-                        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', marginBottom: 16, fontSize: 12, color: '#9ca3af' }}>
-                            <div>
-                                <span style={{ color: '#6b7280', fontWeight: 700 }}>ENVÍO: </span>
-                                {order.shipping_address
-                                    ? `${order.shipping_address} ${order.shipping_number}, ${order.shipping_city}, ${order.shipping_province}`
-                                    : 'Retiro en local'}
+                        {/* Info cliente */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8, marginBottom: 10 }}>
+                            {[
+                                { label: 'CLIENTE', value: `${order.customer_first_name || ''} ${order.customer_last_name || ''}`.trim() },
+                                { label: 'EMAIL', value: order.customer_email },
+                                { label: 'TELÉFONO', value: order.customer_phone },
+                                { label: 'DNI', value: order.customer_dni },
+                            ].filter(f => f.value).map(({ label, value }) => (
+                                <div key={label} style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '8px 12px' }}>
+                                    <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', color: '#6b7280', marginBottom: 2 }}>{label}</div>
+                                    <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{value}</div>
+                                </div>
+                            ))}
+                            <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '8px 12px', flex: 1 }}>
+                                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', color: '#6b7280', marginBottom: 2 }}>ENVÍO</div>
+                                <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>
+                                    {order.shipping_address
+                                        ? `${order.shipping_address} ${order.shipping_number}, ${order.shipping_city}, ${order.shipping_province}`
+                                        : 'Retiro en local'}
+                                </div>
                             </div>
-                            <div><span style={{ color: '#6b7280', fontWeight: 700 }}>PAGO: </span>{order.payment_method}</div>
-                            {order.customer_phone && <div><span style={{ color: '#6b7280', fontWeight: 700 }}>TEL: </span>{order.customer_phone}</div>}
-                            {order.admin_notes && <div><span style={{ color: '#6b7280', fontWeight: 700 }}>NOTA: </span>{order.admin_notes}</div>}
+                            {order.admin_notes && (
+                                <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: '8px 12px' }}>
+                                    <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', color: '#D97706', marginBottom: 2 }}>NOTA</div>
+                                    <div style={{ fontSize: 13, color: '#92400E' }}>{order.admin_notes}</div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Acciones */}
                         {order.status !== 'cancelled' && (
                             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+                                {order.payment_status !== 'paid' && (
+                                    <button
+                                        onClick={(e) => handlePaymentStatus(e, 'paid')}
+                                        disabled={updatingPayment}
+                                        style={{
+                                            background: 'rgba(16,185,129,0.15)', color: '#059669',
+                                            border: '1px solid rgba(16,185,129,0.4)',
+                                            padding: '5px 14px', borderRadius: 20, fontSize: 11, fontWeight: 700,
+                                            cursor: updatingPayment ? 'not-allowed' : 'pointer'
+                                        }}
+                                    >
+                                        {updatingPayment ? 'Guardando...' : '✓ Marcar como Pagado'}
+                                    </button>
+                                )}
+                                {order.payment_status === 'paid' && (
+                                    <button
+                                        onClick={(e) => handlePaymentStatus(e, 'pending')}
+                                        disabled={updatingPayment}
+                                        style={{
+                                            background: 'rgba(245,158,11,0.1)', color: '#D97706',
+                                            border: '1px solid rgba(245,158,11,0.3)',
+                                            padding: '5px 14px', borderRadius: 20, fontSize: 11, fontWeight: 700,
+                                            cursor: updatingPayment ? 'not-allowed' : 'pointer'
+                                        }}
+                                    >
+                                        {updatingPayment ? 'Guardando...' : '↩ Marcar como Pendiente'}
+                                    </button>
+                                )}
                                 <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 700 }}>CAMBIAR ESTADO:</span>
                                 {Object.entries(STATUS_CONFIG)
                                     .filter(([s]) => s !== 'cancelled' && s !== 'refunded' && s !== order.status)
@@ -216,6 +338,8 @@ export default function Orders() {
     const [filter, setFilter] = useState(null)
     const [search, setSearch] = useState(searchParams.get('email') || '')
     const [total, setTotal] = useState(0)
+    const [showDeleteModal, setShowDeleteModal] = useState(false)
+    const [deleting, setDeleting] = useState(false)
 
     const loadOrders = useCallback(async () => {
         setLoading(true)
@@ -244,6 +368,17 @@ export default function Orders() {
         setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: 'cancelled' } : o))
     }
 
+    const handleDeleteCancelled = async () => {
+        setDeleting(true)
+        try {
+            await deleteCancelledOrders()
+            setShowDeleteModal(false)
+            await loadOrders()
+        } finally {
+            setDeleting(false)
+        }
+    }
+
     const filtered = orders.filter(o => {
         if (!search) return true
         const s = search.toLowerCase()
@@ -254,20 +389,60 @@ export default function Orders() {
         )
     })
 
+    const cancelledCount = orders.filter(o => o.status === 'cancelled').length
+
     return (
         <div style={{ color: 'var(--color-text)', fontFamily: 'inherit' }}>
+
+            {/* Modal eliminar anulados */}
+            {showDeleteModal && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ background: '#fff', borderRadius: 12, padding: 32, maxWidth: 400, width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+                        <div style={{ fontSize: 32, marginBottom: 12, textAlign: 'center' }}>🗑️</div>
+                        <h2 style={{ fontSize: 18, fontWeight: 800, color: '#111827', textAlign: 'center', margin: '0 0 8px' }}>Eliminar pedidos anulados</h2>
+                        <p style={{ fontSize: 14, color: '#6b7280', textAlign: 'center', margin: '0 0 24px', lineHeight: 1.5 }}>
+                            Se van a eliminar permanentemente <strong style={{ color: '#EF4444' }}>{cancelledCount} pedidos anulados</strong> y todos sus artículos. Esta acción no se puede deshacer.
+                        </p>
+                        <div style={{ display: 'flex', gap: 10 }}>
+                            <button
+                                onClick={() => setShowDeleteModal(false)}
+                                disabled={deleting}
+                                style={{ flex: 1, padding: '10px', borderRadius: 8, border: '1px solid #e5e7eb', background: '#f9fafb', color: '#374151', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleDeleteCancelled}
+                                disabled={deleting}
+                                style={{ flex: 1, padding: '10px', borderRadius: 8, border: 'none', background: '#EF4444', color: '#fff', fontWeight: 700, cursor: deleting ? 'not-allowed' : 'pointer', fontSize: 14, opacity: deleting ? 0.7 : 1 }}
+                            >
+                                {deleting ? 'Eliminando...' : 'Sí, eliminar todo'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
                 <div>
                     <h1 style={{ fontSize: 24, fontWeight: 900, letterSpacing: '0.05em', margin: 0 }}>PEDIDOS</h1>
                     <p style={{ color: '#6b7280', fontSize: 13, margin: '4px 0 0' }}>{total} pedidos en total</p>
                 </div>
-                <button
-                    onClick={loadOrders}
-                    style={{ background: 'var(--color-background-alt)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--color-text)', padding: '8px 16px', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}
-                >
-                    <RefreshCw size={14} /> Actualizar
-                </button>
+                <div style={{ display: 'flex', gap: 8 }}>
+                    <button
+                        onClick={() => setShowDeleteModal(true)}
+                        style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', padding: '8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 700 }}
+                    >
+                        🗑 Eliminar anulados
+                    </button>
+                    <button
+                        onClick={loadOrders}
+                        style={{ background: 'var(--color-background-alt)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--color-text)', padding: '8px 16px', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}
+                    >
+                        <RefreshCw size={14} /> Actualizar
+                    </button>
+                </div>
             </div>
 
             {/* Filtros */}
@@ -330,6 +505,7 @@ export default function Orders() {
                                     order={order}
                                     onStatusChange={handleStatusChange}
                                     onCancel={handleCancel}
+                                    onItemRemoved={loadOrders}
                                 />
                             ))}
                         </tbody>

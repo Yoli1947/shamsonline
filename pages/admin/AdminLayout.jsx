@@ -41,7 +41,7 @@ export default function AdminLayout() {
     }
 
     if (!user || user.role !== 'admin') {
-        return <Navigate to="/admin/login" replace />;
+        return <Navigate to="/admin/login" replace state={{ from: location }} />;
     }
 
     const handleLogout = async () => {

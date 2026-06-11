@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Plus, Search, Edit, Trash2, Image, X, Check, Loader, RefreshCw, UploadCloud, Maximize2, Minimize2, Star } from 'lucide-react'
 import { getAllProducts, deleteProduct, updateProduct, saveProductVariants, uploadImage, getSeasons } from '../../lib/admin'
@@ -10,9 +10,14 @@ import ProductForm from './ProductForm'
 import './Products.css'
 
 export default function Products() {
-    const [products, setProducts] = useState([])
+    const [searchParams, setSearchParams] = useSearchParams()
+    const [allProducts, setAllProducts] = useState([])   // todos los productos cargados
+    const [products, setProducts] = useState([])          // lo que se muestra (puede ser búsqueda)
     const [loading, setLoading] = useState(true)
-    const [searchTerm, setSearchTerm] = useState('')
+    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
+    const [dbSearchResults, setDbSearchResults] = useState(null)
+    const [isDbSearching, setIsDbSearching] = useState(false)
+    const searchTimeoutRef = useRef(null)
     const [showModal, setShowModal] = useState(false)
     const [isFullscreen, setIsFullscreen] = useState(false)
     const [editingProduct, setEditingProduct] = useState(null)
@@ -25,11 +30,14 @@ export default function Products() {
     const [brands, setBrands] = useState([])
     const [categories, setCategories] = useState([])
     const [seasons, setSeasons] = useState([])
-    const [searchParams, setSearchParams] = useSearchParams()
 
     const [selectedIds, setSelectedIds] = useState(new Set())
     const [bulkDiscountValue, setBulkDiscountValue] = useState('')
     const [isSavingAll, setIsSavingAll] = useState(false)
+
+    // Ref para que loadProducts pueda leer el searchTerm actual sin closure stale
+    const searchTermRef = useRef(searchTerm)
+    useEffect(() => { searchTermRef.current = searchTerm }, [searchTerm])
 
     useEffect(() => {
         loadProducts()
@@ -39,7 +47,60 @@ export default function Products() {
         if (searchParams.get('new') === 'true') {
             openNewProduct()
         }
+
+        // Si viene ?id=UUID por URL, cargar y abrir ese producto para editar
+        const editId = searchParams.get('id')
+        if (editId) {
+            getAllProducts(1, 1, '', null, false).then(() => {}).catch(() => {})
+            supabase.from('products')
+                .select(`*, brand:brands(id, name, card_image_url), category:categories(id, name), images:product_images(id, url, is_primary, alt_text, sort_order), variants:product_variants(id, size, color, stock, sku)`)
+                .eq('id', editId)
+                .single()
+                .then(({ data }) => {
+                    if (data) {
+                        setEditingProduct(data)
+                        setShowModal(true)
+                    }
+                })
+        }
     }, [refreshTrigger, searchParams])
+
+    // Búsqueda directa en DB: reemplaza products con los resultados
+    useEffect(() => {
+        if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
+
+        const term = searchTerm.trim()
+        if (term.length < 2) {
+            if (dbSearchResults !== null) {
+                setDbSearchResults(null)
+                setProducts(allProducts)
+            }
+            setIsDbSearching(false)
+            return
+        }
+
+        setIsDbSearching(true)
+        searchTimeoutRef.current = setTimeout(async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('products')
+                    .select(`*, brand:brands(id, name, card_image_url), category:categories(id, name), images:product_images(id, url, is_primary, alt_text, sort_order), variants:product_variants(id, size, color, stock, sku)`)
+                    .or(`name.ilike.%${term}%,sku.ilike.%${term}%,provider_sku.ilike.%${term}%`)
+                    .limit(200)
+                if (error) throw error
+                const results = data || []
+                setDbSearchResults(results)
+                setProducts(results)   // <-- reemplaza directamente lo que se muestra
+            } catch (e) {
+                console.error('Error en búsqueda DB:', e)
+                setDbSearchResults(null)
+            } finally {
+                setIsDbSearching(false)
+            }
+        }, 400)
+
+        return () => { if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current) }
+    }, [searchTerm, allProducts])
 
     async function loadDependencies() {
         try {
@@ -61,8 +122,24 @@ export default function Products() {
     async function loadProducts() {
         try {
             setLoading(true)
-            const { products: data } = await getAllProducts(1, 5000)
-            setProducts(data)
+            const CHUNK = 500
+            let all = []
+            let offset = 0
+            let hasMore = true
+
+            while (hasMore) {
+                const { products: chunk, count } = await getAllProducts(1, CHUNK, '', offset)
+                if (!chunk || chunk.length === 0) break
+                all = [...all, ...chunk]
+                offset += CHUNK
+                hasMore = all.length < (count || 0)
+            }
+
+            setAllProducts(all)
+            // Solo pisamos products si no hay una búsqueda activa
+            if (!searchTermRef.current.trim() || searchTermRef.current.trim().length < 2) {
+                setProducts(all)
+            }
         } catch (error) {
             console.error('Error loading products:', error)
         } finally {
@@ -396,41 +473,38 @@ export default function Products() {
         }
     };
 
-    const filteredProducts = products.filter(p => {
-        const searchLower = searchTerm.toLowerCase();
+    const isDbSearchActive = dbSearchResults !== null
 
-        // Filter by Search Term
-        const nameMatch = (p.name || '').toLowerCase().includes(searchLower);
-        const brandMatch = (p.brand?.name || '').toLowerCase().includes(searchLower);
-        const skuMatch = (p.sku || '').toLowerCase().includes(searchLower);
-        const providerSkuMatch = (p.provider_sku || '').toLowerCase().includes(searchLower);
-        const variantSkuMatch = p.variants?.some(v => (v.sku || '').toLowerCase().includes(searchLower));
-        const matchesSearch = nameMatch || brandMatch || skuMatch || providerSkuMatch || variantSkuMatch;
+    const filteredProducts = isDbSearchActive
+        ? products   // products YA fue reemplazado con los resultados de búsqueda
+        : products.filter(p => {
+            const searchLower = searchTerm.toLowerCase();
+            const nameMatch = (p.name || '').toLowerCase().includes(searchLower);
+            const brandMatch = (p.brand?.name || '').toLowerCase().includes(searchLower);
+            const skuMatch = (p.sku || '').toLowerCase().includes(searchLower);
+            const providerSkuMatch = (p.provider_sku || '').toLowerCase().includes(searchLower);
+            const variantSkuMatch = p.variants?.some(v => (v.sku || '').toLowerCase().includes(searchLower));
+            const matchesSearch = !searchLower || nameMatch || brandMatch || skuMatch || providerSkuMatch || variantSkuMatch;
 
-        // Filter by Brand ID
-        const currentBrandId = p.brand_id || p.brand?.id;
-        const matchesBrand = !selectedBrandId || String(currentBrandId) === String(selectedBrandId);
+            const currentBrandId = p.brand_id || p.brand?.id;
+            const matchesBrand = !selectedBrandId || String(currentBrandId) === String(selectedBrandId);
 
-        // Filter by Photo
-        const hasPhoto = (p.images && p.images.length > 0) || p.image_url || p.image_url_2 || p.image_url_3 || p.image_url_4;
-        const matchesPhoto = filterPhoto === 'all' ||
-            (filterPhoto === 'with' && hasPhoto) ||
-            (filterPhoto === 'without' && !hasPhoto);
+            const hasPhoto = (p.images && p.images.length > 0) || p.image_url;
+            const matchesPhoto = filterPhoto === 'all' ||
+                (filterPhoto === 'with' && hasPhoto) ||
+                (filterPhoto === 'without' && !hasPhoto);
 
-        // Filter by Category ID
-        const currentCategoryId = p.category_id || p.category?.id;
-        const matchesCategory = !selectedCategoryId || String(currentCategoryId) === String(selectedCategoryId);
+            const currentCategoryId = p.category_id || p.category?.id;
+            const matchesCategory = !selectedCategoryId || String(currentCategoryId) === String(selectedCategoryId);
 
-        // Filter by Season
-        const matchesSeason = !selectedSeasons.length || selectedSeasons.includes(p.season);
+            const matchesSeason = !selectedSeasons.length || selectedSeasons.includes(p.season);
 
-        // Filter by Visibility
-        const matchesVisibility = filterVisibility === 'all' ||
-            (filterVisibility === 'visible' && p.is_published !== false) ||
-            (filterVisibility === 'hidden' && p.is_published === false);
+            const matchesVisibility = filterVisibility === 'all' ||
+                (filterVisibility === 'visible' && p.is_published !== false) ||
+                (filterVisibility === 'hidden' && p.is_published === false);
 
-        return matchesSearch && matchesBrand && matchesPhoto && matchesCategory && matchesSeason && matchesVisibility;
-    })
+            return matchesSearch && matchesBrand && matchesPhoto && matchesCategory && matchesSeason && matchesVisibility;
+        })
 
     const { stats, filteredStats } = useMemo(() => {
         const calculateStats = (list) => {
@@ -585,15 +659,23 @@ export default function Products() {
             {/* Search */}
             <div className="admin-card" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: '300px' }}>
-                    <Search size={20} color="#999" />
+                    {isDbSearching
+                        ? <Loader size={20} color="#c4956a" className="spin" />
+                        : <Search size={20} color={dbSearchResults !== null ? '#c4956a' : '#999'} />
+                    }
                     <input
                         className="admin-input"
                         type="text"
-                        placeholder="Buscar por nombre, SKU o marca..."
+                        placeholder="Buscar por nombre, SKU o marca... (busca en TODO el catálogo)"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         style={{ border: 'none', padding: '0', boxShadow: 'none', background: 'transparent', fontSize: '1rem', width: '100%' }}
                     />
+                    {dbSearchResults !== null && (
+                        <span style={{ fontSize: '10px', color: '#c4956a', fontWeight: '800', whiteSpace: 'nowrap' }}>
+                            DB: {dbSearchResults.length} resultados
+                        </span>
+                    )}
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '1.5rem' }}>

@@ -456,12 +456,17 @@ export default function ProductForm({ product, onSuccess, onCancel }) {
 
             const productId = savedProduct.id
 
-            // 4. Gestionar Imágenes (Re-sincronizar todas para mantener el orden)
-            // Primero borramos las relaciones existentes para este producto
-            // Assuming supabase is available or add it to imports if needed
-            await supabase.from('product_images').delete().eq('product_id', productId)
+            // 4. Gestionar Imágenes
+            // Borrar registros viejos y reinsertar en el nuevo orden
+            const { error: deleteImgError } = await supabase
+                .from('product_images')
+                .delete()
+                .eq('product_id', productId)
 
-            // Luego subimos las nuevas y re-insertamos todas en el nuevo orden
+            if (deleteImgError) {
+                throw new Error('No se pudieron borrar las fotos anteriores: ' + deleteImgError.message)
+            }
+
             for (let i = 0; i < formData.images.length; i++) {
                 const img = formData.images[i]
                 let finalUrl = img.url
@@ -477,6 +482,12 @@ export default function ProductForm({ product, onSuccess, onCancel }) {
             if (variants && variants.length > 0) {
                 await saveProductVariants(productId, variants)
             }
+
+            // Invalida el caché del store para que la tienda muestre los cambios inmediatamente
+            try {
+                localStorage.removeItem('shams_products_v16')
+                localStorage.setItem('shams_cache_ts_v6', '0')
+            } catch {}
 
             onSuccess()
         } catch (error) {

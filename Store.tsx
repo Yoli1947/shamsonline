@@ -285,9 +285,12 @@ const Store: React.FC = () => {
                         let changed = false;
                         const updated = prev.map(p => {
                             const fresh = mappedChunk.find(x => x.id === p.id);
-                            if (fresh && (fresh.is_featured !== p.is_featured || fresh.sort_order !== p.sort_order)) {
-                                changed = true;
-                                return fresh;
+                            if (fresh) {
+                                const imagesChanged = fresh.image !== p.image || fresh.images?.join() !== p.images?.join();
+                                if (imagesChanged || fresh.is_featured !== p.is_featured || fresh.sort_order !== p.sort_order || fresh.price !== p.price) {
+                                    changed = true;
+                                    return fresh;
+                                }
                             }
                             return p;
                         });
@@ -306,7 +309,7 @@ const Store: React.FC = () => {
 
                 // Actualizar caché al final del barrido completo
                 setProducts(current => {
-                    try { localStorage.setItem('shams_products_v15', JSON.stringify(current)); localStorage.setItem('shams_cache_ts_v5', Date.now().toString()); } catch {}
+                    try { localStorage.setItem('shams_products_v16', JSON.stringify(current)); localStorage.setItem('shams_cache_ts_v6', Date.now().toString()); } catch {}
                     return current;
                 });
 
@@ -331,11 +334,11 @@ const Store: React.FC = () => {
 
                 // Mostrar caché INMEDIATAMENTE sin esperar red
                 try {
-                    const cachedTs = localStorage.getItem('shams_cache_ts_v5');
+                    const cachedTs = localStorage.getItem('shams_cache_ts_v6');
                     const cachedTsNum = cachedTs ? parseInt(cachedTs) : 0;
-                    const cachedProducts = JSON.parse(localStorage.getItem('shams_products_v15') || '[]');
-                    const cachedBrands = JSON.parse(localStorage.getItem('shams_brands_v4') || '[]');
-                    const cachedCategories = JSON.parse(localStorage.getItem('shams_categories_v4') || '[]');
+                    const cachedProducts = JSON.parse(localStorage.getItem('shams_products_v16') || '[]');
+                    const cachedBrands = JSON.parse(localStorage.getItem('shams_brands_v5') || '[]');
+                    const cachedCategories = JSON.parse(localStorage.getItem('shams_categories_v5') || '[]');
 
                     if (cachedProducts.length > 0) {
                         setBrands(cachedBrands);
@@ -423,10 +426,10 @@ const Store: React.FC = () => {
                 setProducts(sortedProducts);
                 
                 try {
-                    localStorage.setItem('shams_products_v15', JSON.stringify(sortedProducts));
-                    localStorage.setItem('shams_brands_v4', JSON.stringify(dbBrands));
-                    localStorage.setItem('shams_categories_v4', JSON.stringify(dbCategories));
-                    localStorage.setItem('shams_cache_ts_v5', Date.now().toString());
+                    localStorage.setItem('shams_products_v16', JSON.stringify(sortedProducts));
+                    localStorage.setItem('shams_brands_v5', JSON.stringify(dbBrands));
+                    localStorage.setItem('shams_categories_v5', JSON.stringify(dbCategories));
+                    localStorage.setItem('shams_cache_ts_v6', Date.now().toString());
                 } catch {}
 
                 setLoading(false);
@@ -688,7 +691,7 @@ const Store: React.FC = () => {
                 decrementLocalStock(orderItems);
                 setCart([]);
                 setIsCheckoutOpen(false);
-                localStorage.removeItem('shams_products_v15');
+                localStorage.removeItem('shams_products_v16');
                 localStorage.removeItem('shams_promo_10');
                 window.location.href = naveData.checkout_url;
 
@@ -734,7 +737,7 @@ const Store: React.FC = () => {
                 decrementLocalStock(orderItems);
                 setCart([]);
                 setIsCheckoutOpen(false);
-                localStorage.removeItem('shams_products_v15');
+                localStorage.removeItem('shams_products_v16');
                 localStorage.removeItem('shams_promo_10');
                 window.location.href = mpData.init_point;
             } else if (formData.paymentMethod === 'transferencia') {

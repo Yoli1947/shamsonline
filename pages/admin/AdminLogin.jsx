@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { Lock, Sparkles, LogIn, ChevronRight, User } from 'lucide-react'
 import './AdminLogin.css'
@@ -12,12 +12,14 @@ export default function AdminLogin() {
     const [showPassword, setShowPassword] = useState(false)
     const { user, login } = useAuth()
     const navigate = useNavigate()
+    const location = useLocation()
+    const from = location.state?.from?.pathname + (location.state?.from?.search || '') || '/admin/dashboard'
 
     useEffect(() => {
         if (user && user.role === 'admin') {
-            navigate('/admin/dashboard')
+            navigate(from, { replace: true })
         }
-    }, [user, navigate])
+    }, [user, navigate, from])
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -37,7 +39,7 @@ export default function AdminLogin() {
             await login(email, password, true)
             finished = true
             clearTimeout(timeout)
-            navigate('/admin/dashboard')
+            navigate(from, { replace: true })
         } catch (err) {
             finished = true
             clearTimeout(timeout)
