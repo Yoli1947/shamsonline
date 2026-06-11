@@ -282,11 +282,12 @@ const Store: React.FC = () => {
                     const mappedChunk = mapProductsToUI(chunk);
                     setProducts(prev => {
                         const prevMap = new Map(prev.map(p => [p.id, p]));
+                        const freshMap = new Map(mappedChunk.map(x => [x.id, x]));
                         let changed = false;
                         const updated = prev.map(p => {
-                            const fresh = mappedChunk.find(x => x.id === p.id);
+                            const fresh = freshMap.get(p.id);
                             if (fresh) {
-                                const imagesChanged = fresh.image !== p.image || fresh.images?.join() !== p.images?.join();
+                                const imagesChanged = fresh.image !== p.image;
                                 if (imagesChanged || fresh.is_featured !== p.is_featured || fresh.sort_order !== p.sort_order || fresh.price !== p.price) {
                                     changed = true;
                                     return fresh;
@@ -302,8 +303,7 @@ const Store: React.FC = () => {
                     currentOffset += CHUNK_SIZE;
                     if (count && currentOffset >= count) hasMore = false;
 
-                    // Pequeño respiro para el navegador
-                    await new Promise(r => setTimeout(r, 100));
+                    await new Promise(r => setTimeout(r, 50));
                 }
                 console.log("Carga completa del catálogo finalizada.");
 
@@ -399,7 +399,7 @@ const Store: React.FC = () => {
                 const lastSyncTs = lastSyncStr ? (isNaN(Number(lastSyncStr)) ? new Date(lastSyncStr).getTime() : parseInt(lastSyncStr)) : 0;
 
                 const [productsRes, brandsRes, categoriesRes] = await Promise.all([
-                    getAllProducts(1, 40, '', 0, true, lastSyncTs),
+                    getAllProducts(1, 100, '', 0, true, lastSyncTs),
                     getBrands(lastSyncTs),
                     getCategories(lastSyncTs)
                 ]);
