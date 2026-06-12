@@ -115,6 +115,7 @@ const Store: React.FC = () => {
 
     const [products, setProducts] = useState<Product[]>([]);
     const [brands, setBrands] = useState<any[]>([]);
+    const [quickDiscountBrands, setQuickDiscountBrands] = useState<{ brand: string; bestDiscount: number; image: string; count: number }[]>([]);
 
     const [categoriesByGender, setCategoriesByGender] = useState<{ Mujer: any[], Hombre: any[] }>({ Mujer: [], Hombre: [] });
     const [loading, setLoading] = useState(true);
@@ -262,24 +263,14 @@ const Store: React.FC = () => {
             }
         }, 8000); // 8s margin (much shorter)
 
-        async function fetchRemainingData(offset = 20, lastSyncTs = 0) {
+        async function fetchRemainingData(offset = 100, lastSyncTs = 0) {
             if (!isMounted) return;
             try {
-                // Traemos los productos en lotes más pequeños para evitar AbortError
-                const CHUNK_SIZE = 100;
-                let currentOffset = offset;
-                let hasMore = true;
+                const CHUNK_SIZE = 250;
 
-                while (hasMore && isMounted) {
-                    console.log(`Cargando lote de productos: ${currentOffset} a ${currentOffset + CHUNK_SIZE}...`);
-                    const { products: chunk, count } = await getAllProducts(1, CHUNK_SIZE, '', currentOffset, true, lastSyncTs);
-
-                    if (!chunk || chunk.length === 0) {
-                        hasMore = false;
-                        break;
-                    }
-
-                    const mappedChunk = mapProductsToUI(chunk);
+                // Carga paralela: dispara 4 chunks al mismo tiempo para llegar rápido a todos los productos
+                const mergeChunk = (mappedChunk: any[]) => {
+                    if (!mappedChunk.length || !isMounted) return;
                     setProducts(prev => {
                         const prevMap = new Map(prev.map(p => [p.id, p]));
                         const freshMap = new Map(mappedChunk.map(x => [x.id, x]));
@@ -299,17 +290,31 @@ const Store: React.FC = () => {
                         if (newOnes.length > 0) { changed = true; updated.push(...newOnes); }
                         return changed ? updated : prev;
                     });
+                };
 
+                // Lanzar los primeros 4 chunks en paralelo (cubre hasta producto ~1100)
+                const offsets = [offset, offset + CHUNK_SIZE, offset + CHUNK_SIZE * 2, offset + CHUNK_SIZE * 3];
+                const results = await Promise.all(
+                    offsets.map(o => getAllProducts(1, CHUNK_SIZE, '', o, true, lastSyncTs).catch(() => ({ products: [], count: 0 })))
+                );
+                results.forEach(r => mergeChunk(mapProductsToUI(r.products || [])));
+
+                // Si hay más de 1100 productos, seguir cargando secuencialmente
+                const maxParallelOffset = offset + CHUNK_SIZE * 4;
+                let currentOffset = maxParallelOffset;
+                let hasMore = results.some(r => (r.products || []).length === CHUNK_SIZE);
+                while (hasMore && isMounted) {
+                    const { products: chunk } = await getAllProducts(1, CHUNK_SIZE, '', currentOffset, true, lastSyncTs);
+                    if (!chunk || chunk.length === 0) { hasMore = false; break; }
+                    mergeChunk(mapProductsToUI(chunk));
                     currentOffset += CHUNK_SIZE;
-                    if (count && currentOffset >= count) hasMore = false;
-
                     await new Promise(r => setTimeout(r, 50));
                 }
                 console.log("Carga completa del catálogo finalizada.");
 
                 // Actualizar caché al final del barrido completo
                 setProducts(current => {
-                    try { localStorage.setItem('shams_products_v16', JSON.stringify(current)); localStorage.setItem('shams_cache_ts_v6', Date.now().toString()); } catch {}
+                    try { localStorage.setItem('shams_products_v18', JSON.stringify(current)); localStorage.setItem('shams_cache_ts_v8', Date.now().toString()); } catch {}
                     return current;
                 });
 
@@ -330,15 +335,15 @@ const Store: React.FC = () => {
             try {
                 setLoading(true);
 
-                const CACHE_TTL = 15 * 60 * 1000;
+                const CACHE_TTL = 60 * 60 * 1000;
 
                 // Mostrar caché INMEDIATAMENTE sin esperar red
                 try {
-                    const cachedTs = localStorage.getItem('shams_cache_ts_v6');
+                    const cachedTs = localStorage.getItem('shams_cache_ts_v8');
                     const cachedTsNum = cachedTs ? parseInt(cachedTs) : 0;
-                    const cachedProducts = JSON.parse(localStorage.getItem('shams_products_v16') || '[]');
-                    const cachedBrands = JSON.parse(localStorage.getItem('shams_brands_v5') || '[]');
-                    const cachedCategories = JSON.parse(localStorage.getItem('shams_categories_v5') || '[]');
+                    const cachedProducts = JSON.parse(localStorage.getItem('shams_products_v18') || '[]');
+                    const cachedBrands = JSON.parse(localStorage.getItem('shams_brands_v7') || '[]');
+                    const cachedCategories = JSON.parse(localStorage.getItem('shams_categories_v7') || '[]');
 
                     if (cachedProducts.length > 0) {
                         setBrands(cachedBrands);
@@ -380,11 +385,14 @@ const Store: React.FC = () => {
                             const lastSyncStr = await getLastSyncDate();
                             const lastSyncTs = lastSyncStr ? (isNaN(Number(lastSyncStr)) ? new Date(lastSyncStr).getTime() : parseInt(lastSyncStr)) : 0;
                             if (cachedTsNum >= lastSyncTs) {
-                                setTimeout(() => fetchRemainingData(0, lastSyncTs), 1000);
+                                // Caché vigente y sin cambios en la DB — no recargar
                                 return;
                             }
+                            // Hubo un sync más reciente que el caché — recargar en background
+                            setTimeout(() => fetchRemainingData(0, lastSyncTs), 500);
+                            return;
                         }
-                        // Caché viejo: recargar en background silencioso
+                        // Caché expirado: recargar en background silencioso
                         const lastSyncStr2 = await getLastSyncDate();
                         const lastSyncTs2 = lastSyncStr2 ? (isNaN(Number(lastSyncStr2)) ? new Date(lastSyncStr2).getTime() : parseInt(lastSyncStr2)) : 0;
                         setTimeout(() => fetchRemainingData(0, lastSyncTs2), 100);
@@ -399,7 +407,7 @@ const Store: React.FC = () => {
                 const lastSyncTs = lastSyncStr ? (isNaN(Number(lastSyncStr)) ? new Date(lastSyncStr).getTime() : parseInt(lastSyncStr)) : 0;
 
                 const [productsRes, brandsRes, categoriesRes] = await Promise.all([
-                    getAllProducts(1, 100, '', 0, true, lastSyncTs),
+                    getAllProducts(1, 250, '', 0, true, lastSyncTs),
                     getBrands(lastSyncTs),
                     getCategories(lastSyncTs)
                 ]);
@@ -426,15 +434,15 @@ const Store: React.FC = () => {
                 setProducts(sortedProducts);
                 
                 try {
-                    localStorage.setItem('shams_products_v16', JSON.stringify(sortedProducts));
-                    localStorage.setItem('shams_brands_v5', JSON.stringify(dbBrands));
-                    localStorage.setItem('shams_categories_v5', JSON.stringify(dbCategories));
-                    localStorage.setItem('shams_cache_ts_v6', Date.now().toString());
+                    localStorage.setItem('shams_products_v18', JSON.stringify(sortedProducts));
+                    localStorage.setItem('shams_brands_v7', JSON.stringify(dbBrands));
+                    localStorage.setItem('shams_categories_v7', JSON.stringify(dbCategories));
+                    localStorage.setItem('shams_cache_ts_v8', Date.now().toString());
                 } catch {}
 
                 setLoading(false);
                 clearTimeout(timeout);
-                setTimeout(() => fetchRemainingData(20, lastSyncTs), 500);
+                setTimeout(() => fetchRemainingData(250, lastSyncTs), 300);
 
             } catch (error: any) {
                 console.error('Error fetching data:', error);
@@ -446,6 +454,44 @@ const Store: React.FC = () => {
 
         fetchInitialData();
         return () => { isMounted = false; clearTimeout(timeout); };
+    }, []);
+
+    // Consulta rápida independiente para marcas con descuento (no espera carga completa)
+    useEffect(() => {
+        supabase
+            .from('products')
+            .select('price, sale_price, brand:brands(name), images:product_images(url, is_primary, sort_order)')
+            .eq('is_published', true)
+            .eq('is_active', true)
+            .not('sale_price', 'is', null)
+            .gt('sale_price', 0)
+            .then(({ data }) => {
+                if (!data) return;
+                const map = new Map<string, { brand: string; bestDiscount: number; image: string; count: number }>();
+                data.forEach((p: any) => {
+                    if (!p.brand?.name || !p.price || !p.sale_price || p.sale_price >= p.price) return;
+                    const discountPct = Math.round((p.price - p.sale_price) / p.price * 100);
+                    if (discountPct < 5) return;
+                    const img = p.images?.find((i: any) => i.is_primary)?.url || p.images?.sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))[0]?.url;
+                    if (!img || img.includes('placeholder') || img.includes('No+Image')) return;
+                    const existing = map.get(p.brand.name);
+                    if (!existing) {
+                        map.set(p.brand.name, { brand: p.brand.name, bestDiscount: discountPct, image: img, count: 1 });
+                    } else {
+                        map.set(p.brand.name, {
+                            brand: p.brand.name,
+                            bestDiscount: Math.max(existing.bestDiscount, discountPct),
+                            image: discountPct > existing.bestDiscount ? img : existing.image,
+                            count: existing.count + 1
+                        });
+                    }
+                });
+                const result = Array.from(map.values())
+                    .filter(b => b.count >= 1)
+                    .sort((a, b) => b.bestDiscount - a.bestDiscount)
+                    .slice(0, 12);
+                setQuickDiscountBrands(result);
+            });
     }, []);
 
     // Scroll al inicio cuando cambian los filtros principales
@@ -691,7 +737,7 @@ const Store: React.FC = () => {
                 decrementLocalStock(orderItems);
                 setCart([]);
                 setIsCheckoutOpen(false);
-                localStorage.removeItem('shams_products_v16');
+                localStorage.removeItem('shams_products_v18');
                 localStorage.removeItem('shams_promo_10');
                 window.location.href = naveData.checkout_url;
 
@@ -737,7 +783,7 @@ const Store: React.FC = () => {
                 decrementLocalStock(orderItems);
                 setCart([]);
                 setIsCheckoutOpen(false);
-                localStorage.removeItem('shams_products_v16');
+                localStorage.removeItem('shams_products_v18');
                 localStorage.removeItem('shams_promo_10');
                 window.location.href = mpData.init_point;
             } else if (formData.paymentMethod === 'transferencia') {
@@ -861,6 +907,9 @@ const Store: React.FC = () => {
 
     // Mejores descuentos por marca (solo para la sección de inicio)
     const brandDiscounts = useMemo(() => {
+        // Usar datos de consulta rápida si ya están disponibles (completos)
+        if (quickDiscountBrands.length > 0) return quickDiscountBrands;
+        // Fallback: calcular desde productos ya cargados
         const map = new Map<string, { brand: string; bestDiscount: number; image: string; count: number }>();
         products.forEach(p => {
             if (!p.brand || p.is_published === false || p.is_active === false) return;
@@ -885,7 +934,7 @@ const Store: React.FC = () => {
             .filter(b => b.count >= 1)
             .sort((a, b) => b.bestDiscount - a.bestDiscount)
             .slice(0, 12);
-    }, [products]);
+    }, [products, quickDiscountBrands]);
 
     const filteredProducts = useMemo(() => products.filter(p => {
         // Filter: Solo productos publicados y activos
@@ -1103,6 +1152,46 @@ const Store: React.FC = () => {
                                 </div>
                             </section>
                         )}
+
+                        {/* Sección Editorial: Nuestros Elegidos para Papá */}
+                        {(() => {
+                            const papaItems = products
+                                .filter((p: any) => p.is_featured)
+                                .sort((a: any, b: any) => (a.sort_order || 999) - (b.sort_order || 999));
+                            if (papaItems.length === 0) return null;
+                            // Duplicar suficientes veces para que el loop sea suave
+                            const copies = papaItems.length < 4 ? 6 : papaItems.length < 8 ? 4 : 2;
+                            const loopItems = Array.from({ length: copies }, () => papaItems).flat();
+                            return (
+                                <section className="py-10">
+                                    <h2 className="text-center uppercase tracking-[0.3em] text-sm md:text-base font-bold text-[var(--color-text)] mb-6 px-4">
+                                        NUESTROS ELEGIDOS PARA PAPÁ
+                                    </h2>
+                                    <div className="overflow-hidden">
+                                        <div className="animate-papa-scroll gap-1" style={{ width: `${loopItems.length * 22}vw` }}>
+                                            {loopItems.map((product: any, idx: number) => (
+                                                <button
+                                                    key={`${product.id}-${idx}`}
+                                                    onClick={() => setSelectedProduct(product)}
+                                                    className="relative shrink-0 overflow-hidden group cursor-pointer"
+                                                    style={{ width: '21vw', minWidth: '160px' }}
+                                                >
+                                                    <div className="aspect-[3/4]">
+                                                        <img
+                                                            src={product.image}
+                                                            alt={product.name}
+                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                                            loading="lazy"
+                                                        />
+                                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors duration-300" />
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </section>
+                            );
+                        })()}
                     </>
                 )}
 
@@ -1143,7 +1232,7 @@ const Store: React.FC = () => {
                                         </span>
                                     </div>
                                 ) : (
-                                    <>ÚLTIMOS <span className="text-[var(--color-text)] italic">INGRESOS</span></>
+                                    <>TODA LA <span className="text-[var(--color-text)] italic">COLECCIÓN</span></>
                                 )}
                             </h2>
                         </div>
@@ -1507,62 +1596,20 @@ const Store: React.FC = () => {
                         </div>
                     ) : (
                         (!selectedBrand && !selectedGender && !selectedCategory && !searchQuery) ? (
-                            <div className="flex flex-col gap-6 md:gap-16">
-                                {/* Featured Products Large Cards (admin-selected) */}
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-0.5 sm:gap-2">
-                                    {(filteredProducts.filter(p => p.is_featured).length > 0
-                                        ? filteredProducts.filter(p => p.is_featured).slice(0, 3)
-                                        : filteredProducts.slice(0, 3)
-                                    ).map(product => (
-                                        <button
-                                            key={product.id}
-                                            onClick={() => openProduct(product)}
-                                            className="group relative w-full aspect-[3/4] md:aspect-[4/5] overflow-hidden bg-[var(--color-background-alt)] block"
-                                        >
-                                            <img
-                                                src={(product.images && product.images.length > 0) ? product.images[0] : product.image || ''}
-                                                alt={product.name}
-                                                className="w-full h-full object-cover object-top transition-transform duration-1000 group-hover:scale-105"
-                                            />
-                                            {/* Hover Overlay */}
-                                            <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                                            
-                                            {/* Shopping Bag Button at bottom center */}
-                                            <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex justify-center w-full">
-                                                <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center shadow-[0_10px_30px_rgba(0,0,0,0.15)] transform transition-transform duration-500 group-hover:-translate-y-2 group-hover:scale-105">
-                                                    <ShoppingBag size={18} className="text-black" />
-                                                </div>
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
-                                
-                                {/* Rest of the Catalog */}
-                                {filteredProducts.filter(p => !p.is_featured).length > 0 && (
-                                    <div>
-                                        <div className="flex items-center justify-center mb-8 mt-4 md:mt-0">
-                                            <span className="text-[var(--color-text)] uppercase tracking-[0.4em] text-[10px] md:text-xs block font-bold px-8 py-2 border-y border-[var(--color-text)]/20">
-                                                CATÁLOGO GENERAL
-                                            </span>
-                                        </div>
-                                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-0.5 sm:gap-6 gap-y-4 sm:gap-y-12 min-h-[50vh]">
-                                            {(() => {
-                                                const isBottom = (p: any) => { const cat = (p.category?.name || '').toUpperCase(); return cat.includes('ACCESORIO') || cat.includes('CALZADO') || cat.includes('BOLSO') || cat.includes('CARTERA'); };
-                                                const base = filteredProducts.filter(p => !p.is_featured);
-                                                const clothing = base.filter(p => !isBottom(p));
-                                                const accessories = base.filter(p => isBottom(p));
-                                                const brandMap = new Map<string, any[]>();
-                                                for (const p of clothing) { const b = (p.brand as any)?.name || ''; if (!brandMap.has(b)) brandMap.set(b, []); brandMap.get(b)!.push(p); }
-                                                const queues = Array.from(brandMap.values());
-                                                const result: any[] = [];
-                                                while (queues.some(q => q.length > 0)) { for (const q of queues) { if (q.length > 0) result.push(q.shift()); } }
-                                                return [...result, ...accessories].map(product => (
-                                                    <ProductCard key={product.id} product={product} onAddToCart={addToCart} onOpenDetail={(p) => openProduct(p)} isFavorite={favorites.includes(product.id)} onToggleFavorite={toggleFavorite} />
-                                                ));
-                                            })()}
-                                        </div>
-                                    </div>
-                                )}
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-0.5 sm:gap-6 gap-y-4 sm:gap-y-12 min-h-[50vh]">
+                                {(() => {
+                                    const isBottom = (p: any) => { const cat = (p.category?.name || '').toUpperCase(); return cat.includes('ACCESORIO') || cat.includes('CALZADO') || cat.includes('BOLSO') || cat.includes('CARTERA'); };
+                                    const clothing = filteredProducts.filter(p => !isBottom(p));
+                                    const accessories = filteredProducts.filter(p => isBottom(p));
+                                    const brandMap = new Map<string, any[]>();
+                                    for (const p of clothing) { const b = (p.brand as any)?.name || ''; if (!brandMap.has(b)) brandMap.set(b, []); brandMap.get(b)!.push(p); }
+                                    const queues = Array.from(brandMap.values());
+                                    const result: any[] = [];
+                                    while (queues.some(q => q.length > 0)) { for (const q of queues) { if (q.length > 0) result.push(q.shift()); } }
+                                    return [...result, ...accessories].map(product => (
+                                        <ProductCard key={product.id} product={product} onAddToCart={addToCart} onOpenDetail={(p) => openProduct(p)} isFavorite={favorites.includes(product.id)} onToggleFavorite={toggleFavorite} />
+                                    ));
+                                })()}
                             </div>
                         ) : (
                             <div>

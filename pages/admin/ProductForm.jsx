@@ -485,8 +485,8 @@ export default function ProductForm({ product, onSuccess, onCancel }) {
 
             // Invalida el caché del store para que la tienda muestre los cambios inmediatamente
             try {
-                localStorage.removeItem('shams_products_v16')
-                localStorage.setItem('shams_cache_ts_v6', '0')
+                localStorage.removeItem('shams_products_v18')
+                localStorage.setItem('shams_cache_ts_v8', '0')
             } catch {}
 
             onSuccess()

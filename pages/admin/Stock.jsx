@@ -435,6 +435,12 @@ export default function Stock() {
                         brandName = 'PERRAMUS'
                     }
 
+                    // Normalización de Stanley: si el proveedor es STANLEY, forzar marca STANLEY
+                    const rowProvider = (row['PROVEEDOR'] || row['proveedor'] || '').toString().trim().toUpperCase();
+                    if (rowProvider === 'STANLEY' || (existingP?.provider || '').toUpperCase() === 'STANLEY') {
+                        brandName = 'STANLEY';
+                    }
+
                     // 1. Manejar Marca sin crear (solo mapear si existe)
                     let effectiveBrandId = existingP?.brand_id || null;
                     if (brandName && brandMap[brandName]) {

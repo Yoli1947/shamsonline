@@ -75,6 +75,21 @@
       animation: marquee 30s linear infinite;
     }
 
+    @keyframes papa-scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .animate-papa-scroll {
+      display: flex;
+      animation: papa-scroll 70s linear infinite;
+      will-change: transform;
+    }
+
+    .animate-papa-scroll:hover {
+      animation-play-state: paused;
+    }
+
     .filter-btn-active {
       background: #000000;
       border-color: #000000;
