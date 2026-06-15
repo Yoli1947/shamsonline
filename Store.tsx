@@ -314,7 +314,7 @@ const Store: React.FC = () => {
 
                 // Actualizar caché al final del barrido completo
                 setProducts(current => {
-                    try { localStorage.setItem('shams_products_v18', JSON.stringify(current)); localStorage.setItem('shams_cache_ts_v8', Date.now().toString()); } catch {}
+                    try { localStorage.setItem('shams_products_v19', JSON.stringify(current)); localStorage.setItem('shams_cache_ts_v9', Date.now().toString()); } catch {}
                     return current;
                 });
 
@@ -339,9 +339,9 @@ const Store: React.FC = () => {
 
                 // Mostrar caché INMEDIATAMENTE sin esperar red
                 try {
-                    const cachedTs = localStorage.getItem('shams_cache_ts_v8');
+                    const cachedTs = localStorage.getItem('shams_cache_ts_v9');
                     const cachedTsNum = cachedTs ? parseInt(cachedTs) : 0;
-                    const cachedProducts = JSON.parse(localStorage.getItem('shams_products_v18') || '[]');
+                    const cachedProducts = JSON.parse(localStorage.getItem('shams_products_v19') || '[]');
                     const cachedBrands = JSON.parse(localStorage.getItem('shams_brands_v7') || '[]');
                     const cachedCategories = JSON.parse(localStorage.getItem('shams_categories_v7') || '[]');
 
@@ -433,10 +433,10 @@ const Store: React.FC = () => {
                 setProducts(sortedProducts);
                 
                 try {
-                    localStorage.setItem('shams_products_v18', JSON.stringify(sortedProducts));
+                    localStorage.setItem('shams_products_v19', JSON.stringify(sortedProducts));
                     localStorage.setItem('shams_brands_v7', JSON.stringify(dbBrands));
                     localStorage.setItem('shams_categories_v7', JSON.stringify(dbCategories));
-                    localStorage.setItem('shams_cache_ts_v8', Date.now().toString());
+                    localStorage.setItem('shams_cache_ts_v9', Date.now().toString());
                 } catch {}
 
                 setLoading(false);
@@ -739,7 +739,7 @@ const Store: React.FC = () => {
                 decrementLocalStock(orderItems);
                 setCart([]);
                 setIsCheckoutOpen(false);
-                localStorage.removeItem('shams_products_v18');
+                localStorage.removeItem('shams_products_v19');
                 localStorage.removeItem('shams_promo_10');
                 window.location.href = naveData.checkout_url;
 
@@ -785,7 +785,7 @@ const Store: React.FC = () => {
                 decrementLocalStock(orderItems);
                 setCart([]);
                 setIsCheckoutOpen(false);
-                localStorage.removeItem('shams_products_v18');
+                localStorage.removeItem('shams_products_v19');
                 localStorage.removeItem('shams_promo_10');
                 window.location.href = mpData.init_point;
             } else if (formData.paymentMethod === 'transferencia') {

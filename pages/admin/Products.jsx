@@ -108,8 +108,11 @@ export default function Products() {
             setBrands(b)
             setSeasons(s)
 
-            const hierarchical = (cRaw || [])
-                .filter(cat => cat.parent_id === '00000000-0000-0000-0000-000000000003')
+            // Mostrar todas las categorías que tienen padre (subcategorías reales)
+            // Si ninguna tiene parent_id, mostrar todas
+            const withParent = (cRaw || []).filter(cat => cat.parent_id !== null)
+            const toShow = withParent.length > 0 ? withParent : (cRaw || [])
+            const hierarchical = toShow
                 .map(cat => ({ ...cat, displayName: cat.name, parentName: 'GENERAL' }))
                 .sort((a, b) => a.displayName.localeCompare(b.displayName));
 
