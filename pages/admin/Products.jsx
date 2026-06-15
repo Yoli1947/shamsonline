@@ -475,16 +475,15 @@ export default function Products() {
 
     const isDbSearchActive = dbSearchResults !== null
 
-    const filteredProducts = isDbSearchActive
-        ? products   // products YA fue reemplazado con los resultados de búsqueda
-        : products.filter(p => {
+    const filteredProducts = products.filter(p => {
             const searchLower = searchTerm.toLowerCase();
             const nameMatch = (p.name || '').toLowerCase().includes(searchLower);
             const brandMatch = (p.brand?.name || '').toLowerCase().includes(searchLower);
             const skuMatch = (p.sku || '').toLowerCase().includes(searchLower);
             const providerSkuMatch = (p.provider_sku || '').toLowerCase().includes(searchLower);
             const variantSkuMatch = p.variants?.some(v => (v.sku || '').toLowerCase().includes(searchLower));
-            const matchesSearch = !searchLower || nameMatch || brandMatch || skuMatch || providerSkuMatch || variantSkuMatch;
+            // Cuando hay búsqueda DB activa, products ya viene filtrado por texto — no re-filtrar por texto
+            const matchesSearch = isDbSearchActive || !searchLower || nameMatch || brandMatch || skuMatch || providerSkuMatch || variantSkuMatch;
 
             const currentBrandId = p.brand_id || p.brand?.id;
             const matchesBrand = !selectedBrandId || String(currentBrandId) === String(selectedBrandId);

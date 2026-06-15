@@ -16,16 +16,36 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
     const [loading, setLoading] = useState(true);
 
-    const refreshSettings = useCallback(async () => {
+    const refreshSettings = useCallback(async (force = false) => {
         try {
+            // Usar caché de localStorage para no hacer un fetch en cada carga
+            if (!force) {
+                try {
+                    const cached = localStorage.getItem('shams_settings_v1');
+                    if (cached) {
+                        const parsed = JSON.parse(cached);
+                        setSettings(prev => ({ ...prev, ...parsed }));
+                        setLoading(false);
+                        // Actualizar en background sin bloquear
+                        getSiteSettings().then(data => {
+                            if (!data) return;
+                            const parsedData = { ...data };
+                            if (parsedData.transfer_discount) parsedData.transfer_discount = Number(parsedData.transfer_discount);
+                            setSettings(prev => ({ ...prev, ...parsedData }));
+                            try { localStorage.setItem('shams_settings_v1', JSON.stringify(parsedData)); } catch {}
+                        }).catch(() => {});
+                        return;
+                    }
+                } catch {}
+            }
             const data = await getSiteSettings();
             if (data) {
-                // Parse numeric values if they are strings
                 const parsedData = { ...data };
                 if (parsedData.transfer_discount) {
                     parsedData.transfer_discount = Number(parsedData.transfer_discount);
                 }
                 setSettings(prev => ({ ...prev, ...parsedData }));
+                try { localStorage.setItem('shams_settings_v1', JSON.stringify(parsedData)); } catch {}
             }
         } catch (error) {
             console.error('Error fetching settings:', error);

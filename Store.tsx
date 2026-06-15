@@ -402,15 +402,14 @@ const Store: React.FC = () => {
                     console.warn('Error reading cache:', e);
                 }
 
-                // Sin caché: cargar desde red
-                const lastSyncStr = await getLastSyncDate();
-                const lastSyncTs = lastSyncStr ? (isNaN(Number(lastSyncStr)) ? new Date(lastSyncStr).getTime() : parseInt(lastSyncStr)) : 0;
-
-                const [productsRes, brandsRes, categoriesRes] = await Promise.all([
-                    getAllProducts(1, 250, '', 0, true, lastSyncTs),
-                    getBrands(lastSyncTs),
-                    getCategories(lastSyncTs)
+                // Sin caché: cargar desde red en paralelo (lastSyncDate no bloquea la carga de productos)
+                const [productsRes, brandsRes, categoriesRes, lastSyncStr] = await Promise.all([
+                    getAllProducts(1, 250, '', 0, true, 0),
+                    getBrands(0),
+                    getCategories(0),
+                    getLastSyncDate().catch(() => null)
                 ]);
+                const lastSyncTs = lastSyncStr ? (isNaN(Number(lastSyncStr)) ? new Date(lastSyncStr).getTime() : parseInt(lastSyncStr)) : 0;
 
                 const dbProducts = productsRes.products || [];
                 const dbBrands = brandsRes || [];
@@ -456,8 +455,9 @@ const Store: React.FC = () => {
         return () => { isMounted = false; clearTimeout(timeout); };
     }, []);
 
-    // Consulta rápida independiente para marcas con descuento (no espera carga completa)
+    // Consulta para marcas con descuento — se difiere 2s para no competir con la carga inicial
     useEffect(() => {
+        const timer = setTimeout(() => {
         supabase
             .from('products')
             .select('price, sale_price, brand:brands(name), images:product_images(url, is_primary, sort_order)')
@@ -492,6 +492,8 @@ const Store: React.FC = () => {
                     .slice(0, 12);
                 setQuickDiscountBrands(result);
             });
+        }, 2000);
+        return () => clearTimeout(timer);
     }, []);
 
     // Scroll al inicio cuando cambian los filtros principales
@@ -960,8 +962,9 @@ const Store: React.FC = () => {
             p.image !== 'https://via.placeholder.com/400x500?text=No+Image';
 
         // Categoría Cafetería check
-        const CAFETERIA_BRANDS = ['bialetti', 'stanley'];
+        const CAFETERIA_BRANDS = ['bialetti'];
         const isCafeteriaProduct = p.category?.toLowerCase() === 'cafeteria' ||
+            p.category?.toLowerCase() === 'cafetería' ||
             CAFETERIA_BRANDS.includes((p.brand || '').toLowerCase());
         const isCafeteriaFilterActive = selectedCategory?.toLowerCase() === 'cafeteria';
 
@@ -1482,7 +1485,7 @@ const Store: React.FC = () => {
                                         </div>
                                         <div className="flex flex-col gap-1.5 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
                                             {selectedCategory?.toLowerCase() === 'cafeteria' ? (
-                                                ['BIALETTI', 'STANLEY'].map(brand => {
+                                                ['BIALETTI'].map(brand => {
                                                     const isActive = selectedBrand?.toUpperCase() === brand;
                                                     return (
                                                         <button

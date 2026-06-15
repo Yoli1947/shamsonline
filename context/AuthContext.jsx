@@ -190,30 +190,8 @@ export function AuthProvider({ children }) {
         if (error) throw error
     }
 
-    // Si estamos cargando la sesión inicial, no renderizamos nada (o un spinner)
-    // para evitar redirecciones incorrectas en rutas protegidas
-    // Si estamos cargando la sesión inicial
-    if (loading) {
-        return (
-            <div style={{
-                height: '100vh',
-                width: '100vw',
-                backgroundColor: '#000000',
-                color: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexDirection: 'column',
-                fontFamily: 'sans-serif'
-            }}>
-                <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '16px', letterSpacing: '0.4em' }}>SHAMS</div>
-                    <div style={{ color: '#999999', fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Cargando...</div>
-                </div>
-            </div>
-        )
-    }
-
+    // La tienda pública se renderiza inmediatamente sin esperar la sesión.
+    // Las rutas de admin pueden leer `loading` y esperar ellas mismas si lo necesitan.
     return (
         <AuthContext.Provider value={{ user, login, signup, logout, loading }}>
             {children}

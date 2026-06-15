@@ -6,8 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="facebook-domain-verification" content="u4e2o0xr6su0atx5r8xbk845s3il2f" />
   <title>Shams Online | Moda Premium</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Josefin+Sans:wght@100;200;300;400;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Josefin+Sans:wght@300;400;700&display=swap"
     rel="stylesheet">
 
   <style>
@@ -170,6 +171,29 @@
     </div>
   </div>
   <script>
+    // Auto-reload si el browser intenta cargar un chunk JS viejo que ya no existe
+    window.addEventListener('error', function(e) {
+      if (e.target && (e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK')) {
+        if (!sessionStorage.getItem('_chunk_reload')) {
+          sessionStorage.setItem('_chunk_reload', '1');
+          window.location.reload(true);
+        }
+      }
+    }, true);
+    window.addEventListener('unhandledrejection', function(event) {
+      var reason = String(event.reason || '');
+      if (reason.includes('Failed to fetch') || reason.includes('Loading chunk') || reason.includes('dynamically imported module')) {
+        if (!sessionStorage.getItem('_chunk_reload')) {
+          sessionStorage.setItem('_chunk_reload', '1');
+          window.location.reload(true);
+        }
+        return;
+      }
+      document.getElementById('loading-status').style.display = 'none';
+      var errorDisplay = document.getElementById('error-display');
+      errorDisplay.style.display = 'block';
+      errorDisplay.innerHTML = '<strong>Promesa Rechazada:</strong><br>' + event.reason;
+    });
     window.onerror = function (message, source, lineno, colno, error) {
       document.getElementById('loading-status').style.display = 'none';
       const errorDisplay = document.getElementById('error-display');
@@ -177,12 +201,6 @@
       errorDisplay.innerHTML = '<strong>Error Crítico:</strong><br>' + message +
         '<br><small>' + source + ':' + lineno + '</small>';
     };
-    window.addEventListener('unhandledrejection', function (event) {
-      document.getElementById('loading-status').style.display = 'none';
-      const errorDisplay = document.getElementById('error-display');
-      errorDisplay.style.display = 'block';
-      errorDisplay.innerHTML = '<strong>Promesa Rechazada:</strong><br>' + event.reason;
-    });
   </script>
   <script type="module" src="/index.tsx"></script>
 </body>
