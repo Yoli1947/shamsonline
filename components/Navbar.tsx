@@ -132,13 +132,6 @@ const Navbar: React.FC<NavbarProps> = ({
               <Gift size={12} />
               GIFT CARDS
             </button>
-            <button
-              className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5"
-              style={{ color: '#000000' }}
-              onClick={() => window.open('https://shamsoutlet.com', '_blank')}
-            >
-              OUTLET
-            </button>
             {isAdmin && (
               <button
                 className="flex items-center gap-2 hover:text-black transition-all font-normal uppercase text-[10px] lg:text-[12px] border-l border-zinc-200 pl-8 ml-4 tracking-[0.12em]"
@@ -281,13 +274,6 @@ const Navbar: React.FC<NavbarProps> = ({
             <div className="w-1.5 h-1.5 bg-black scale-0 group-hover:scale-100 transition-transform" />
           </button>
 
-          <button 
-            onClick={() => { setIsMobileMenuOpen(false); window.open('https://shamsoutlet.com', '_blank'); }}
-            className="group flex items-center justify-between w-full py-5 text-left border-b border-black/5 transition-all hover:pl-2"
-          >
-            <span className="text-lg font-black tracking-[0.1em] text-black uppercase">OUTLET</span>
-            <div className="w-1.5 h-1.5 bg-black scale-0 group-hover:scale-100 transition-transform" />
-          </button>
 
           {isAdmin && (
             <button 

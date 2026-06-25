@@ -143,7 +143,7 @@ const FuturistPreview: React.FC = () => {
                             </span>
                         </div>
                         <h2 className="font-heading text-6xl md:text-9xl font-black mb-8 leading-[0.8] tracking-tighter text-white">
-                            SHAMS <br /> <span className="text-vibrant italic">OUTLET</span>
+                            SHAMS
                         </h2>
                         <p className="text-zinc-300 text-sm md:text-base max-w-3xl mx-auto mb-10 font-black leading-relaxed tracking-wider uppercase">
                             Primeras marcas. Precios imbatibles. <br />
