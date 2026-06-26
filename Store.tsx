@@ -968,13 +968,24 @@ const Store: React.FC = () => {
             CAFETERIA_BRANDS.includes((p.brand || '').toLowerCase());
         const isCafeteriaFilterActive = selectedCategory?.toLowerCase() === 'cafeteria';
 
+        // Accesorios check — se excluyen de vistas por género y agrupan bajo ACCESORIOS
+        const ACCESSORY_CAT_KEYWORDS = ['accesorio', 'calzado', 'bolso', 'cartera'];
+        const isAccessoryProduct = ACCESSORY_CAT_KEYWORDS.some(kw => p.category?.toLowerCase().includes(kw));
+        const isAccesoriosFilterActive = selectedCategory?.toLowerCase().includes('accesorio');
+
         // Filter by Category
         const matchesCategory = !selectedCategory || selectedCategory === 'Todos' ||
             p.category?.toLowerCase() === selectedCategory.toLowerCase() ||
-            (isCafeteriaFilterActive && CAFETERIA_BRANDS.includes((p.brand || '').toLowerCase()));
+            (isCafeteriaFilterActive && CAFETERIA_BRANDS.includes((p.brand || '').toLowerCase())) ||
+            (isAccesoriosFilterActive && isAccessoryProduct);
 
         // Excluir categorías de la lista negra global SOLO si no hay un filtro de marca o categoría activo
         if (!selectedCategory && !selectedBrand && isCafeteriaProduct) {
+            return false;
+        }
+
+        // Excluir accesorios de vistas por género — solo aparecen al filtrar por ACCESORIOS
+        if (selectedGender && !selectedCategory && isAccessoryProduct) {
             return false;
         }
 
