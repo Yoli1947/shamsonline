@@ -118,7 +118,6 @@ const Store: React.FC = () => {
     const [quickDiscountBrands, setQuickDiscountBrands] = useState<{ brand: string; bestDiscount: number; image: string; count: number }[]>([]);
 
     const [categoriesByGender, setCategoriesByGender] = useState<{ Mujer: any[], Hombre: any[] }>({ Mujer: [], Hombre: [] });
-    const [accesoriosCategoryNames, setAccesoriosCategoryNames] = useState<Set<string>>(new Set());
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -354,14 +353,6 @@ const Store: React.FC = () => {
                             Mujer: cachedCategories.filter((c: any) => c.parent_id === mujerParent?.id),
                             Hombre: cachedCategories.filter((c: any) => c.parent_id === hombreParent?.id)
                         });
-                        const accesoriosParentC = cachedCategories.find((c: any) => c.name?.toUpperCase().includes('ACCESORIO'));
-                        const accesoriosCatSetC = new Set<string>();
-                        if (accesoriosParentC) {
-                            accesoriosCatSetC.add((accesoriosParentC.name || '').toLowerCase().trim());
-                            cachedCategories.filter((c: any) => c.parent_id === accesoriosParentC.id)
-                                .forEach((c: any) => { if (c.name) accesoriosCatSetC.add(c.name.toLowerCase().trim()); });
-                        }
-                        setAccesoriosCategoryNames(accesoriosCatSetC);
                         setAvailableCategories(Array.from(new Set(cachedCategories.filter((c: any) => c.parent_id !== null).map((c: any) => c.name))));
                         setProducts(cachedProducts);
                         setLoading(false);
@@ -434,15 +425,6 @@ const Store: React.FC = () => {
                     Mujer: dbCategories.filter((c: any) => c.parent_id === mujerParent?.id && !EXCLUDED_CATS.includes(c.name?.toLowerCase().trim())),
                     Hombre: dbCategories.filter((c: any) => c.parent_id === hombreParent?.id && !EXCLUDED_CATS.includes(c.name?.toLowerCase().trim()))
                 });
-
-                const accesoriosParentDB = dbCategories.find((c: any) => c.name?.toUpperCase().includes('ACCESORIO'));
-                const accesoriosCatSetDB = new Set<string>();
-                if (accesoriosParentDB) {
-                    accesoriosCatSetDB.add((accesoriosParentDB.name || '').toLowerCase().trim());
-                    dbCategories.filter((c: any) => c.parent_id === accesoriosParentDB.id)
-                        .forEach((c: any) => { if (c.name) accesoriosCatSetDB.add(c.name.toLowerCase().trim()); });
-                }
-                setAccesoriosCategoryNames(accesoriosCatSetDB);
 
                 const allCategories = Array.from(new Set(dbCategories.filter((c: any) => c.parent_id !== null && !EXCLUDED_CATS.includes(c.name?.toLowerCase().trim())).map((c: any) => c.name?.trim()))).filter(Boolean) as string[];
                 setAvailableCategories(allCategories);
@@ -956,11 +938,7 @@ const Store: React.FC = () => {
             .slice(0, 12);
     }, [products, quickDiscountBrands]);
 
-    const filteredProducts = useMemo(() => {
-        const _mujerCatNames = new Set(categoriesByGender.Mujer.map((c: any) => (c.name || '').toLowerCase().trim()));
-        const _hombreCatNames = new Set(categoriesByGender.Hombre.map((c: any) => (c.name || '').toLowerCase().trim()));
-        const _hasGenderCatData = _mujerCatNames.size > 0 || _hombreCatNames.size > 0;
-    return products.filter(p => {
+    const filteredProducts = useMemo(() => products.filter(p => {
         // Filter: Solo productos publicados y activos
         if (p.is_published === false || p.is_active === false) return false;
 
@@ -990,16 +968,8 @@ const Store: React.FC = () => {
             CAFETERIA_BRANDS.includes((p.brand || '').toLowerCase());
         const isCafeteriaFilterActive = selectedCategory?.toLowerCase() === 'cafeteria';
 
-        // Accesorios check — estrategia robusta en 3 capas
         const _catLower = (p.category || '').toLowerCase().trim();
-        const _isInGenderCat = _mujerCatNames.has(_catLower) || _hombreCatNames.has(_catLower);
-        const isAccessoryProduct =
-            // Capa 1: categoría conocida como accesorio por jerarquía DB (ACCESORIOS → hijos)
-            (accesoriosCategoryNames.size > 0 && accesoriosCategoryNames.has(_catLower)) ||
-            // Capa 2 (más robusta): categoría NO está en ningún árbol de género → es accesorio
-            (_hasGenderCatData && !_isInGenderCat && _catLower !== '' && _catLower !== 'general') ||
-            // Capa 3: fallback por palabras clave cuando no hay datos de categorías
-            (!_hasGenderCatData && ['accesorio', 'calzado', 'bolso', 'cartera', 'gorro', 'mochila', 'sombrero', 'gorra'].some(kw => _catLower.includes(kw)));
+        const isAccessoryProduct = ['accesorio', 'calzado', 'bolso', 'cartera', 'gorro', 'mochila', 'sombrero', 'gorra'].some(kw => _catLower.includes(kw));
         const isAccesoriosFilterActive = selectedCategory?.toLowerCase().includes('accesorio');
 
         // Filter by Category
@@ -1071,8 +1041,7 @@ const Store: React.FC = () => {
             return sortA - sortB;
         }
         return (a.name || '').localeCompare(b.name || '');
-    });
-    }, [products, selectedCategory, selectedBrand, selectedGender, searchQuery, selectedSize, selectedOrder, accesoriosCategoryNames, categoriesByGender]);
+    }), [products, selectedCategory, selectedBrand, selectedGender, searchQuery, selectedSize, selectedOrder]);
 
     // Note: The full-screen loading blocker was removed here to allow instant FCP.
 
