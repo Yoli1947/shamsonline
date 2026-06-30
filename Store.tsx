@@ -956,7 +956,11 @@ const Store: React.FC = () => {
             .slice(0, 12);
     }, [products, quickDiscountBrands]);
 
-    const filteredProducts = useMemo(() => products.filter(p => {
+    const filteredProducts = useMemo(() => {
+        const _mujerCatNames = new Set(categoriesByGender.Mujer.map((c: any) => (c.name || '').toLowerCase().trim()));
+        const _hombreCatNames = new Set(categoriesByGender.Hombre.map((c: any) => (c.name || '').toLowerCase().trim()));
+        const _hasGenderCatData = _mujerCatNames.size > 0 || _hombreCatNames.size > 0;
+    return products.filter(p => {
         // Filter: Solo productos publicados y activos
         if (p.is_published === false || p.is_active === false) return false;
 
@@ -986,10 +990,16 @@ const Store: React.FC = () => {
             CAFETERIA_BRANDS.includes((p.brand || '').toLowerCase());
         const isCafeteriaFilterActive = selectedCategory?.toLowerCase() === 'cafeteria';
 
-        // Accesorios check — usa la jerarquía real de categorías de la DB
-        const isAccessoryProduct = accesoriosCategoryNames.size > 0
-            ? accesoriosCategoryNames.has((p.category || '').toLowerCase().trim())
-            : ['accesorio', 'calzado', 'bolso', 'cartera', 'gorro', 'mochila', 'sombrero', 'gorra'].some(kw => (p.category || '').toLowerCase().includes(kw));
+        // Accesorios check — estrategia robusta en 3 capas
+        const _catLower = (p.category || '').toLowerCase().trim();
+        const _isInGenderCat = _mujerCatNames.has(_catLower) || _hombreCatNames.has(_catLower);
+        const isAccessoryProduct =
+            // Capa 1: categoría conocida como accesorio por jerarquía DB (ACCESORIOS → hijos)
+            (accesoriosCategoryNames.size > 0 && accesoriosCategoryNames.has(_catLower)) ||
+            // Capa 2 (más robusta): categoría NO está en ningún árbol de género → es accesorio
+            (_hasGenderCatData && !_isInGenderCat && _catLower !== '' && _catLower !== 'general') ||
+            // Capa 3: fallback por palabras clave cuando no hay datos de categorías
+            (!_hasGenderCatData && ['accesorio', 'calzado', 'bolso', 'cartera', 'gorro', 'mochila', 'sombrero', 'gorra'].some(kw => _catLower.includes(kw)));
         const isAccesoriosFilterActive = selectedCategory?.toLowerCase().includes('accesorio');
 
         // Filter by Category
@@ -1061,7 +1071,8 @@ const Store: React.FC = () => {
             return sortA - sortB;
         }
         return (a.name || '').localeCompare(b.name || '');
-    }), [products, selectedCategory, selectedBrand, selectedGender, searchQuery, selectedSize, selectedOrder, accesoriosCategoryNames]);
+    });
+    }, [products, selectedCategory, selectedBrand, selectedGender, searchQuery, selectedSize, selectedOrder, accesoriosCategoryNames, categoriesByGender]);
 
     // Note: The full-screen loading blocker was removed here to allow instant FCP.
 
