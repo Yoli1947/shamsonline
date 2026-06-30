@@ -118,6 +118,7 @@ const Store: React.FC = () => {
     const [quickDiscountBrands, setQuickDiscountBrands] = useState<{ brand: string; bestDiscount: number; image: string; count: number }[]>([]);
 
     const [categoriesByGender, setCategoriesByGender] = useState<{ Mujer: any[], Hombre: any[] }>({ Mujer: [], Hombre: [] });
+    const [accesoriosCategoryNames, setAccesoriosCategoryNames] = useState<Set<string>>(new Set());
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -353,6 +354,14 @@ const Store: React.FC = () => {
                             Mujer: cachedCategories.filter((c: any) => c.parent_id === mujerParent?.id),
                             Hombre: cachedCategories.filter((c: any) => c.parent_id === hombreParent?.id)
                         });
+                        const accesoriosParentC = cachedCategories.find((c: any) => c.name?.toUpperCase().includes('ACCESORIO'));
+                        const accesoriosCatSetC = new Set<string>();
+                        if (accesoriosParentC) {
+                            accesoriosCatSetC.add((accesoriosParentC.name || '').toLowerCase().trim());
+                            cachedCategories.filter((c: any) => c.parent_id === accesoriosParentC.id)
+                                .forEach((c: any) => { if (c.name) accesoriosCatSetC.add(c.name.toLowerCase().trim()); });
+                        }
+                        setAccesoriosCategoryNames(accesoriosCatSetC);
                         setAvailableCategories(Array.from(new Set(cachedCategories.filter((c: any) => c.parent_id !== null).map((c: any) => c.name))));
                         setProducts(cachedProducts);
                         setLoading(false);
@@ -425,6 +434,15 @@ const Store: React.FC = () => {
                     Mujer: dbCategories.filter((c: any) => c.parent_id === mujerParent?.id && !EXCLUDED_CATS.includes(c.name?.toLowerCase().trim())),
                     Hombre: dbCategories.filter((c: any) => c.parent_id === hombreParent?.id && !EXCLUDED_CATS.includes(c.name?.toLowerCase().trim()))
                 });
+
+                const accesoriosParentDB = dbCategories.find((c: any) => c.name?.toUpperCase().includes('ACCESORIO'));
+                const accesoriosCatSetDB = new Set<string>();
+                if (accesoriosParentDB) {
+                    accesoriosCatSetDB.add((accesoriosParentDB.name || '').toLowerCase().trim());
+                    dbCategories.filter((c: any) => c.parent_id === accesoriosParentDB.id)
+                        .forEach((c: any) => { if (c.name) accesoriosCatSetDB.add(c.name.toLowerCase().trim()); });
+                }
+                setAccesoriosCategoryNames(accesoriosCatSetDB);
 
                 const allCategories = Array.from(new Set(dbCategories.filter((c: any) => c.parent_id !== null && !EXCLUDED_CATS.includes(c.name?.toLowerCase().trim())).map((c: any) => c.name?.trim()))).filter(Boolean) as string[];
                 setAvailableCategories(allCategories);
@@ -968,9 +986,10 @@ const Store: React.FC = () => {
             CAFETERIA_BRANDS.includes((p.brand || '').toLowerCase());
         const isCafeteriaFilterActive = selectedCategory?.toLowerCase() === 'cafeteria';
 
-        // Accesorios check — se excluyen de vistas por género y agrupan bajo ACCESORIOS
-        const ACCESSORY_CAT_KEYWORDS = ['accesorio', 'calzado', 'bolso', 'cartera'];
-        const isAccessoryProduct = ACCESSORY_CAT_KEYWORDS.some(kw => p.category?.toLowerCase().includes(kw));
+        // Accesorios check — usa la jerarquía real de categorías de la DB
+        const isAccessoryProduct = accesoriosCategoryNames.size > 0
+            ? accesoriosCategoryNames.has((p.category || '').toLowerCase().trim())
+            : ['accesorio', 'calzado', 'bolso', 'cartera', 'gorro', 'mochila', 'sombrero', 'gorra'].some(kw => (p.category || '').toLowerCase().includes(kw));
         const isAccesoriosFilterActive = selectedCategory?.toLowerCase().includes('accesorio');
 
         // Filter by Category
@@ -1042,7 +1061,7 @@ const Store: React.FC = () => {
             return sortA - sortB;
         }
         return (a.name || '').localeCompare(b.name || '');
-    }), [products, selectedCategory, selectedBrand, selectedGender, searchQuery, selectedSize, selectedOrder]);
+    }), [products, selectedCategory, selectedBrand, selectedGender, searchQuery, selectedSize, selectedOrder, accesoriosCategoryNames]);
 
     // Note: The full-screen loading blocker was removed here to allow instant FCP.
 
