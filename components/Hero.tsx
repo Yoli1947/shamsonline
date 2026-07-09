@@ -10,31 +10,6 @@ const slides = [
     objectPosition: "center"
   },
   {
-    image: "/armesto banner.jpg",
-    title: "SHAMS / ARMESTO",
-    subtitle: "ALTA SASTRERÍA",
-    description: "Experimentá el arte de la sastrería a medida. Estilo impecable y elegancia contemporánea.",
-    objectPosition: "50% 20%",
-    objectFit: "cover",
-    imageScale: 1.1
-  },
-  {
-    image: "/maxg/maxg banner.jpg",
-    title: "SHAMS / MAXG",
-    subtitle: "COLECCIÓN FW26",
-    description: "Inspiración urbana y tecnológica. La colección de MAXG redefine el abrigo contemporáneo con un diseño audaz y exclusivo.",
-    objectPosition: "center",
-    objectFit: "contain",
-    bgColor: "bg-[#f2f2f2]"
-  },
-  {
-    image: "/hero-banner-cibeles.jpg",
-    title: "SHAMS / CIBELES",
-    subtitle: "NUEVA TEMPORADA",
-    description: "Lo mejor de Cibeles para esta temporada. Elegancia y exclusividad en cada detalle.",
-    objectPosition: "top"
-  },
-  {
     image: "/hero-banner-hunter.jpg",
     title: "SHAMS / HUNTER",
     subtitle: "COLECCIÓN EXCLUSIVA",

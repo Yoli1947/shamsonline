@@ -274,7 +274,6 @@ const Navbar: React.FC<NavbarProps> = ({
             <div className="w-1.5 h-1.5 bg-black scale-0 group-hover:scale-100 transition-transform" />
           </button>
 
-
           {isAdmin && (
             <button 
               onClick={() => { setIsMobileMenuOpen(false); navigate('/admin/login'); }}

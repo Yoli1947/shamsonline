@@ -455,12 +455,19 @@ const Store: React.FC = () => {
         return () => { isMounted = false; clearTimeout(timeout); };
     }, []);
 
+    const activeBrandNames = useMemo(() => new Set(
+        (brands || [])
+            .filter((brand: any) => brand?.is_active !== false)
+            .map((brand: any) => brand?.name?.trim().toLowerCase())
+            .filter(Boolean)
+    ), [brands]);
+
     // Consulta para marcas con descuento — se difiere 2s para no competir con la carga inicial
     useEffect(() => {
         const timer = setTimeout(() => {
         supabase
             .from('products')
-            .select('price, sale_price, brand:brands(name), images:product_images(url, is_primary, sort_order)')
+            .select('price, sale_price, brand:brands(name, is_active), images:product_images(url, is_primary, sort_order)')
             .eq('is_published', true)
             .eq('is_active', true)
             .not('sale_price', 'is', null)
@@ -469,17 +476,19 @@ const Store: React.FC = () => {
                 if (!data) return;
                 const map = new Map<string, { brand: string; bestDiscount: number; image: string; count: number }>();
                 data.forEach((p: any) => {
-                    if (!p.brand?.name || !p.price || !p.sale_price || p.sale_price >= p.price) return;
+                    const brandName = p.brand?.name?.trim();
+                    if (!brandName || p.brand?.is_active === false || !p.price || !p.sale_price || p.sale_price >= p.price) return;
                     const discountPct = Math.round((p.price - p.sale_price) / p.price * 100);
                     if (discountPct < 5) return;
                     const img = p.images?.find((i: any) => i.is_primary)?.url || p.images?.sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))[0]?.url;
                     if (!img || img.includes('placeholder') || img.includes('No+Image')) return;
-                    const existing = map.get(p.brand.name);
+                    if (!activeBrandNames.has(brandName.toLowerCase())) return;
+                    const existing = map.get(brandName);
                     if (!existing) {
-                        map.set(p.brand.name, { brand: p.brand.name, bestDiscount: discountPct, image: img, count: 1 });
+                        map.set(brandName, { brand: brandName, bestDiscount: discountPct, image: img, count: 1 });
                     } else {
-                        map.set(p.brand.name, {
-                            brand: p.brand.name,
+                        map.set(brandName, {
+                            brand: brandName,
                             bestDiscount: Math.max(existing.bestDiscount, discountPct),
                             image: discountPct > existing.bestDiscount ? img : existing.image,
                             count: existing.count + 1
@@ -494,7 +503,7 @@ const Store: React.FC = () => {
             });
         }, 2000);
         return () => clearTimeout(timer);
-    }, []);
+    }, [activeBrandNames]);
 
     // Scroll al inicio cuando cambian los filtros principales
     useEffect(() => {
@@ -910,22 +919,23 @@ const Store: React.FC = () => {
     // Mejores descuentos por marca (solo para la sección de inicio)
     const brandDiscounts = useMemo(() => {
         // Usar datos de consulta rápida si ya están disponibles (completos)
-        if (quickDiscountBrands.length > 0) return quickDiscountBrands;
+        if (quickDiscountBrands.length > 0) return quickDiscountBrands.filter((brand: any) => activeBrandNames.has(brand.brand?.trim().toLowerCase()));
         // Fallback: calcular desde productos ya cargados
         const map = new Map<string, { brand: string; bestDiscount: number; image: string; count: number }>();
         products.forEach(p => {
-            if (!p.brand || p.is_published === false || p.is_active === false) return;
+            const brandName = p.brand?.trim();
+            if (!brandName || !activeBrandNames.has(brandName.toLowerCase()) || p.is_published === false || p.is_active === false) return;
             if (!p.originalPrice || p.originalPrice <= p.price) return;
             const hasValidImage = p.image && !p.image.includes('placeholder') && !p.image.includes('No+Image');
             if (!hasValidImage) return;
             const discountPct = Math.round((p.originalPrice - p.price) / p.originalPrice * 100);
             if (discountPct < 5) return;
-            const existing = map.get(p.brand);
+            const existing = map.get(brandName);
             if (!existing) {
-                map.set(p.brand, { brand: p.brand, bestDiscount: discountPct, image: p.image, count: 1 });
+                map.set(brandName, { brand: brandName, bestDiscount: discountPct, image: p.image, count: 1 });
             } else {
-                map.set(p.brand, {
-                    brand: p.brand,
+                map.set(brandName, {
+                    brand: brandName,
                     bestDiscount: Math.max(existing.bestDiscount, discountPct),
                     image: discountPct > existing.bestDiscount ? p.image : existing.image,
                     count: existing.count + 1
@@ -936,7 +946,7 @@ const Store: React.FC = () => {
             .filter(b => b.count >= 1)
             .sort((a, b) => b.bestDiscount - a.bestDiscount)
             .slice(0, 12);
-    }, [products, quickDiscountBrands]);
+    }, [products, quickDiscountBrands, activeBrandNames]);
 
     const filteredProducts = useMemo(() => products.filter(p => {
         // Filter: Solo productos publicados y activos
