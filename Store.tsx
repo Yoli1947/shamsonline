@@ -1505,7 +1505,7 @@ const Store: React.FC = () => {
                                         </div>
                                         <div className="flex flex-col gap-1.5 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
                                             {selectedCategory?.toLowerCase() === 'cafeteria' ? (
-                                                ['BIALETTI'].map(brand => {
+                                                ['BIALETTI', 'STANLEY'].map(brand => {
                                                     const isActive = selectedBrand?.toUpperCase() === brand;
                                                     return (
                                                         <button
