@@ -1188,7 +1188,7 @@ const Store: React.FC = () => {
                             return (
                                 <section className="py-10">
                                     <h2 className="text-center uppercase tracking-[0.3em] text-sm md:text-base font-bold text-[var(--color-text)] mb-6 px-4">
-                                        NUESTROS ELEGIDOS PARA PAPÁ
+                                        NUESTROS ELEGIDOS DE ESTA SEMANA
                                     </h2>
                                     <div className="overflow-hidden">
                                         <div className="animate-papa-scroll gap-1" style={{ width: `${loopItems.length * 22}vw` }}>
@@ -1621,14 +1621,30 @@ const Store: React.FC = () => {
                         (!selectedBrand && !selectedGender && !selectedCategory && !searchQuery) ? (
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-0.5 sm:gap-6 gap-y-4 sm:gap-y-12 min-h-[50vh]">
                                 {(() => {
-                                    const isBottom = (p: any) => { const cat = (p.category?.name || '').toUpperCase(); return cat.includes('ACCESORIO') || cat.includes('CALZADO') || cat.includes('BOLSO') || cat.includes('CARTERA'); };
+                                    const isBottom = (p: any) => { const cat = (p.category || '').toUpperCase(); return cat.includes('ACCESORIO') || cat.includes('CALZADO') || cat.includes('BOLSO') || cat.includes('CARTERA'); };
+                                    const isAbrigo = (p: any) => { const cat = (p.category || '').toUpperCase(); return cat.includes('ABRIGO') || cat.includes('CAMPERA') || cat.includes('PAÑO') || cat.includes('PILOTO'); };
+                                    const getGenders = (p: any) => (p.features || []).map((f: string) => f?.toLowerCase());
+
                                     const clothing = filteredProducts.filter(p => !isBottom(p));
                                     const accessories = filteredProducts.filter(p => isBottom(p));
-                                    const brandMap = new Map<string, any[]>();
-                                    for (const p of clothing) { const b = (p.brand as any)?.name || ''; if (!brandMap.has(b)) brandMap.set(b, []); brandMap.get(b)!.push(p); }
-                                    const queues = Array.from(brandMap.values());
+
+                                    // Prioriza los abrigos más caros al frente de cada cola de género
+                                    const byAbrigoCaroFirst = (a: any, b: any) => {
+                                        const aAb = isAbrigo(a) ? 1 : 0;
+                                        const bAb = isAbrigo(b) ? 1 : 0;
+                                        if (aAb !== bAb) return bAb - aAb;
+                                        return (b.price || 0) - (a.price || 0);
+                                    };
+
+                                    const hombreQueue = clothing.filter(p => getGenders(p).includes('hombre')).sort(byAbrigoCaroFirst);
+                                    const mujerQueue = clothing.filter(p => getGenders(p).includes('mujer')).sort(byAbrigoCaroFirst);
+                                    const otrosQueue = clothing.filter(p => { const g = getGenders(p); return !g.includes('hombre') && !g.includes('mujer'); }).sort(byAbrigoCaroFirst);
+
+                                    // Round-robin Hombre/Mujer/Otros para que la colección se vea mezclada, como armando conjuntos
+                                    const queues = [hombreQueue, mujerQueue, otrosQueue];
                                     const result: any[] = [];
                                     while (queues.some(q => q.length > 0)) { for (const q of queues) { if (q.length > 0) result.push(q.shift()); } }
+
                                     return [...result, ...accessories].map(product => (
                                         <ProductCard key={product.id} product={product} onAddToCart={addToCart} onOpenDetail={(p) => openProduct(p)} isFavorite={favorites.includes(product.id)} onToggleFavorite={toggleFavorite} />
                                     ));
