@@ -28,6 +28,13 @@ if %ERRORLEVEL% NEQ 0 (
     echo ❌ ERROR: No se pudo conectar al servidor. Revisa tu conexion o contraseña.
 ) else (
     echo.
+    echo 4. Corrigiendo permisos y dueno de archivos en el servidor...
+    :: scp desde Windows a veces sube carpetas con dueno root y permisos restrictivos ^(700^),
+    :: lo que impide que nginx ^(usuario www-data^) sirva los archivos de /assets y otras carpetas.
+    :: Lo corregimos siempre: dueno www-data, carpetas 755, archivos 644.
+    ssh root@76.13.234.137 "chown -R www-data:www-data /var/www/shamsonline/dist && find /var/www/shamsonline/dist -type d -exec chmod 755 {} \; && find /var/www/shamsonline/dist -type f -exec chmod 644 {} \;"
+
+    echo.
     echo ======================================================
     echo   ¡TIENDA SUBIDA AL SERVIDOR CON EXITO!
     echo   Revisa tu celular en un par de minutos. ✨
