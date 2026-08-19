@@ -18,6 +18,8 @@ interface NavbarProps {
   brands?: any[];
   onOpenAuth: () => void;
   customerName?: string;
+  products?: any[];
+  onSelectProduct?: (p: any) => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({
@@ -31,8 +33,23 @@ const Navbar: React.FC<NavbarProps> = ({
   brands,
   onOpenAuth,
   customerName,
+  products,
+  onSelectProduct,
 }) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  const searchResults = React.useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query || !products || products.length === 0) return [];
+    const terms = query.split(/\s+/);
+    return products
+      .filter((p: any) => terms.every(term =>
+        p.name?.toLowerCase().includes(term) ||
+        p.brand?.toLowerCase().includes(term) ||
+        p.category?.toLowerCase().includes(term)
+      ))
+      .slice(0, 6);
+  }, [searchQuery, products]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -147,7 +164,7 @@ const Navbar: React.FC<NavbarProps> = ({
           {/* RIGHT - Actions */}
           <div className="flex-1 flex items-center gap-3 lg:gap-5 justify-end">
             {/* Animated Search */}
-            <div className="flex items-center">
+            <div className="flex items-center relative">
               <div
                 className={`flex items-center transition-all duration-300 ${isSearchOpen ? 'w-36 md:w-48 opacity-100 overflow-visible' : 'w-0 opacity-0 overflow-hidden'}`}
               >
@@ -158,6 +175,10 @@ const Navbar: React.FC<NavbarProps> = ({
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       document.getElementById('new')?.scrollIntoView({ behavior: 'smooth' });
+                    }
+                    if (e.key === 'Escape') {
+                      onSearchChange('');
+                      setIsSearchOpen(false);
                     }
                   }}
                   placeholder="BUSCAR..."
@@ -173,6 +194,47 @@ const Navbar: React.FC<NavbarProps> = ({
               >
                 <Search size={24} />
               </button>
+
+              {/* Resultados en vivo */}
+              {isSearchOpen && searchQuery.trim() !== '' && (
+                <div className="absolute top-[110%] right-0 w-[320px] max-w-[90vw] bg-white border border-black/5 rounded-none z-[50] shadow-[0_30px_100px_rgba(0,0,0,0.12)] animate-in fade-in slide-in-from-top-4 duration-500 max-h-[70vh] overflow-y-auto">
+                  {searchResults.length > 0 ? (
+                    <>
+                      {searchResults.map((p: any) => (
+                        <button
+                          key={p.id}
+                          onClick={() => {
+                            onSelectProduct?.(p);
+                            setIsSearchOpen(false);
+                            onSearchChange('');
+                          }}
+                          className="flex items-center gap-3 w-full p-3 hover:bg-black/[0.03] transition-colors text-left border-b border-black/5 last:border-b-0"
+                        >
+                          <img src={p.image} alt={p.name} className="w-12 h-14 object-cover flex-shrink-0 bg-[var(--color-background-alt)]" />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[9px] font-black uppercase tracking-widest text-black/40 truncate">{p.brand}</p>
+                            <p className="text-[12px] font-bold uppercase tracking-wide text-black truncate">{p.name}</p>
+                            <p className="text-[12px] font-black text-black mt-0.5">${(p.originalPrice > p.price ? p.originalPrice : p.price).toLocaleString()}</p>
+                          </div>
+                        </button>
+                      ))}
+                      <button
+                        onClick={() => {
+                          setIsSearchOpen(false);
+                          document.getElementById('new')?.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        className="w-full p-3 text-center text-[10px] font-black uppercase tracking-widest text-black bg-black/[0.03] hover:bg-black/[0.06] transition-colors"
+                      >
+                        Ver todos los resultados
+                      </button>
+                    </>
+                  ) : (
+                    <p className="p-4 text-[11px] font-bold uppercase tracking-widest text-black/40 text-center">
+                      Sin resultados
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Auth */}

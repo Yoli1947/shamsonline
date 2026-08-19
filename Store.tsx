@@ -161,6 +161,7 @@ const Store: React.FC = () => {
                 brand: p.brand?.name || 'SHAMS',
                 price: p.sale_price && p.sale_price < p.price ? p.sale_price : p.price,
                 originalPrice: p.price,
+                compareAtPrice: p.compare_at_price && p.compare_at_price > p.price ? p.compare_at_price : null,
                 image: galleryImages[0]?.url || 'https://via.placeholder.com/400x500?text=No+Image',
                 images: galleryImages.map(gi => gi.url),
                 imageObjects: galleryImages,
@@ -637,7 +638,6 @@ const Store: React.FC = () => {
                 body: { email: footerEmail }
             });
         } catch (_) { /* Si falla o no existe tabla, igual mostramos éxito visualmente */ }
-        localStorage.setItem('shams_promo_10', 'true');
         localStorage.setItem('shams_newsletter_v8', 'true');
         setFooterSubStatus('success');
     };
@@ -659,7 +659,6 @@ const Store: React.FC = () => {
 
     const handleCheckoutConfirm = async (formData: any) => {
         try {
-            const hasPromo = localStorage.getItem('shams_promo_10') === 'true' && !formData.promoAlreadyUsed;
             const orderItems = cart.map(item => ({
                 productId: item.id,
                 variantId: item.variantId,
@@ -672,7 +671,7 @@ const Store: React.FC = () => {
                 color: item.selectedColor || ''
             }));
 
-            const order = await createOrder({ ...formData, hasPromo }, orderItems);
+            const order = await createOrder(formData, orderItems);
 
             // Si es envío a domicilio, crear el envío en Correo Argentino (sin bloquear el flujo)
             if (formData.shippingMethod === 'envio') {
@@ -749,7 +748,6 @@ const Store: React.FC = () => {
                 setCart([]);
                 setIsCheckoutOpen(false);
                 localStorage.removeItem('shams_products_v19');
-                localStorage.removeItem('shams_promo_10');
                 window.location.href = naveData.checkout_url;
 
             } else if (formData.paymentMethod === 'mercadopago' || formData.paymentMethod === 'mercadopago_saldo') {
@@ -795,7 +793,6 @@ const Store: React.FC = () => {
                 setCart([]);
                 setIsCheckoutOpen(false);
                 localStorage.removeItem('shams_products_v19');
-                localStorage.removeItem('shams_promo_10');
                 window.location.href = mpData.init_point;
             } else if (formData.paymentMethod === 'transferencia') {
                 const transferDiscount = settings.transfer_discount || 15;
@@ -863,9 +860,6 @@ const Store: React.FC = () => {
                 decrementLocalStock(orderItems);
                 setCart([]);
                 setIsCheckoutOpen(false);
-                if (localStorage.getItem('shams_promo_10') === 'true' && !formData.promoAlreadyUsed) {
-                    localStorage.setItem('shams_promo_10', 'used'); // Marcar como usado
-                }
 
             } else {
                 // Efectivo
@@ -906,9 +900,6 @@ const Store: React.FC = () => {
                 decrementLocalStock(orderItems);
                 setCart([]);
                 setIsCheckoutOpen(false);
-                if (localStorage.getItem('shams_promo_10') === 'true' && !formData.promoAlreadyUsed) {
-                    localStorage.setItem('shams_promo_10', 'used'); // Marcar como usado
-                }
             }
         } catch (error) {
             console.error(error);
@@ -949,6 +940,10 @@ const Store: React.FC = () => {
     }, [products, quickDiscountBrands, activeBrandNames]);
 
     const filteredProducts = useMemo(() => products.filter(p => {
+        // Si hay una búsqueda por nombre activa, ignoramos categoría/marca/género:
+        // se busca en toda la tienda, no solo dentro de la sección actual.
+        const isSearching = searchQuery.trim() !== '';
+
         // Filter: Solo productos publicados y activos
         if (p.is_published === false || p.is_active === false) return false;
 
@@ -989,12 +984,12 @@ const Store: React.FC = () => {
             (isAccesoriosFilterActive && isAccessoryProduct);
 
         // Excluir categorías de la lista negra global SOLO si no hay un filtro de marca o categoría activo
-        if (!selectedCategory && !selectedBrand && isCafeteriaProduct) {
+        if (!isSearching && !selectedCategory && !selectedBrand && isCafeteriaProduct) {
             return false;
         }
 
         // Excluir accesorios de vistas por género — solo aparecen al filtrar por ACCESORIOS
-        if (selectedGender && !selectedCategory && isAccessoryProduct) {
+        if (!isSearching && selectedGender && !selectedCategory && isAccessoryProduct) {
             return false;
         }
 
@@ -1029,7 +1024,8 @@ const Store: React.FC = () => {
         const totalWithPhotos = products.filter(prod => prod.image && !prod.image.includes('placeholder')).length;
         const finalImageCheck = (totalWithPhotos > 0) ? hasValidImage : true;
 
-        if (!(finalImageCheck && matchesCategory && matchesBrand && matchesGender && matchesSearch && matchesSize)) return false;
+        const matchesScope = isSearching || (matchesCategory && matchesBrand && matchesGender);
+        if (!(finalImageCheck && matchesScope && matchesSearch && matchesSize)) return false;
 
         return true;
     }).sort((a, b) => {
@@ -1092,6 +1088,8 @@ const Store: React.FC = () => {
                 brands={brands}
                 onOpenAuth={() => setIsAuthOpen(true)}
                 customerName={customer?.name}
+                products={products}
+                onSelectProduct={openProduct}
             />
 
             <main>
@@ -1110,7 +1108,8 @@ const Store: React.FC = () => {
                                 <div id="brands">
                                     <BrandMarquee />
                                 </div>
-                        {brandDiscounts.length > 0 && (
+                        {/* Sección "Modelos más pedidos esta semana" oculta a pedido (2026-08-18) - dejar código para reactivar más adelante */}
+                        {false && brandDiscounts.length > 0 && (
                             <section className="py-10 px-4 md:px-12 max-w-screen-2xl mx-auto">
                                 <div className="mb-6 px-1">
                                     <span className="text-[#999] uppercase tracking-[0.4em] text-[10px] block mb-2 font-bold">DESCUENTOS ACTIVOS</span>
@@ -1176,40 +1175,78 @@ const Store: React.FC = () => {
                             </section>
                         )}
 
-                        {/* Sección Editorial: Nuestros Elegidos para Papá */}
+                        {/* Sección Editorial: Nuestros Elegidos en Sale */}
                         {(() => {
+                            // Un producto puede estar en oferta por dos vías: compareAtPrice (mecanismo nuevo)
+                            // o sale_price ya aplicado dentro de "price" (mecanismo legado, ej. Hunter).
+                            // Calculamos precio de lista y precio actual de forma genérica para cubrir ambas.
                             const papaItems = products
-                                .filter((p: any) => p.is_featured)
-                                .sort((a: any, b: any) => (a.sort_order || 999) - (b.sort_order || 999));
+                                .filter((p: any) => p.image && !p.image.includes('placeholder') && !p.image.includes('No+Image'))
+                                .map((p: any) => {
+                                    const hasNewSaleFlag = !!p.compareAtPrice && p.compareAtPrice > p.originalPrice;
+                                    const listPrice = hasNewSaleFlag ? p.compareAtPrice : p.originalPrice;
+                                    const currentPrice = hasNewSaleFlag ? p.originalPrice : p.price;
+                                    return { ...p, __listPrice: listPrice, __currentPrice: currentPrice };
+                                })
+                                .filter((p: any) => p.__listPrice > p.__currentPrice)
+                                .sort((a: any, b: any) => {
+                                    const discountA = (a.__listPrice - a.__currentPrice) / a.__listPrice;
+                                    const discountB = (b.__listPrice - b.__currentPrice) / b.__listPrice;
+                                    return discountB - discountA;
+                                });
                             if (papaItems.length === 0) return null;
                             // Duplicar suficientes veces para que el loop sea suave
                             const copies = papaItems.length < 4 ? 6 : papaItems.length < 8 ? 4 : 2;
                             const loopItems = Array.from({ length: copies }, () => papaItems).flat();
+                            // La animación recorre exactamente 1 vuelta de papaItems (0% a -50% del ancho total).
+                            // Fijamos segundos por tarjeta para que la velocidad sea siempre la misma,
+                            // sin importar cuántos productos entren en oferta.
+                            const SECONDS_PER_CARD = 3;
+                            const scrollDurationSec = papaItems.length * SECONDS_PER_CARD;
                             return (
                                 <section className="py-10">
                                     <h2 className="text-center uppercase tracking-[0.3em] text-sm md:text-base font-bold text-[var(--color-text)] mb-6 px-4">
-                                        NUESTROS ELEGIDOS DE ESTA SEMANA
+                                        NUESTROS ELEGIDOS EN SALE
                                     </h2>
                                     <div className="overflow-hidden">
-                                        <div className="animate-papa-scroll gap-1" style={{ width: `${loopItems.length * 22}vw` }}>
-                                            {loopItems.map((product: any, idx: number) => (
-                                                <button
-                                                    key={`${product.id}-${idx}`}
-                                                    onClick={() => setSelectedProduct(product)}
-                                                    className="relative shrink-0 overflow-hidden group cursor-pointer"
-                                                    style={{ width: '21vw', minWidth: '160px' }}
-                                                >
-                                                    <div className="aspect-[3/4]">
-                                                        <img
-                                                            src={product.image}
-                                                            alt={product.name}
-                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                                                            loading="lazy"
-                                                        />
-                                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors duration-300" />
-                                                    </div>
-                                                </button>
-                                            ))}
+                                        <div className="animate-papa-scroll gap-1" style={{ width: `${loopItems.length * 22}vw`, animationDuration: `${scrollDurationSec}s` }}>
+                                            {loopItems.map((product: any, idx: number) => {
+                                                const discountPct = Math.round((1 - product.__currentPrice / product.__listPrice) * 100);
+                                                return (
+                                                    <button
+                                                        key={`${product.id}-${idx}`}
+                                                        onClick={() => setSelectedProduct(product)}
+                                                        className="relative shrink-0 overflow-hidden group cursor-pointer"
+                                                        style={{ width: '21vw', minWidth: '160px' }}
+                                                    >
+                                                        <div className="aspect-[3/4] relative">
+                                                            <img
+                                                                src={product.image}
+                                                                alt={product.name}
+                                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                                                loading="lazy"
+                                                            />
+                                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors duration-300" />
+                                                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pt-8 pb-2 px-2 md:px-3">
+                                                                <p className="text-white text-[9px] md:text-[11px] font-semibold uppercase tracking-wide truncate mb-1">
+                                                                    {product.name}
+                                                                </p>
+                                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                                    <span className="text-white/60 text-[8px] md:text-[10px] line-through">
+                                                                        ${product.__listPrice.toLocaleString()}
+                                                                    </span>
+                                                                    <span className="text-white text-[11px] md:text-sm font-black tracking-tighter">
+                                                                        ${product.__currentPrice.toLocaleString()}
+                                                                    </span>
+                                                                    <span className="bg-red-600 text-white text-[8px] md:text-[10px] font-black px-1.5 py-0.5 uppercase tracking-tighter">
+                                                                        -{discountPct}%
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 </section>
@@ -1733,7 +1770,7 @@ const Store: React.FC = () => {
                             {footerSubStatus === 'success' ? (
                                 <div className="flex items-center gap-3 py-4 border-b border-[#e0e0e0]">
                                     <span className="text-black text-lg">✓</span>
-                                    <span className="text-[10px] font-semibold tracking-[0.3em] text-black uppercase">¡Bienvenido! 10% OFF en tu primera compra</span>
+                                    <span className="text-[10px] font-semibold tracking-[0.3em] text-black uppercase">¡Bienvenido/a al Club Shams!</span>
                                 </div>
                             ) : (
                                 <form onSubmit={handleFooterSubscribe} className="flex border-b border-[var(--color-border)] pb-4 group focus-within:border-black/40 transition-colors">

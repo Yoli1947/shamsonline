@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS products (
     gender VARCHAR(20),
     image_url TEXT,
     price DECIMAL(12, 2) NOT NULL,
+    compare_at_price DECIMAL(12, 2),
     sale_price DECIMAL(12, 2),
     is_on_sale BOOLEAN DEFAULT false,
     sale_end_date TIMESTAMPTZ,

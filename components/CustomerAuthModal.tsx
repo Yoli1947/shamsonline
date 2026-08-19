@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Mail, Lock, User, ChevronRight, Gift } from 'lucide-react';
+import { X, Mail, Lock, User, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface CustomerAuthModalProps {
@@ -36,16 +36,13 @@ const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({ isOpen, onClose, 
                 // Registro REAL con Supabase
                 const signUpResult = await signup(email, password, name);
 
-                // Aplicamos el promo de 10% IMMEDIATAMENTE al registrarse
-                localStorage.setItem('shams_promo_10', 'true');
-
                 // Si Supabase permite el login inmediato tras registro (configuración por defecto)
                 // el AuthContext detectará el cambio. Si no, forzamos un login o mostramos mensaje de éxito.
                 if (signUpResult?.session) {
                     onLoginSuccess({ email, name });
                     onClose();
                 } else {
-                    setSuccessMsg('¡Registro exitoso! Ya podés disfrutar de tu 10% de descuento. Iniciá sesión para continuar.');
+                    setSuccessMsg('¡Registro exitoso! Iniciá sesión para continuar.');
                     setTimeout(() => setIsLogin(true), 3000);
                 }
             }
@@ -70,19 +67,6 @@ const CustomerAuthModal: React.FC<CustomerAuthModalProps> = ({ isOpen, onClose, 
                 >
                     <X size={18} />
                 </button>
-
-                {/* Promo Banner */}
-                <div style={{ backgroundColor: '#000', borderBottom: '1px solid #222', padding: '16px 24px', textAlign: 'center' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                        <Gift color="#fff" size={22} style={{ marginBottom: '4px' }} />
-                        <h3 style={{ color: '#fff', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', fontSize: '14px' }}>
-                            10% OFF EN TU PRIMERA COMPRA
-                        </h3>
-                        <p style={{ color: '#aaa', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.3em' }}>
-                            Registrate o iniciá sesión para reclamarlo
-                        </p>
-                    </div>
-                </div>
 
                  {/* Form Content */}
                 <div className="p-8">

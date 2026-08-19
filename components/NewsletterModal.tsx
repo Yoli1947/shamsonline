@@ -49,7 +49,6 @@ const NewsletterModal: React.FC = () => {
             });
         } catch (_) {}
 
-        localStorage.setItem('shams_promo_10', 'true');
         localStorage.setItem('shams_newsletter_v8', 'true');
         setStatus('success');
         setTimeout(() => setIsOpen(false), 2500);
@@ -112,7 +111,7 @@ const NewsletterModal: React.FC = () => {
                                         </div>
                                         <h3 style={{ fontSize: '20px', fontWeight: 900, color: '#000', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>¡EXCELENTE!</h3>
                                         <p style={{ color: '#666', fontSize: '10px', fontWeight: 700, letterSpacing: '0.3em', textTransform: 'uppercase' }}>
-                                            Tu descuento ya está activo en tu carrito.
+                                            ¡Gracias por sumarte al Club!
                                         </p>
                                     </motion.div>
                                 )}
@@ -121,7 +120,7 @@ const NewsletterModal: React.FC = () => {
                             <div style={{ position: 'relative', zIndex: 10 }}>
                                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 12px', backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', marginBottom: '20px' }}>
                                     <Gift size={12} color="#000" />
-                                    <span style={{ color: '#000', fontSize: '9px', fontWeight: 900, letterSpacing: '0.2em', textTransform: 'uppercase' }}>10% OFF BIENVENIDA</span>
+                                    <span style={{ color: '#000', fontSize: '9px', fontWeight: 900, letterSpacing: '0.2em', textTransform: 'uppercase' }}>NOVEDADES Y BENEFICIOS</span>
                                 </div>
 
                                 <h2 style={{ fontSize: '28px', fontWeight: 900, color: '#000', letterSpacing: '-0.02em', marginBottom: '8px', lineHeight: 1.1, textTransform: 'uppercase' }}>
@@ -173,7 +172,7 @@ const NewsletterModal: React.FC = () => {
                                         {status === 'loading' ? (
                                             <div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
                                         ) : (
-                                            'QUIERO MI BENEFICIO'
+                                            'SUSCRIBIRME'
                                         )}
                                     </button>
                                 </form>

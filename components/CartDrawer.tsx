@@ -19,9 +19,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemov
   const navigate = useNavigate();
   const transferDiscount = settings.transfer_discount || 15;
   // Siempre mostrar precio de lista (originalPrice) en el carrito; los descuentos se aplican en el checkout
-  const rawTotal = items.reduce((sum, item) => sum + (item.originalPrice || item.price) * item.quantity, 0);
-  const hasPromo = localStorage.getItem('shams_promo_10') === 'true';
-  const total = hasPromo ? rawTotal * 0.9 : rawTotal;
+  const total = items.reduce((sum, item) => sum + (item.originalPrice || item.price) * item.quantity, 0);
 
   if (!isOpen) return null;
 
@@ -148,18 +146,9 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onRemov
                   <span className="text-[var(--color-text-muted)] text-[10px] tracking-[0.3em] font-black uppercase">Total de Lista</span>
                   <div className="flex items-center gap-2">
                     <span className="text-[var(--color-text)] text-3xl font-bold tracking-tighter">${(total || 0).toLocaleString()}</span>
-                    {hasPromo && (
-                      <span className="text-[9px] bg-black text-white px-2 py-0.5 font-bold tracking-widest uppercase">PROMO -10%</span>
-                    )}
                   </div>
                 </div>
               </div>
-              
-              {hasPromo && (
-                <p className="text-[9px] text-[var(--color-text-muted)] font-bold tracking-widest uppercase px-1">
-                  ✓ CÓDIGO PROMO APLICADO CORRECTAMENTE
-                </p>
-              )}
             </div>
 
             {/* Banner de Descuento por Transferencia - PREMIUM REDESIGN */}

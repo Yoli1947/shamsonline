@@ -40,12 +40,6 @@ serve(async (req) => {
             Gracias por suscribirte a nuestro newsletter. A partir de ahora vas a ser el primero en enterarte de las mejores tendencias ingresadas a la tienda de **Mujer** y **Hombre**, rebajas exclusivas y beneficios sorpresa.
           </p>
           
-          <div style="background-color: #f9f9f9; padding: 25px; border-radius: 12px; border-left: 5px solid #00D1FF; margin: 30px 0; text-align: center;">
-            <p style="margin: 0 0 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; color: #666; font-weight: bold;">Tu regalo de bienvenida:</p>
-            <h2 style="margin: 0; font-size: 32px; color: #000; font-weight: 900; letter-spacing: 1px;">10% OFF</h2>
-            <p style="margin: 10px 0 0; font-size: 14px; color: #666;">En tu primera compra aplicándose automáticamente en el carrito de la tienda online.</p>
-          </div>
-
           <div style="text-align: center; margin-top: 40px;">
             <a href="https://shamsonline.com.ar" style="display: inline-block; padding: 15px 35px; background-color: #00D1FF; color: #000; text-decoration: none; font-weight: bold; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; border-radius: 5px;">
               IR A LA TIENDA
@@ -69,7 +63,7 @@ serve(async (req) => {
       body: JSON.stringify({
         from: "Shams Online <tienda@shamsonline.com.ar>",
         to: [email],
-        subject: "🎉 ¡Bienvenido a Shams Online! Acá tenés tu beneficio.",
+        subject: "🎉 ¡Bienvenido a Shams Online!",
         html: emailHtml,
       }),
     });

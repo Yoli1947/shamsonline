@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Loader, MapPin, ExternalLink } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
-import { checkPromoAlreadyUsed } from '../lib/orders';
 import GiftCardInput, { GiftCardData, redeemGiftCard } from './GiftCardInput';
 
 interface CheckoutModalProps {
@@ -55,31 +54,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
     const [shippingQuote, setShippingQuote] = useState<{ cost: number; days: string } | null>(null);
     const [shippingQuoteLoading, setShippingQuoteLoading] = useState(false);
     const quoteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    const hasPromo = localStorage.getItem('shams_promo_10') === 'true';
-    const [promoAlreadyUsed, setPromoAlreadyUsed] = useState(false);
-    const [checkingPromo, setCheckingPromo] = useState(false);
-    const effectiveHasPromo = hasPromo && !promoAlreadyUsed;
-
-    // Verificar si el beneficio de primera compra ya fue usado (por email o DNI)
-    useEffect(() => {
-        if (!hasPromo) return;
-        const email = formData.email.trim();
-        const dni = formData.dni.trim();
-        const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        if (!emailValid && !dni) { setPromoAlreadyUsed(false); return; }
-
-        const timer = setTimeout(async () => {
-            setCheckingPromo(true);
-            try {
-                const used = await checkPromoAlreadyUsed(emailValid ? email : '', dni || null);
-                setPromoAlreadyUsed(used);
-            } catch { /* silencioso */ } finally {
-                setCheckingPromo(false);
-            }
-        }, 700);
-        return () => clearTimeout(timer);
-    }, [formData.email, formData.dni, hasPromo]);
 
     // Cotización automática al ingresar CP (solo en envío a domicilio)
     useEffect(() => {
@@ -265,11 +239,10 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
         } catch { /* no crítico */ }
         try {
             const quotedShipping = formData.shippingMethod === 'retiro' ? 0 : (shippingQuote?.cost ?? null);
-            const promoFactor = (hasPromo && !promoAlreadyUsed) ? 0.9 : 1;
             const shipping = formData.shippingMethod === 'retiro' ? 0 : (shippingQuote?.cost ?? 0);
-            const afterPromo = Math.round(total * promoFactor) + shipping;
+            const afterShipping = Math.round(total) + shipping;
             const gcDiscount = giftCard ? giftCard.amountToApply : 0;
-            const amountToChargeMP = Math.max(0, afterPromo - gcDiscount);
+            const amountToChargeMP = Math.max(0, afterShipping - gcDiscount);
 
             const giftCardApplied = giftCard ? {
                 code: giftCard.code,
@@ -286,7 +259,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
             await onConfirm({
                 ...formData,
                 shippingQuotedCost: quotedShipping,
-                promoAlreadyUsed,
                 gift_card_applied: giftCardApplied,
                 gift_card_discount: gcDiscount,
                 amount_to_charge_mp: amountToChargeMP,
@@ -353,11 +325,10 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
     const PROVINCES = ['Buenos Aires','CABA','Catamarca','Chaco','Chubut','Córdoba','Corrientes','Entre Ríos','Formosa','Jujuy','La Pampa','La Rioja','Mendoza','Misiones','Neuquén','Río Negro','Salta','San Juan','San Luis','Santa Cruz','Santa Fe','Santiago del Estero','Tierra del Fuego','Tucumán'];
 
     // Calcular totales
-    const promoFactor = effectiveHasPromo ? 0.9 : 1;
     const paymentDiscountFactor = (formData.paymentMethod === 'transferencia' || formData.paymentMethod === 'efectivo') ? (1 - transferDiscount / 100) : 1;
     const shipping = formData.shippingMethod === 'retiro' ? 0 : (shippingQuote?.cost ?? 0);
     const subtotal = total;
-    const afterDiscounts = Math.round(subtotal * promoFactor * paymentDiscountFactor);
+    const afterDiscounts = Math.round(subtotal * paymentDiscountFactor);
     const gcDiscount = giftCard ? giftCard.amountToApply : 0;
     const finalTotal = Math.max(0, afterDiscounts + shipping - gcDiscount);
     const paymentDesc = formData.paymentMethod === 'transferencia'
@@ -377,13 +348,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                             <X size={22} />
                         </button>
                     </div>
-
-                    {hasPromo && (
-                        <div className="mx-8 mt-4 flex items-center gap-3 p-3 border border-black bg-black/5">
-                            <span className="text-base">🎉</span>
-                            <span className="text-[11px] font-black uppercase tracking-widest text-black">10% OFF EXTRA EN TU PRIMERA COMPRA — BENEFICIO APLICADO</span>
-                        </div>
-                    )}
 
                     <form onSubmit={handleSubmit}>
                         <div className="flex flex-col lg:flex-row">
@@ -551,12 +515,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                                 <td className="p-2 text-right font-semibold text-green-700">-${(subtotal - afterDiscounts).toLocaleString()}</td>
                                             </tr>
                                         )}
-                                        {effectiveHasPromo && (
-                                            <tr className="border-b border-[#e0e0e0]">
-                                                <td className="p-2 text-[#555]">10% OFF Primera compra</td>
-                                                <td className="p-2 text-right font-semibold text-green-700">-${Math.round(subtotal * 0.1).toLocaleString()}</td>
-                                            </tr>
-                                        )}
                                         {gcDiscount > 0 && (
                                             <tr className="border-b border-[#e0e0e0]">
                                                 <td className="p-2 text-[#555]">Gift Card</td>
@@ -573,8 +531,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                 {/* Gift Card */}
                                 <div>
                                     {(() => {
-                                        const totalAfterPromo = Math.round(subtotal * promoFactor) + shipping;
-                                        return <GiftCardInput orderTotal={totalAfterPromo} applied={giftCard} onApply={setGiftCard} onRemove={() => setGiftCard(null)} />;
+                                        const orderTotal = Math.round(subtotal) + shipping;
+                                        return <GiftCardInput orderTotal={orderTotal} applied={giftCard} onApply={setGiftCard} onRemove={() => setGiftCard(null)} />;
                                     })()}
                                 </div>
 
@@ -605,15 +563,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                         );
                                     })}
                                 </div>
-
-                                {promoAlreadyUsed && (
-                                    <div className="p-3 bg-red-50 border border-red-300 text-xs text-red-600 font-bold">
-                                        ❌ El descuento de primera compra ya fue utilizado con estos datos.
-                                    </div>
-                                )}
-                                {checkingPromo && hasPromo && (
-                                    <p className="text-[10px] text-[#888]">Verificando beneficio...</p>
-                                )}
 
                                 <button type="submit" disabled={loading}
                                     className="w-full bg-black text-white font-black uppercase tracking-widest py-4 hover:bg-zinc-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-sm">

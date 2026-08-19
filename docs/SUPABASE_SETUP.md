@@ -31,6 +31,28 @@ VITE_SUPABASE_ANON_KEY=tu-anon-key-aqui
 
 2. Reiniciá el servidor de desarrollo (`npm run dev`)
 
+## 3.1 Configurar secretos para Edge Functions
+
+Las funciones de Supabase usan secretos separados para enviar emails y notificaciones.
+
+1. En la consola de Supabase, configura estos secretos:
+   - `RESEND_API_KEY` → clave de Resend para enviar emails
+   - `TELEGRAM_BOT_TOKEN` → token del bot de Telegram
+   - `TELEGRAM_CHAT_ID` → ID del chat o canal donde querés recibir las ventas
+   - `MP_ACCESS_TOKEN` → token de Mercado Pago para webhooks MP
+
+2. Si usás la CLI, podés ejecutarlo así:
+
+```bash
+supabase secrets set \
+  RESEND_API_KEY=tu_resend_api_key \
+  TELEGRAM_BOT_TOKEN=tu_telegram_bot_token \
+  TELEGRAM_CHAT_ID=tu_telegram_chat_id \
+  MP_ACCESS_TOKEN=tu_mp_access_token
+```
+
+> Importante: si `TELEGRAM_BOT_TOKEN` o `TELEGRAM_CHAT_ID` no están configurados, las notificaciones de ventas en Telegram se omiten.
+
 ## 4. Ejecutar el Esquema de Base de Datos
 
 1. En Supabase, andá a **SQL Editor**

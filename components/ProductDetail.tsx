@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { X, ChevronLeft, ChevronRight, ShoppingBag, Check, ChevronDown, Heart } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ShoppingBag, Check, ChevronDown, Heart, Share2 } from 'lucide-react';
 import { Product } from '../types';
 import { COLOR_MAP, SIZE_ORDER, sortSizes } from '../lib/constants';
 import { useSettings } from '../context/SettingsContext';
+import { getProductPricing } from '../lib/pricing';
 
 interface ProductDetailProps {
     product: Product;
@@ -125,6 +126,27 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
         onAddToCart(product, selectedSize, selectedColor);
         setAdded(true);
         setTimeout(() => setAdded(false), 2000);
+    };
+
+    const handleShare = async () => {
+        const shareUrl = product.sku ? `${window.location.origin}/producto/${product.sku}` : window.location.href;
+        const shareText = `Mirá este producto: ${product.name}`;
+
+        try {
+            if (navigator.share) {
+                await navigator.share({
+                    title: product.name,
+                    text: shareText,
+                    url: shareUrl,
+                });
+                return;
+            }
+        } catch (error) {
+            // El usuario canceló la acción de compartir.
+        }
+
+        const fallbackUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
+        window.open(fallbackUrl, '_blank', 'noopener,noreferrer');
     };
 
     const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -313,27 +335,50 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                         </div>
                         <div className="flex justify-between items-start mb-4">
                             <h2 className="font-heading text-xl md:text-2xl font-bold tracking-tighter text-[var(--color-text)] uppercase leading-none break-words pr-4">{product.name}</h2>
-                            <button
-                                onClick={(e) => { e.stopPropagation(); if (onToggleFavorite) onToggleFavorite(product.id); }}
-                                className={`transition-colors flex-shrink-0 ${isFavorite ? 'text-red-500' : 'text-[var(--color-text)]/20 hover:text-red-500'}`}
-                            >
-                                <Heart size={24} className={isFavorite ? 'fill-red-500 text-red-500' : ''} />
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleShare();
+                                    }}
+                                    className="transition-colors flex-shrink-0 text-[var(--color-text)]/50 hover:text-[var(--color-text)]"
+                                    aria-label="Compartir producto"
+                                    title="Compartir producto"
+                                >
+                                    <Share2 size={22} />
+                                </button>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); if (onToggleFavorite) onToggleFavorite(product.id); }}
+                                    className={`transition-colors flex-shrink-0 ${isFavorite ? 'text-red-500' : 'text-[var(--color-text)]/20 hover:text-red-500'}`}
+                                    aria-label="Agregar a favoritos"
+                                    title="Agregar a favoritos"
+                                >
+                                    <Heart size={24} className={isFavorite ? 'fill-red-500 text-red-500' : ''} />
+                                </button>
+                            </div>
                         </div>
 
                         <div className="flex flex-col gap-2 mb-2">
+                            {getProductPricing(product, transferDiscount).isOnSale && (
+                                <div className="flex items-center gap-2">
+                                    <span className="text-base font-medium text-[var(--color-text-muted)] line-through tracking-tighter">
+                                        ${product.compareAtPrice!.toLocaleString()}
+                                    </span>
+                                    <span className="text-sm font-black bg-red-600 text-white px-3 py-1 tracking-tighter uppercase">
+                                        -{getProductPricing(product, transferDiscount).saleDiscountPct}% OFF
+                                    </span>
+                                </div>
+                            )}
                              <div className="flex items-center gap-3">
                                 <span className="text-lg md:text-xl font-black text-[var(--color-text)] tracking-tighter">
-                                    ${(product.originalPrice > product.price ? product.originalPrice : (product.price || 0)).toLocaleString()}
+                                    ${getProductPricing(product, transferDiscount).creditPrice.toLocaleString()}
                                 </span>
                                 <span className="text-[10px] font-black tracking-widest text-[var(--color-text-muted)] uppercase mt-auto pb-1">Crédito / Débito</span>
                             </div>
                         </div>
 
                         {(() => {
-                            const creditPrice = product.originalPrice > product.price ? product.originalPrice : (product.price || 0);
-                            const transferPrice = product.originalPrice > product.price ? product.price : Math.round((product.price || 0) * (1 - transferDiscount / 100));
-                            const discountPct = Math.round((creditPrice - transferPrice) / creditPrice * 100);
+                            const { isOnSale, creditPrice, transferPrice, discountPct } = getProductPricing(product, transferDiscount);
                             const saved = creditPrice - transferPrice;
 
                             return (
@@ -347,13 +392,20 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                                                 <span className="text-[9px] font-black tracking-[0.2em] text-[#666] uppercase">PRECIO TRANSFERENCIA</span>
                                                 <span className="flex h-1.5 w-1.5 rounded-full bg-black animate-pulse"></span>
                                             </div>
-                                            <span className="text-2xl md:text-3xl font-black text-black tracking-tighter">
-                                                ${transferPrice.toLocaleString()}
-                                            </span>
+                                            <div className="flex items-baseline gap-2">
+                                                <span className="text-2xl md:text-3xl font-black text-black tracking-tighter">
+                                                    ${transferPrice.toLocaleString()}
+                                                </span>
+                                                {isOnSale && (
+                                                    <span className="text-sm font-medium text-[#999] line-through tracking-tighter">
+                                                        ${Math.round(product.compareAtPrice! * (1 - transferDiscount / 100)).toLocaleString()}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                         <div className="flex flex-col items-end">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-[10px] font-black bg-black text-white px-2 py-0.5 tracking-tighter uppercase mb-1">-{discountPct}% OFF</span>
+                                                <span className="text-sm font-black bg-red-600 text-white px-3 py-1 tracking-tighter uppercase mb-1">-{discountPct}% OFF</span>
                                             </div>
                                             {saved > 0 && (
                                                 <span className="text-[9px] font-bold text-black tracking-widest uppercase">
@@ -368,8 +420,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                         })()}
 
                         {(() => {
-                            const creditPrice = product.originalPrice > product.price ? product.originalPrice : (product.price || 0);
-                            const transferPrice = product.originalPrice > product.price ? product.price : Math.round((product.price || 0) * (1 - transferDiscount / 100));
+                            const { creditPrice, transferPrice } = getProductPricing(product, transferDiscount);
                             const bankDetailsStr = [
                                 `🏦 *Consulta por Transferencia — Shams*`,
                                 ``,

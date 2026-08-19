@@ -5,6 +5,7 @@ export interface Product {
   brand: string;
   price: number;
   originalPrice: number;
+  compareAtPrice?: number | null;
   image: string;
   images?: string[];
   imageObjects?: {

@@ -1,9 +1,10 @@
 
 import React from 'react';
-import { Plus, Heart } from 'lucide-react';
+import { Plus, Heart, Share2 } from 'lucide-react';
 import { Product } from '../types';
 import { COLOR_MAP } from '../lib/constants';
 import { useSettings } from '../context/SettingsContext';
+import { getProductPricing } from '../lib/pricing';
 
 interface ProductCardProps {
   product: Product;
@@ -22,6 +23,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onOpenD
   const isOutOfStock = totalStock === 0;
 
   const discount = product.originalPrice > 0 ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
+
+  const { isOnSale, saleDiscountPct } = getProductPricing(product, transferDiscount);
 
   const imageList = React.useMemo(() => {
     const baseImages = (product.images && product.images.length > 0 ? product.images : [product.image]).map(url => ({ url, color: '', inStock: !isOutOfStock }));
@@ -48,6 +51,25 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onOpenD
   }, [product, isOutOfStock]);
 
   const images = imageList.map(img => img.url);
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const shareUrl = product.sku ? `${window.location.origin}/producto/${product.sku}` : window.location.href;
+    const shareText = `Mirá este producto: ${product.name}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: product.name, text: shareText, url: shareUrl });
+        return;
+      }
+    } catch (error) {
+      // El usuario canceló la acción de compartir.
+      return;
+    }
+
+    const fallbackUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
+    window.open(fallbackUrl, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <div className="group relative flex flex-col h-full">
@@ -119,18 +141,32 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onOpenD
           )}
         </div>
 
-        {/* Favorites Button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (onToggleFavorite) onToggleFavorite(product.id);
-          }}
-          className={`absolute top-3 right-3 md:top-4 md:right-4 transition-all duration-300 z-20 ${isFavorite ? 'text-red-500' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'}`}
-        >
-          <div className={`p-2.5 rounded-none bg-white/80 backdrop-blur-md border border-[var(--color-border)] ${isFavorite ? 'bg-red-50 border-red-200' : ''}`}>
-            <Heart size={18} className={`transition-colors ${isFavorite ? 'fill-red-500' : 'stroke-[1.5px]'}`} />
-          </div>
-        </button>
+        {/* Favorites & Share Buttons */}
+        <div className="absolute top-3 right-3 md:top-4 md:right-4 flex flex-col gap-2 z-20">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onToggleFavorite) onToggleFavorite(product.id);
+            }}
+            className={`transition-all duration-300 ${isFavorite ? 'text-red-500' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'}`}
+            aria-label="Agregar a favoritos"
+            title="Agregar a favoritos"
+          >
+            <div className={`p-2.5 rounded-none bg-white/80 backdrop-blur-md border border-[var(--color-border)] ${isFavorite ? 'bg-red-50 border-red-200' : ''}`}>
+              <Heart size={18} className={`transition-colors ${isFavorite ? 'fill-red-500' : 'stroke-[1.5px]'}`} />
+            </div>
+          </button>
+          <button
+            onClick={handleShare}
+            className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-all duration-300"
+            aria-label="Compartir producto"
+            title="Compartir producto"
+          >
+            <div className="p-2.5 rounded-none bg-white/80 backdrop-blur-md border border-[var(--color-border)]">
+              <Share2 size={18} className="stroke-[1.5px]" />
+            </div>
+          </button>
+        </div>
 
         {/* Floating Quick Add */}
         <div className="absolute bottom-6 right-6 translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 z-30 hidden md:block">
@@ -172,16 +208,24 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onOpenD
 
         {/* Prices */}
         <div className="mt-auto pt-2 space-y-1.5">
+          {isOnSale && (
+            <div className="flex items-center gap-2">
+              <span className="text-[13px] font-medium text-[var(--color-text-muted)] line-through tracking-tighter">
+                ${product.compareAtPrice!.toLocaleString()}
+              </span>
+              <span className="text-[12px] font-black bg-red-600 text-white px-2 py-1 tracking-tighter uppercase">
+                -{saleDiscountPct}% OFF
+              </span>
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <span className="text-[12px] md:text-[13px] font-bold text-[var(--color-text)] tracking-tighter leading-none">
-              ${(product.originalPrice > product.price ? product.originalPrice : (product.price || 0)).toLocaleString()}
+              ${getProductPricing(product, transferDiscount).creditPrice.toLocaleString()}
             </span>
             <span className="text-[9px] font-medium text-[var(--color-text-muted)] uppercase tracking-widest mt-0.5">CRÉDITO / DÉBITO</span>
           </div>
           {(() => {
-            const creditPrice = product.originalPrice > product.price ? product.originalPrice : (product.price || 0);
-            const transferPrice = product.originalPrice > product.price ? product.price : Math.round((product.price || 0) * 0.85);
-            const discountPct = Math.round((creditPrice - transferPrice) / creditPrice * 100);
+            const { creditPrice, transferPrice, discountPct } = getProductPricing(product, transferDiscount);
             return (
               <div className="bg-black/[0.03] p-2 mt-1 -mx-2 flex flex-col gap-1 border-l-2 border-black/10 hover:border-black transition-colors group/discount">
                 <div className="flex items-center justify-between gap-2">
@@ -194,7 +238,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onOpenD
                     </span>
                   </div>
                   {discountPct > 0 && (
-                    <span className="text-[9px] font-black bg-black text-white px-1.5 py-0.5 tracking-tighter uppercase">
+                    <span className="text-[12px] font-black bg-red-600 text-white px-2 py-1 tracking-tighter uppercase">
                       -{discountPct}%
                     </span>
                   )}
