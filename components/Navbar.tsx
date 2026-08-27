@@ -76,7 +76,7 @@ const Navbar: React.FC<NavbarProps> = ({
               className="font-heading text-3xl md:text-5xl font-bold tracking-[0.35em] md:tracking-[0.4em] whitespace-nowrap uppercase"
               style={{ color: '#000000' }}
             >
-              SHAMS
+              MULTIBRAND
             </h1>
             <div className="absolute -bottom-1 left-0 w-0 h-[2px] bg-[#000000] group-hover:w-full transition-all duration-500 ease-out" />
           </div>
@@ -349,7 +349,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
         {/* Footer Area */}
         <div className="mt-12 mb-20 px-6 text-center">
-          <h2 className="font-heading text-2xl font-black tracking-[0.5em] text-black/10 mb-2">SHAMS</h2>
+          <h2 className="font-heading text-2xl font-black tracking-[0.5em] text-black/10 mb-2">MULTIBRAND</h2>
           <p className="text-[10px] tracking-[0.2em] text-zinc-400 uppercase font-medium">Est. 2026 — Rosario, Sta Fe</p>
         </div>
       </div>,

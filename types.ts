@@ -21,6 +21,7 @@ export interface Product {
     color: string;
     color_code?: string;
     stock: number;
+    has_defect?: boolean;
   }[];
   is_published?: boolean;
   is_active?: boolean;

@@ -1,9 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import { usePageSEO } from '../lib/seo';
 
 const PrivacyPolicy: React.FC = () => {
     const navigate = useNavigate();
+
+    usePageSEO({
+        title: 'Política de Privacidad | Multibrand Rosario',
+        description: 'Política de privacidad y protección de datos personales de Multibrand Rosario.',
+    });
 
     return (
         <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', color: '#000000' }}>
@@ -17,7 +23,7 @@ const PrivacyPolicy: React.FC = () => {
                     Volver
                 </button>
                 <span className="text-[var(--color-text)]/20">|</span>
-                <span className="text-[10px] font-black tracking-[0.4em] text-black uppercase">Shams Online — Rosario</span>
+                <span className="text-[10px] font-black tracking-[0.4em] text-black uppercase">Multibrand Online — Rosario</span>
             </div>
 
             <div className="max-w-3xl mx-auto px-6 py-16 space-y-12">
@@ -207,7 +213,7 @@ const PrivacyPolicy: React.FC = () => {
                 {/* Footer de la página */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-8">
                     <div>
-                        <p className="text-[10px] font-black tracking-[0.4em] text-[var(--color-text-muted)] uppercase">Shams — Rosario, Santa Fe, Argentina</p>
+                        <p className="text-[10px] font-black tracking-[0.4em] text-[var(--color-text-muted)] uppercase">Multibrand — Rosario, Santa Fe, Argentina</p>
                         <p className="text-[10px] font-black tracking-[0.3em] text-[var(--color-text-muted)] uppercase mt-1">© 2026 — Todos los derechos reservados</p>
                     </div>
                     <button

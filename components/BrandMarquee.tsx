@@ -37,7 +37,7 @@ const BrandMarquee: React.FC = () => {
   };
 
   // Display default text if specific brands aren't loaded or available
-  const displayItems = brands.length > 0 ? brands : [{ name: 'SHAMS', logo_url: null }];
+  const displayItems = brands.length > 0 ? brands : [{ name: 'MULTIBRAND', logo_url: null }];
 
   return (
     <div className="py-4 md:py-6 border-y border-[var(--color-border)] overflow-hidden bg-white relative z-10">

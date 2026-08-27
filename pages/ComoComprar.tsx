@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Ruler, ShoppingCart, MousePointer, ClipboardList, CreditCard, Mail } from 'lucide-react';
+import { usePageSEO } from '../lib/seo';
 
 const steps = [
     {
@@ -50,6 +51,11 @@ const steps = [
 const ComoComprar: React.FC = () => {
     const navigate = useNavigate();
 
+    usePageSEO({
+        title: 'Cómo Comprar | Multibrand Rosario',
+        description: 'Guía paso a paso para comprar online en Multibrand Rosario: Perramus, Hunter, Nautica y más marcas.',
+    });
+
     return (
         <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', color: '#000000' }}>
             {/* Header */}
@@ -62,7 +68,7 @@ const ComoComprar: React.FC = () => {
                     Volver
                 </button>
                 <span style={{ color: '#ccc' }}>|</span>
-                <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#000', textTransform: 'uppercase' }}>Shams — Guía de Compra</span>
+                <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#000', textTransform: 'uppercase' }}>Multibrand — Guía de Compra</span>
             </div>
 
             <div style={{ maxWidth: '768px', margin: '0 auto', padding: '64px 24px' }}>
@@ -73,7 +79,7 @@ const ComoComprar: React.FC = () => {
                         Cómo<br /><span style={{ fontStyle: 'italic' }}>Comprar</span>
                     </h1>
                     <p style={{ color: '#666', fontSize: '11px', letterSpacing: '0.2em', lineHeight: 1.8, textTransform: 'uppercase' }}>
-                        Seguí estos simples pasos para realizar tu compra en Shams.
+                        Seguí estos simples pasos para realizar tu compra en Multibrand.
                     </p>
                 </div>
 
@@ -133,7 +139,7 @@ const ComoComprar: React.FC = () => {
 
                 <div style={{ width: '100%', height: '1px', backgroundColor: '#e5e5e5', margin: '64px 0 40px' }} />
                 <div style={{ textAlign: 'center', opacity: 0.4 }}>
-                    <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#666', textTransform: 'uppercase' }}>Shams — Rosario, Santa Fe, Argentina</p>
+                    <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#666', textTransform: 'uppercase' }}>Multibrand — Rosario, Santa Fe, Argentina</p>
                 </div>
             </div>
         </div>

@@ -89,7 +89,7 @@ serve(async (req) => {
 
         <!-- HEADER -->
         <div style="background-color: #000000; padding: 40px 30px; text-align: center;">
-          <div style="letter-spacing: 12px; font-size: 22px; font-weight: 900; color: #ffffff; text-transform: uppercase; margin-bottom: 8px;">SHAMS</div>
+          <div style="letter-spacing: 12px; font-size: 22px; font-weight: 900; color: #ffffff; text-transform: uppercase; margin-bottom: 8px;">MULTIBRAND</div>
           <div style="letter-spacing: 6px; font-size: 10px; font-weight: 400; color: #999999; text-transform: uppercase;">ONLINE STORE</div>
           <div style="width: 40px; height: 1px; background-color: #444; margin: 20px auto 0;"></div>
           <div style="letter-spacing: 4px; font-size: 9px; font-weight: 700; color: #888888; text-transform: uppercase; margin-top: 16px;">CONFIRMACIÓN DE PEDIDO</div>
@@ -165,7 +165,7 @@ serve(async (req) => {
           <p style="font-size: 11px; color: #666666; margin: 0 0 6px 0; letter-spacing: 0.5px;">¿Tenés alguna duda? Contactanos por WhatsApp</p>
           <p style="font-size: 13px; font-weight: 700; color: #000000; margin: 0 0 20px 0; letter-spacing: 1px;">341 217-5258</p>
           <div style="width: 30px; height: 1px; background-color: #cccccc; margin: 0 auto 16px;"></div>
-          <p style="font-size: 9px; color: #aaaaaa; margin: 0; letter-spacing: 3px; text-transform: uppercase;">SHAMS ONLINE &copy; 2026 — Rosario, Argentina</p>
+          <p style="font-size: 9px; color: #aaaaaa; margin: 0; letter-spacing: 3px; text-transform: uppercase;">MULTIBRAND ONLINE &copy; 2026 — Rosario, Argentina</p>
         </div>
 
       </div>
@@ -178,9 +178,9 @@ serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Shams Online <tienda@shamsonline.com.ar>",
+        from: "Multibrand Online <tienda@shamsonline.com.ar>",
         to: [order.customer_email, "admteruzyolanda@gmail.com"],
-        subject: `Confirmación de Pedido #${order.order_number} - Shams Online`,
+        subject: `Confirmación de Pedido #${order.order_number} - Multibrand Online`,
         html: emailHtml,
       }),
     });

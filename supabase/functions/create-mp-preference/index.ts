@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
       items: [
         {
           id: order_id,
-          title: 'Compra en Shams Online',
+          title: 'Compra en Multibrand Online',
           description: `Pedido ${order_number}`,
           quantity: 1,
           unit_price: Number(total),

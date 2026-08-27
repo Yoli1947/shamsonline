@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Search, AlertTriangle, Plus, Minus, Download, Upload, FileSpreadsheet, Loader, Maximize2, Minimize2, Trash2 } from 'lucide-react'
-import { getAllProducts, updateVariantStock, createProduct, updateProduct, deleteProduct, createBrand, createCategory, getBrands, getCategories, saveProductVariants, batchUpsertProducts, batchUpsertVariants, getSeasons, createSeason, updateSiteSetting } from '../../lib/admin'
+import { getAllProducts, updateVariantStock, updateVariantDefect, createProduct, updateProduct, deleteProduct, createBrand, createCategory, getBrands, getCategories, saveProductVariants, batchUpsertProducts, batchUpsertVariants, getSeasons, createSeason, updateSiteSetting } from '../../lib/admin'
 import { supabase } from '../../lib/supabase'
 import * as XLSX from 'xlsx'
 import { COLOR_MAP, SIZE_ORDER } from '../../lib/constants'
@@ -68,6 +68,19 @@ export default function Stock() {
             })))
         } catch (error) {
             alert('Error al actualizar stock')
+        }
+    }
+
+    const handleToggleDefect = async (variantId, currentValue) => {
+        const newValue = !currentValue
+        try {
+            await updateVariantDefect(variantId, newValue)
+            setProducts(prev => prev.map(p => ({
+                ...p,
+                variants: p.variants?.map(v => v.id === variantId ? { ...v, has_defect: newValue } : v)
+            })))
+        } catch (error) {
+            alert('Error al marcar falla')
         }
     }
 
@@ -879,11 +892,11 @@ export default function Stock() {
             ws['!cols'] = colWidths;
 
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Stock_Shams");
+            XLSX.utils.book_append_sheet(wb, ws, "Stock_Multibrand");
 
             const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
             const blobData = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            const fileName = `Plantilla_Stock_Shams_${new Date().toISOString().split('T')[0]}.xlsx`;
+            const fileName = `Plantilla_Stock_Multibrand_${new Date().toISOString().split('T')[0]}.xlsx`;
 
             const url = window.URL.createObjectURL(blobData);
             const link = document.createElement('a');
@@ -1271,13 +1284,35 @@ CREATE POLICY "Full access for variants" ON product_variants FOR ALL TO authenti
                                             return (
                                                 <td key={i} style={{ padding: '1px', textAlign: 'center' }}>
                                                     {variant ? (
-                                                        <input
-                                                            type="number"
-                                                            className="stock-input"
-                                                            style={{ width: '32px', height: '22px', fontSize: '10px', padding: '0', border: '1px solid #333' }}
-                                                            value={variant.stock}
-                                                            onChange={(e) => handleUpdateStock(variant.id, parseInt(e.target.value) || 0)}
-                                                        />
+                                                        <div style={{ position: 'relative', width: '32px', margin: '0 auto' }}>
+                                                            <input
+                                                                type="number"
+                                                                className="stock-input"
+                                                                style={{
+                                                                    width: '32px', height: '22px', fontSize: '10px', padding: '0',
+                                                                    border: variant.has_defect ? '1px solid #ef4444' : '1px solid #333',
+                                                                    background: variant.has_defect ? 'rgba(239,68,68,0.15)' : undefined
+                                                                }}
+                                                                value={variant.stock}
+                                                                onChange={(e) => handleUpdateStock(variant.id, parseInt(e.target.value) || 0)}
+                                                                title={variant.has_defect ? 'Con falla: no se vende en la tienda' : ''}
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleToggleDefect(variant.id, variant.has_defect)}
+                                                                title={variant.has_defect ? 'Quitar marca de falla' : 'Marcar con falla (no se venderá en la tienda)'}
+                                                                style={{
+                                                                    position: 'absolute', top: '-6px', right: '-6px',
+                                                                    width: '13px', height: '13px', padding: 0, borderRadius: '50%',
+                                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                    border: 'none', cursor: 'pointer',
+                                                                    background: variant.has_defect ? '#ef4444' : '#333',
+                                                                    color: '#fff'
+                                                                }}
+                                                            >
+                                                                <AlertTriangle size={8} />
+                                                            </button>
+                                                        </div>
                                                     ) : (
                                                         <span style={{ color: '#222', fontSize: '9px' }}>-</span>
                                                     )}

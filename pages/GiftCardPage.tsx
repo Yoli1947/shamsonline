@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Gift, User, Mail, Phone, MessageSquare, ChevronRight, Loader } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { usePageSEO } from '../lib/seo';
 
 const PRESET_AMOUNTS = [800, 150000, 200000, 300000, 500000];
 
@@ -16,6 +17,12 @@ function generateOrderNumber() {
 
 const GiftCardPage: React.FC = () => {
     const navigate = useNavigate();
+
+    usePageSEO({
+        title: 'Gift Cards | Multibrand Rosario',
+        description: 'Regalá una Gift Card de Multibrand Rosario: el destinatario la recibe al instante por WhatsApp.',
+    });
+
     const [isGift, setIsGift] = useState(false);
     const [amount, setAmount] = useState(200000);
     const [customAmount, setCustomAmount] = useState('200000');
@@ -109,7 +116,7 @@ const GiftCardPage: React.FC = () => {
                 product_id: null,
                 variant_id: null,
                 product_name: `Gift Card $${effectiveAmount.toLocaleString('es-AR')}`,
-                product_brand: 'SHAMS',
+                product_brand: 'MULTIBRAND',
                 product_image: null,
                 size: 'ÚNICO',
                 color: null,
@@ -146,7 +153,7 @@ const GiftCardPage: React.FC = () => {
                     },
                     total: effectiveAmount,
                     items: [{
-                        name: `Gift Card Shams $${effectiveAmount.toLocaleString('es-AR')}`,
+                        name: `Gift Card Multibrand $${effectiveAmount.toLocaleString('es-AR')}`,
                         price: effectiveAmount,
                         quantity: 1,
                     }],
@@ -211,7 +218,7 @@ const GiftCardPage: React.FC = () => {
                 <div style={{ textAlign: 'center', marginBottom: '48px' }}>
                     <Gift size={32} color="#000" style={{ margin: '0 auto 16px' }} />
                     <h1 style={{ fontSize: '40px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.02em', marginBottom: '12px' }}>
-                        Gift Card<br /><span style={{ fontStyle: 'italic' }}>Shams</span>
+                        Gift Card<br /><span style={{ fontStyle: 'italic' }}>Multibrand</span>
                     </h1>
                     <p style={{ color: '#666', fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', lineHeight: 1.8 }}>
                         El regalo perfecto. El destinatario la recibe por WhatsApp al instante.
@@ -420,7 +427,7 @@ const GiftCardPage: React.FC = () => {
                 </form>
 
                 <div style={{ marginTop: '64px', textAlign: 'center', opacity: 0.4 }}>
-                    <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#666', textTransform: 'uppercase' }}>Shams — Rosario, Santa Fe, Argentina</p>
+                    <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#666', textTransform: 'uppercase' }}>Multibrand — Rosario, Santa Fe, Argentina</p>
                 </div>
             </div>
         </div>

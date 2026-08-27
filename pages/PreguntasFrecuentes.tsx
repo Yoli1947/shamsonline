@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronDown, ChevronUp, CreditCard, Truck, RotateCcw, Shield, MapPin, MessageCircle, Ruler } from 'lucide-react';
+import { usePageSEO } from '../lib/seo';
 
 const faqs = [
     {
@@ -104,7 +105,7 @@ const faqs = [
         color: '#000000',
         questions: [
             {
-                q: '¿Es seguro comprar en Shams?',
+                q: '¿Es seguro comprar en Multibrand?',
                 a: 'Sí. Somos un comercio registrado (CUIT 27-05784065-5) que opera bajo la normativa de Defensa del Consumidor. Nuestros pagos están procesados por plataformas certificadas y tus datos están protegidos según nuestra Política de Privacidad.',
             },
             {
@@ -155,6 +156,11 @@ const FAQItem = ({ q, a }: { q: string; a: string }) => {
 export default function PreguntasFrecuentes() {
     const navigate = useNavigate();
 
+    usePageSEO({
+        title: 'Preguntas Frecuentes | Multibrand Rosario',
+        description: 'Pagos, envíos, cambios y devoluciones: todo lo que necesitás saber sobre tus compras en Multibrand Rosario.',
+    });
+
     return (
         <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', color: '#000000' }}>
             {/* Header */}
@@ -178,7 +184,7 @@ export default function PreguntasFrecuentes() {
                         PREGUNTAS <span className="text-black italic">FRECUENTES</span>
                     </h1>
                     <p className="text-[var(--color-text-muted)] text-sm max-w-md mx-auto">
-                        Todo lo que necesitás saber sobre tus compras en Shams.
+                        Todo lo que necesitás saber sobre tus compras en Multibrand.
                     </p>
                 </div>
 

@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /admin
 
-Sitemap: https://shamsoutlet.com/sitemap.xml
+Sitemap: https://multibrandrosario.com/sitemap.xml

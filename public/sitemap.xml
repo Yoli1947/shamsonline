@@ -1,38 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://shamsoutlet.com/</loc>
+    <loc>https://multibrandrosario.com/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://shamsoutlet.com/marcas</loc>
+    <loc>https://multibrandrosario.com/marcas</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://shamsoutlet.com/como-comprar</loc>
+    <loc>https://multibrandrosario.com/gift-cards</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://shamsoutlet.com/envios</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://shamsoutlet.com/preguntas-frecuentes</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://shamsoutlet.com/arrepentimiento</loc>
+    <loc>https://multibrandrosario.com/como-comprar</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://shamsoutlet.com/politicas-de-privacidad</loc>
+    <loc>https://multibrandrosario.com/envios</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://multibrandrosario.com/preguntas-frecuentes</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://multibrandrosario.com/arrepentimiento</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://multibrandrosario.com/politicas-de-privacidad</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
   </url>
 </urlset>

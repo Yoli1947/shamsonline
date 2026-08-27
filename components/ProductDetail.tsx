@@ -5,6 +5,7 @@ import { Product } from '../types';
 import { COLOR_MAP, SIZE_ORDER, sortSizes } from '../lib/constants';
 import { useSettings } from '../context/SettingsContext';
 import { getProductPricing } from '../lib/pricing';
+import { supabase } from '../lib/supabase';
 
 interface ProductDetailProps {
     product: Product;
@@ -25,19 +26,46 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
     const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
     const [isZooming, setIsZooming] = useState(false);
     const rafRef = useRef<number | null>(null);
+    // Stock fresco de Supabase al abrir la ficha, para no depender del snapshot inicial
+    // del catálogo (que puede tener horas de antigüedad y mostrar talles ya sin stock).
+    const [liveVariants, setLiveVariants] = useState<Product['variants'] | null>(null);
 
-    // Reset image index and selections when product or modal visibility changes
+    useEffect(() => {
+        if (!isOpen || !product?.id) { setLiveVariants(null); return; }
+        let cancelled = false;
+        setLiveVariants(null);
+        (async () => {
+            let { data, error }: { data: any; error: any } = await supabase
+                .from('product_variants')
+                .select('id, size, color, color_code, stock, has_defect')
+                .eq('product_id', product.id);
+            if (error) {
+                // La columna has_defect puede no existir todavía (migración pendiente):
+                // reintentamos sin ella para al menos tener el stock fresco.
+                ({ data, error } = await supabase
+                    .from('product_variants')
+                    .select('id, size, color, color_code, stock')
+                    .eq('product_id', product.id));
+            }
+            if (!cancelled && !error && data) setLiveVariants(data as any);
+        })();
+        return () => { cancelled = true; };
+    }, [isOpen, product?.id]);
+
+    const effectiveVariants = liveVariants ?? product.variants ?? [];
+
+    // Reset image index and selections when product o modal visibility changes
     useEffect(() => {
         if (isOpen) {
-            const variantsWithStock = product.variants?.filter(v => (v.stock || 0) > 0) || [];
+            const variantsWithStock = effectiveVariants.filter(v => !v.has_defect && (v.stock || 0) > 0);
             setCurrentImgIndex(0);
             setSelectedSize('');
             setSelectedColor(variantsWithStock[0]?.color || '');
             setAdded(false);
         }
-    }, [isOpen, product]);
+    }, [isOpen, product, liveVariants]);
 
-    const totalStock = product.variants?.reduce((acc, v) => acc + v.stock, 0) || 0;
+    const totalStock = effectiveVariants.reduce((acc, v) => acc + (v.has_defect ? 0 : v.stock), 0);
     const isOutOfStock = totalStock === 0;
 
     if (!isOpen) return null;
@@ -52,9 +80,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
             }));
         }
 
-        const colorStock = (product.variants || []).reduce((acc: Record<string, number>, v) => {
+        const colorStock = effectiveVariants.reduce((acc: Record<string, number>, v) => {
             const color = (v.color || '').trim().toLowerCase();
-            acc[color] = (acc[color] || 0) + (v.stock || 0);
+            acc[color] = (acc[color] || 0) + (v.has_defect ? 0 : (v.stock || 0));
             return acc;
         }, {});
 
@@ -71,7 +99,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                 inStock: hasExplicitColorMatch ? (colorStock[colorKey] > 0) : !isOutOfStock
             };
         }).sort((a, b) => (a.inStock === b.inStock ? 0 : a.inStock ? -1 : 1));
-    }, [product]);
+    }, [product, effectiveVariants]);
 
     // Filter out images that are out of stock
     // Only show them if the ENTIRE product is out of stock (availableImages is empty)
@@ -81,7 +109,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
     const images = finalImageList.map(img => img.url);
 
     // ... (rest of filtering code for colors/sizes if needed)
-    const variantsWithStock = product.variants?.filter(v => (v.stock || 0) > 0) || [];
+    const variantsWithStock = effectiveVariants.filter(v => !v.has_defect && (v.stock || 0) > 0);
 
     // Available colors (with codes for swatches)
     const colorOptions = useMemo(() => {
@@ -122,10 +150,37 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
         }
     }, [selectedColor, variantsWithStock]);
 
-    const handleAddToCart = () => {
-        onAddToCart(product, selectedSize, selectedColor);
-        setAdded(true);
-        setTimeout(() => setAdded(false), 2000);
+    const [addError, setAddError] = useState('');
+    const [checkingStock, setCheckingStock] = useState(false);
+
+    const handleAddToCart = async () => {
+        setAddError('');
+        setCheckingStock(true);
+        try {
+            // Verificación final en vivo justo antes de agregar, por si el talle se vendió
+            // en los segundos desde que se abrió la ficha.
+            const variant = effectiveVariants.find(v => v.size === selectedSize && (!selectedColor || v.color === selectedColor));
+            if (variant?.id) {
+                let { data, error } = await supabase.from('product_variants').select('stock, has_defect').eq('id', variant.id).maybeSingle();
+                if (error) {
+                    // La columna has_defect puede no existir todavía: reintentamos solo por stock.
+                    ({ data, error } = await supabase.from('product_variants').select('stock').eq('id', variant.id).maybeSingle());
+                }
+                // Si la consulta falla igual (ej. sin conexión), no bloqueamos la compra acá:
+                // el chequeo definitivo se hace de nuevo al crear el pedido.
+                if (!error && data && (data.has_defect || (data.stock || 0) <= 0)) {
+                    setAddError('Este talle ya no tiene stock disponible.');
+                    setLiveVariants(prev => (prev || effectiveVariants).map(v => v.id === variant.id ? { ...v, stock: 0 } : v));
+                    setSelectedSize('');
+                    return;
+                }
+            }
+            onAddToCart({ ...product, variants: effectiveVariants }, selectedSize, selectedColor);
+            setAdded(true);
+            setTimeout(() => setAdded(false), 2000);
+        } finally {
+            setCheckingStock(false);
+        }
     };
 
     const handleShare = async () => {
@@ -422,7 +477,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                         {(() => {
                             const { creditPrice, transferPrice } = getProductPricing(product, transferDiscount);
                             const bankDetailsStr = [
-                                `🏦 *Consulta por Transferencia — Shams*`,
+                                `🏦 *Consulta por Transferencia — Multibrand*`,
                                 ``,
                                 `¡Hola! Me gustaría comprar: *${product.name}*`,
                                 selectedSize ? `📏 Talle: ${selectedSize}` : ``,
@@ -502,15 +557,20 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                         <div className="mb-6">
                             <h4 className="text-[8px] font-black tracking-widest text-[var(--color-text-muted)] uppercase mb-2">Descripción</h4>
                             <p className="text-[var(--color-text-muted)] text-[11px] leading-relaxed tracking-wide font-medium whitespace-pre-line break-words">
-                                {product.description || 'Este exclusivo artículo de Shams combina diseño premium con materiales de alta calidad.'}
+                                {product.description || 'Este exclusivo artículo de Multibrand combina diseño premium con materiales de alta calidad.'}
                             </p>
                         </div>
                     </div>
 
                      <div className="pt-6 border-t border-black/5 bg-[var(--color-background)] md:sticky md:bottom-0 mt-auto">
+                        {addError && (
+                            <p className="mb-3 text-center text-[10px] font-black tracking-widest uppercase text-red-600">
+                                {addError}
+                            </p>
+                        )}
                         <button
                             onClick={handleAddToCart}
-                            disabled={added || isOutOfStock || (sizes.length > 0 && !selectedSize)}
+                            disabled={added || checkingStock || isOutOfStock || (sizes.length > 0 && !selectedSize)}
                             className={`w-full py-5 rounded-none flex items-center justify-center gap-3 font-black tracking-[0.3em] text-[11px] uppercase transition-all duration-500 ${isOutOfStock
                                 ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
                                 : added
@@ -524,6 +584,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                                 'AGOTADO'
                             ) : added ? (
                                 <><Check size={18} /> ¡AGREGADO!</>
+                            ) : checkingStock ? (
+                                'VERIFICANDO STOCK...'
                             ) : (sizes.length > 0 && !selectedSize) ? (
                                 'SELECCIONAR TALLE'
                             ) : (

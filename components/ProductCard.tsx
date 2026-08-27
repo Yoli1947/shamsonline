@@ -19,7 +19,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onOpenD
   const [hoverIndex, setHoverIndex] = React.useState(0);
   const transferDiscount = settings.transfer_discount || 15;
 
-  const totalStock = product.variants?.reduce((acc, v) => acc + (Number(v.stock) || 0), 0) || 0;
+  const totalStock = product.variants?.reduce((acc, v) => acc + (v.has_defect ? 0 : (Number(v.stock) || 0)), 0) || 0;
   const isOutOfStock = totalStock === 0;
 
   const discount = product.originalPrice > 0 ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
@@ -32,7 +32,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onOpenD
 
     const colorStock = (product.variants || []).reduce((acc: Record<string, number>, v) => {
       const color = (v.color || '').trim().toLowerCase();
-      acc[color] = (acc[color] || 0) + (Number(v.stock) || 0);
+      acc[color] = (acc[color] || 0) + (v.has_defect ? 0 : (Number(v.stock) || 0));
       return acc;
     }, {});
 
@@ -183,7 +183,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onOpenD
         {/* Colors as circles */}
         {product.variants && product.variants.length > 0 && (
           <div className="flex flex-wrap gap-2 items-center">
-            {Array.from(new Set(product.variants.filter(v => (Number(v.stock) || 0) > 0).map(v => v.color))).filter(Boolean).map((color, idx) => {
+            {Array.from(new Set(product.variants.filter(v => !v.has_defect && (Number(v.stock) || 0) > 0).map(v => v.color))).filter(Boolean).map((color, idx) => {
               const colorStr = String(color);
               const colorKey = colorStr.toLowerCase().trim();
               const colorHex = (COLOR_MAP as any)[colorKey] || '#DCDCDC';

@@ -4,9 +4,9 @@ import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 const slides = [
   {
     image: "/banners/perramus-banner.jpg",
-    title: "SHAMS / PERRAMUS",
+    title: "MULTIBRAND / PERRAMUS",
     subtitle: "WINTER SALE",
-    description: "Calidad y diseño de vanguardia. Descubrí la Winter Sale de Perramus en Shams.",
+    description: "Calidad y diseño de vanguardia. Descubrí la Winter Sale de Perramus en Multibrand.",
     objectPosition: "center",
     letterbox: true,
     split: { overlaySrc: "/banners/perramus-sale.png" },
@@ -15,16 +15,16 @@ const slides = [
   },
   {
     image: "/banners/hunter-22.webp",
-    title: "SHAMS / HUNTER",
+    title: "MULTIBRAND / HUNTER",
     subtitle: "COLECCIÓN EXCLUSIVA",
-    description: "Resiliencia y estilo icónico para el aire libre. La sofisticación de las botas Hunter en Shams.",
+    description: "Resiliencia y estilo icónico para el aire libre. La sofisticación de las botas Hunter en Multibrand.",
     objectPosition: "center",
     logo: true,
     shrinkMobile: true
   },
   {
     image: "/banners/nautica-banner.webp",
-    title: "SHAMS / NAUTICA",
+    title: "MULTIBRAND / NAUTICA",
     subtitle: "AUTUMN / WINTER 2026",
     description: "Herencia náutica, mirada contemporánea.",
     objectPosition: "right",

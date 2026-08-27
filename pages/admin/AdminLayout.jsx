@@ -72,7 +72,7 @@ export default function AdminLayout() {
         <div className="admin-layout">
             <aside className={`admin-sidebar ${sidebarOpen ? 'admin-sidebar--open' : 'desktop-closed'}`}>
                 <div className="admin-sidebar__header">
-                    <h1 className="admin-sidebar__logo" style={{ fontWeight: 900, letterSpacing: '0.5em' }}>SHAMS</h1>
+                    <h1 className="admin-sidebar__logo" style={{ fontWeight: 900, letterSpacing: '0.5em' }}>MULTIBRAND</h1>
                     <span className="admin-sidebar__badge">ADMIN</span>
                     <button className="admin-sidebar__close" onClick={() => setSidebarOpen(false)}>
                         <X size={24} />

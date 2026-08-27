@@ -30,7 +30,7 @@ serve(async (req) => {
     const emailHtml = `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 10px; overflow: hidden;">
         <div style="background-color: #000; color: #fff; padding: 40px 30px; text-align: center;">
-          <h1 style="margin: 0; letter-spacing: 5px; font-size: 28px;">SHAMS <span style="color: #00D1FF;">ONLINE</span></h1>
+          <h1 style="margin: 0; letter-spacing: 5px; font-size: 28px;">MULTIBRAND <span style="color: #00D1FF;">ONLINE</span></h1>
           <p style="margin: 15px 0 0; color: #00D1FF; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 2px;">¡BIENVENIDO/A AL CLUB PREMIUM!</p>
         </div>
         
@@ -48,7 +48,7 @@ serve(async (req) => {
           
           <div style="margin-top: 50px; text-align: center; border-top: 1px solid #eee; padding-top: 30px;">
             <p style="font-size: 12px; color: #999; margin: 0;">Si tenés alguna duda, contactanos por WhatsApp al 3412175258</p>
-            <p style="font-size: 10px; color: #ccc; margin-top: 15px; letter-spacing: 1px;">SHAMS ONLINE &copy; ${new Date().getFullYear()} - Rosario, Argentina</p>
+            <p style="font-size: 10px; color: #ccc; margin-top: 15px; letter-spacing: 1px;">MULTIBRAND ONLINE &copy; ${new Date().getFullYear()} - Rosario, Argentina</p>
           </div>
         </div>
       </div>
@@ -61,9 +61,9 @@ serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Shams Online <tienda@shamsonline.com.ar>",
+        from: "Multibrand Online <tienda@shamsonline.com.ar>",
         to: [email],
-        subject: "🎉 ¡Bienvenido a Shams Online!",
+        subject: "🎉 ¡Bienvenido a Multibrand Online!",
         html: emailHtml,
       }),
     });

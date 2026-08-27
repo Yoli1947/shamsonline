@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, CheckCircle2, ChevronDown, Info } from 'lucide-react';
+import { usePageSEO } from '../lib/seo';
 
 const Arrepentimiento: React.FC = () => {
     const navigate = useNavigate();
+
+    usePageSEO({
+        title: 'Arrepentimiento de Compra | Multibrand Rosario',
+        description: 'Solicitá el arrepentimiento de tu compra en Multibrand Rosario según la Ley de Defensa del Consumidor.',
+    });
     const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
     const [formData, setFormData] = useState({
         motivo: '',
@@ -40,7 +46,7 @@ const Arrepentimiento: React.FC = () => {
         window.open(`https://wa.me/5493412175258?text=${encodeURIComponent(msg)}`, '_blank');
 
         // También abrir email
-        const subject = encodeURIComponent('Solicitud de Arrepentimiento de Compra — Shams Online');
+        const subject = encodeURIComponent('Solicitud de Arrepentimiento de Compra — Multibrand Online');
         const body = encodeURIComponent(msg.replace(/\*/g, ''));
         window.open(`mailto:admteruzyolanda@gmail.com?subject=${subject}&body=${body}`, '_blank');
 
@@ -198,7 +204,7 @@ const Arrepentimiento: React.FC = () => {
 
                 {/* Footer del Formulario */}
                 <div className="text-center opacity-40">
-                    <p className="text-[10px] font-black tracking-[0.4em] text-[var(--color-text-muted)] uppercase">Shams — Rosario, Santa Fe, Argentina</p>
+                    <p className="text-[10px] font-black tracking-[0.4em] text-[var(--color-text-muted)] uppercase">Multibrand — Rosario, Santa Fe, Argentina</p>
                 </div>
             </div>
         </div>

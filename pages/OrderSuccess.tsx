@@ -92,7 +92,7 @@ const OrderSuccess: React.FC = () => {
                     Volver a la tienda
                 </button>
                 <span style={{ color: '#ccc' }}>|</span>
-                <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#000', textTransform: 'uppercase' }}>Shams — Rosario</span>
+                <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#000', textTransform: 'uppercase' }}>Multibrand — Rosario</span>
             </div>
 
             {/* Content */}

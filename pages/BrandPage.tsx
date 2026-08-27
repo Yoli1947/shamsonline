@@ -4,12 +4,18 @@ import Navbar from '../components/Navbar';
 import { Loader, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase'; // Import supabase client directly for custom query
+import { usePageSEO } from '../lib/seo';
 
 const BrandPage: React.FC = () => {
     const [brands, setBrands] = useState<any[]>([]);
     const [brandImages, setBrandImages] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+
+    usePageSEO({
+        title: 'Marcas — Perramus, Hunter, Nautica | Multibrand Rosario',
+        description: 'Todas las marcas de Multibrand Rosario: Perramus, Hunter, Nautica y más. Elegí la tuya y descubrí la colección completa.',
+    });
 
     useEffect(() => {
         async function fetchData() {
@@ -104,7 +110,7 @@ const BrandPage: React.FC = () => {
                                     />
                                 ) : (
                                     <div className="absolute inset-0 bg-white flex items-center justify-center">
-                                        <span className="text-[10px] tracking-[0.5em] text-[var(--color-text-muted)] font-black uppercase">SHAMS ARCHIVE</span>
+                                        <span className="text-[10px] tracking-[0.5em] text-[var(--color-text-muted)] font-black uppercase">MULTIBRAND ARCHIVE</span>
                                     </div>
                                 )}
 

@@ -143,7 +143,7 @@ const FuturistPreview: React.FC = () => {
                             </span>
                         </div>
                         <h2 className="font-heading text-6xl md:text-9xl font-black mb-8 leading-[0.8] tracking-tighter text-white">
-                            SHAMS
+                            MULTIBRAND
                         </h2>
                         <p className="text-zinc-300 text-sm md:text-base max-w-3xl mx-auto mb-10 font-black leading-relaxed tracking-wider uppercase">
                             Primeras marcas. Precios imbatibles. <br />
@@ -198,7 +198,7 @@ const FuturistPreview: React.FC = () => {
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[url('https://images.unsplash.com/photo-1610450949065-1f2809da7f81?q=80&w=2000&auto=format&fit=crop')] opacity-5 bg-fixed bg-cover" />
                     <div className="max-w-6xl mx-auto text-center relative z-10">
                         <h3 className="font-heading text-4xl md:text-6xl font-bold mb-32 tracking-tighter text-white uppercase italic">
-                            EL MANIFIESTO <span className="text-[#DCDCDC]">SHAMS</span>
+                            EL MANIFIESTO <span className="text-[#DCDCDC]">MULTIBRAND</span>
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-left">
                             {[

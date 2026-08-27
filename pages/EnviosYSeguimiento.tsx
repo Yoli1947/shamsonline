@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Truck, MapPin, Clock, Search, Package, AlertCircle, Store } from 'lucide-react';
+import { usePageSEO } from '../lib/seo';
 
 const s = {
     page: { minHeight: '100vh', backgroundColor: '#ffffff', color: '#000000' } as React.CSSProperties,
@@ -19,6 +20,11 @@ const s = {
 const EnviosYSeguimiento: React.FC = () => {
     const navigate = useNavigate();
 
+    usePageSEO({
+        title: 'Envíos y Seguimiento | Multibrand Rosario',
+        description: 'Información de envíos, retiro en local y seguimiento de pedidos de Multibrand Rosario.',
+    });
+
     return (
         <div style={s.page}>
             <div style={s.header}>
@@ -26,7 +32,7 @@ const EnviosYSeguimiento: React.FC = () => {
                     <ArrowLeft size={16} /> Volver
                 </button>
                 <span style={{ color: '#ccc' }}>|</span>
-                <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#000', textTransform: 'uppercase' }}>Shams — Envíos</span>
+                <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#000', textTransform: 'uppercase' }}>Multibrand — Envíos</span>
             </div>
 
             <div style={s.content}>
@@ -161,7 +167,7 @@ const EnviosYSeguimiento: React.FC = () => {
                 </div>
 
                 <div style={{ textAlign: 'center', opacity: 0.4, paddingTop: '16px' }}>
-                    <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#666', textTransform: 'uppercase' }}>Shams — Rosario, Santa Fe, Argentina</p>
+                    <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#666', textTransform: 'uppercase' }}>Multibrand — Rosario, Santa Fe, Argentina</p>
                 </div>
             </div>
         </div>

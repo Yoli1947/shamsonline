@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
     if (products.length === 0) {
       products.push({
         id: String(order_number),
-        name: 'Compra en Shams',
+        name: 'Compra en Multibrand',
         description: `Pedido ${order_number}`,
         quantity: 1,
         unit_price: { currency: 'ARS', value: Number(total).toFixed(2) },

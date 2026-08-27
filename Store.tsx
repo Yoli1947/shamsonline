@@ -13,6 +13,7 @@ import ProductDetail from './components/ProductDetail';
 import { getAllProducts, getBrands, getCategories, getLastSyncDate, getProductBySku } from './lib/admin'; // Import DB function
 import { supabase } from './lib/supabase';
 import { createOrder } from './lib/orders';
+import { usePageSEO } from './lib/seo';
 import { Product, CartItem } from './types';
 import { Filter, Loader, X, Ruler, Trash2, Tag, Search, Users, Mail, Phone, MapPin, HelpCircle, ShoppingBag, Instagram, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import CheckoutModal from './components/CheckoutModal';
@@ -89,6 +90,34 @@ const Store: React.FC = () => {
     const selectedBrand = searchParams.get('marca');
     const selectedGender = searchParams.get('genero');
     const selectedCategory = searchParams.get('categoria');
+
+    // SEO: título y descripción dinámicos según el filtro activo, para que cada
+    // combinación (marca, categoría, género) pueda posicionar por su cuenta.
+    usePageSEO(useMemo(() => {
+        if (selectedBrand) {
+            return {
+                title: `${selectedBrand} Rosario | Multibrand`,
+                description: `Comprá ${selectedBrand} en Rosario: envío a todo el país, cuotas y precio especial por transferencia. Tienda oficial Multibrand.`,
+            };
+        }
+        if (selectedCategory) {
+            const categoryLabel = selectedCategory.toLowerCase() === 'cafeteria' ? 'Speciality Coffee' : selectedCategory;
+            return {
+                title: `${categoryLabel} en Rosario | Multibrand`,
+                description: `${categoryLabel} en Multibrand Rosario. Perramus, Hunter, Nautica y más marcas, con envío a todo el país.`,
+            };
+        }
+        if (selectedGender) {
+            return {
+                title: `Moda ${selectedGender} Rosario — Perramus, Hunter, Nautica | Multibrand`,
+                description: `Ropa y accesorios de ${selectedGender.toLowerCase()}: Perramus, Hunter, Nautica y más marcas en Multibrand Rosario.`,
+            };
+        }
+        return {
+            title: 'Multibrand Rosario | Perramus, Hunter, Nautica — Ropa y Accesorios Premium',
+            description: 'Tienda multimarca en Rosario: Perramus, Hunter, Nautica y más. Camperas, botas y accesorios premium con envíos a todo el país. Precios en pesos argentinos.',
+        };
+    }, [selectedBrand, selectedCategory, selectedGender]));
     const selectedOrder = searchParams.get('orden');
 
     const brandsScrollRef = useRef<HTMLDivElement>(null);
@@ -158,7 +187,7 @@ const Store: React.FC = () => {
             return {
                 id: p.id,
                 name: cleanProductName(p.name),
-                brand: p.brand?.name || 'SHAMS',
+                brand: p.brand?.name || 'MULTIBRAND',
                 price: p.sale_price && p.sale_price < p.price ? p.sale_price : p.price,
                 originalPrice: p.price,
                 compareAtPrice: p.compare_at_price && p.compare_at_price > p.price ? p.compare_at_price : null,
@@ -276,11 +305,14 @@ const Store: React.FC = () => {
                         const prevMap = new Map(prev.map(p => [p.id, p]));
                         const freshMap = new Map(mappedChunk.map(x => [x.id, x]));
                         let changed = false;
+                        const variantsSignature = (variants: any[]) =>
+                            (variants || []).map((v: any) => `${v.id}:${v.stock}:${v.has_defect ? 1 : 0}`).sort().join('|');
                         const updated = prev.map(p => {
                             const fresh = freshMap.get(p.id);
                             if (fresh) {
                                 const imagesChanged = fresh.image !== p.image;
-                                if (imagesChanged || fresh.is_featured !== p.is_featured || fresh.sort_order !== p.sort_order || fresh.price !== p.price) {
+                                const stockChanged = variantsSignature(fresh.variants) !== variantsSignature(p.variants);
+                                if (imagesChanged || stockChanged || fresh.is_featured !== p.is_featured || fresh.sort_order !== p.sort_order || fresh.price !== p.price) {
                                     changed = true;
                                     return fresh;
                                 }
@@ -867,7 +899,7 @@ const Store: React.FC = () => {
                 const msg = [
                     `💵 *REGISTRO DE PEDIDO #${order.order_number} (EFECTIVO)*`,
                     ``,
-                    `¡Hola! Hemos registrado tu pedido en *Shams* para abono en efectivo.`,
+                    `¡Hola! Hemos registrado tu pedido en *Multibrand* para abono en efectivo.`,
                     ``,
                     `*📦 Detalle del pedido:*`,
                     itemsText,
@@ -1719,7 +1751,7 @@ const Store: React.FC = () => {
                     <div className="absolute top-0 right-1/4 w-96 h-96 bg-black/5 blur-[120px] rounded-none" />
                     <div className="max-w-screen-2xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-20 relative z-10">
                         <div>
-                            <h1 className="font-heading text-3xl font-black tracking-[0.6em] mb-12 uppercase">SHAMS</h1>
+                            <h1 className="font-heading text-3xl font-black tracking-[0.6em] mb-12 uppercase">MULTIBRAND</h1>
 
                             <div className="space-y-6">
                                 <h5 className="text-[11px] font-semibold tracking-[0.5em] text-[#999] mb-6 uppercase">Contacto</h5>
@@ -1770,7 +1802,7 @@ const Store: React.FC = () => {
                             {footerSubStatus === 'success' ? (
                                 <div className="flex items-center gap-3 py-4 border-b border-[#e0e0e0]">
                                     <span className="text-black text-lg">✓</span>
-                                    <span className="text-[10px] font-semibold tracking-[0.3em] text-black uppercase">¡Bienvenido/a al Club Shams!</span>
+                                    <span className="text-[10px] font-semibold tracking-[0.3em] text-black uppercase">¡Bienvenido/a al Club Multibrand!</span>
                                 </div>
                             ) : (
                                 <form onSubmit={handleFooterSubscribe} className="flex border-b border-[var(--color-border)] pb-4 group focus-within:border-black/40 transition-colors">

@@ -61,7 +61,7 @@ export default function AdminLogin() {
                     <div className="admin-login-icon">
                         <Lock size={32} strokeWidth={1.5} />
                     </div>
-                    <h1>SHAMS</h1>
+                    <h1>MULTIBRAND</h1>
                     <p>PORTAL EXCLUSIVO</p>
                 </div>
 
