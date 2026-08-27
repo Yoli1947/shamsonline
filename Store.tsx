@@ -1020,11 +1020,6 @@ const Store: React.FC = () => {
             return false;
         }
 
-        // Excluir accesorios de vistas por género — solo aparecen al filtrar por ACCESORIOS
-        if (!isSearching && selectedGender && !selectedCategory && isAccessoryProduct) {
-            return false;
-        }
-
         // Filter by Brand
         const matchesBrand = !selectedBrand ||
             p.brand?.toLowerCase() === selectedBrand.toLowerCase();
@@ -1690,30 +1685,14 @@ const Store: React.FC = () => {
                         (!selectedBrand && !selectedGender && !selectedCategory && !searchQuery) ? (
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-0.5 sm:gap-6 gap-y-4 sm:gap-y-12 min-h-[50vh]">
                                 {(() => {
-                                    const isBottom = (p: any) => { const cat = (p.category || '').toUpperCase(); return cat.includes('ACCESORIO') || cat.includes('CALZADO') || cat.includes('BOLSO') || cat.includes('CARTERA'); };
-                                    const isAbrigo = (p: any) => { const cat = (p.category || '').toUpperCase(); return cat.includes('ABRIGO') || cat.includes('CAMPERA') || cat.includes('PAÑO') || cat.includes('PILOTO'); };
-                                    const getGenders = (p: any) => (p.features || []).map((f: string) => f?.toLowerCase());
-
+                                    const isBottom = (p: any) => { const cat = (p.category?.name || '').toUpperCase(); return cat.includes('ACCESORIO') || cat.includes('CALZADO') || cat.includes('BOLSO') || cat.includes('CARTERA'); };
                                     const clothing = filteredProducts.filter(p => !isBottom(p));
                                     const accessories = filteredProducts.filter(p => isBottom(p));
-
-                                    // Prioriza los abrigos más caros al frente de cada cola de género
-                                    const byAbrigoCaroFirst = (a: any, b: any) => {
-                                        const aAb = isAbrigo(a) ? 1 : 0;
-                                        const bAb = isAbrigo(b) ? 1 : 0;
-                                        if (aAb !== bAb) return bAb - aAb;
-                                        return (b.price || 0) - (a.price || 0);
-                                    };
-
-                                    const hombreQueue = clothing.filter(p => getGenders(p).includes('hombre')).sort(byAbrigoCaroFirst);
-                                    const mujerQueue = clothing.filter(p => getGenders(p).includes('mujer')).sort(byAbrigoCaroFirst);
-                                    const otrosQueue = clothing.filter(p => { const g = getGenders(p); return !g.includes('hombre') && !g.includes('mujer'); }).sort(byAbrigoCaroFirst);
-
-                                    // Round-robin Hombre/Mujer/Otros para que la colección se vea mezclada, como armando conjuntos
-                                    const queues = [hombreQueue, mujerQueue, otrosQueue];
+                                    const brandMap = new Map<string, any[]>();
+                                    for (const p of clothing) { const b = (p.brand as any)?.name || ''; if (!brandMap.has(b)) brandMap.set(b, []); brandMap.get(b)!.push(p); }
+                                    const queues = Array.from(brandMap.values());
                                     const result: any[] = [];
                                     while (queues.some(q => q.length > 0)) { for (const q of queues) { if (q.length > 0) result.push(q.shift()); } }
-
                                     return [...result, ...accessories].map(product => (
                                         <ProductCard key={product.id} product={product} onAddToCart={addToCart} onOpenDetail={(p) => openProduct(p)} isFavorite={favorites.includes(product.id)} onToggleFavorite={toggleFavorite} />
                                     ));
