@@ -7,6 +7,103 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+// Emite en EchoGiftCard las gift cards compradas en este pedido (order_items con
+// type/product_type = 'gift_card'), y registra el resultado en gift_card_purchases.
+// Idempotente: el idempotency_key evita emitir dos veces si MP reintenta el webhook.
+async function issueGiftCards(
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
+  // deno-lint-ignore no-explicit-any
+  order: any,
+) {
+  const echoApiUrl = Deno.env.get('ECHO_API_URL');
+  const echoApiKey = Deno.env.get('ECHO_API_KEY');
+  if (!echoApiUrl || !echoApiKey) {
+    console.warn('ECHO_API_URL/ECHO_API_KEY no configurados: se omite emisión de gift cards');
+    return;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  const items = (order.items || []) as any[];
+  const giftCardItems = items.filter((item) => item.type === 'gift_card' || item.product_type === 'gift_card');
+  if (giftCardItems.length === 0) return;
+
+  // MP puede reintentar el webhook para el mismo pago: si ya procesamos esta orden, no repetir.
+  const { data: existing } = await supabase
+    .from('gift_card_purchases')
+    .select('id')
+    .eq('order_id', order.id)
+    .limit(1);
+  if (existing && existing.length > 0) {
+    console.log(`Gift card(s) de orden ${order.order_number} ya procesadas, se omite (reintento de webhook).`);
+    return;
+  }
+
+  for (const item of giftCardItems) {
+    const gcAmount = Number(item.unit_price ?? item.price ?? item.subtotal);
+    if (!gcAmount || gcAmount < 100000) {
+      console.warn(`Item de gift card con monto inválido en orden ${order.order_number}:`, gcAmount);
+      continue;
+    }
+
+    try {
+      const echoRes = await fetch(`${echoApiUrl}/api/external/issue`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Api-Key': echoApiKey,
+        },
+        body: JSON.stringify({
+          amount: gcAmount,
+          recipient_name: item.recipient_name || undefined,
+          recipient_phone: item.recipient_phone || undefined,
+          recipient_email: item.recipient_email || order.customer_email || undefined,
+          sender_name: item.sender_name || order.customer_first_name || undefined,
+          message: item.message || undefined,
+          is_gift: Boolean(item.is_gift),
+          external_order_id: order.id,
+          idempotency_key: `order-${order.id}-item-${item.id}-issue`,
+        }),
+      });
+
+      const echoData = await echoRes.json();
+
+      if (echoRes.ok) {
+        await supabase.from('gift_card_purchases').insert({
+          order_id: order.id,
+          echo_card_id: echoData.card_id,
+          public_code: echoData.public_code,
+          hash_token: echoData.hash_token,
+          card_url: echoData.card_url,
+          image_url: echoData.image_url,
+          amount: gcAmount,
+          recipient_name: item.recipient_name || null,
+          recipient_phone: item.recipient_phone || null,
+          is_gift: Boolean(item.is_gift),
+          status: 'issued',
+        });
+        console.log(`Gift card emitida para orden ${order.order_number}: ${echoData.public_code} por $${gcAmount}`);
+      } else {
+        console.error(`Error emitiendo gift card para orden ${order.order_number}:`, echoData);
+        await supabase.from('gift_card_purchases').insert({
+          order_id: order.id,
+          amount: gcAmount,
+          status: 'failed',
+          error_message: echoData.error || `HTTP ${echoRes.status}`,
+        });
+      }
+    } catch (err) {
+      console.error(`Excepción emitiendo gift card para orden ${order.order_number}:`, err);
+      await supabase.from('gift_card_purchases').insert({
+        order_id: order.id,
+        amount: gcAmount,
+        status: 'failed',
+        error_message: String(err),
+      }).catch(() => {});
+    }
+  }
+}
+
 Deno.serve(async (req) => {
   // MP espera 200 rápido — siempre responder 200
   const ok = () =>
@@ -110,7 +207,7 @@ Deno.serve(async (req) => {
 
     console.log(`Pedido ${orderNumber} actualizado: payment_status=${paymentStatus}, status=${orderStatus}`);
 
-    // Si el pago fue aprobado, enviar email de confirmación
+    // Si el pago fue aprobado, enviar email de confirmación y emitir gift cards compradas
     if (paymentStatus === 'paid') {
       const { data: orderData } = await supabase
         .from('orders')
@@ -122,6 +219,8 @@ Deno.serve(async (req) => {
         await supabase.functions.invoke('send-order-email', {
           body: { order: orderData, items: orderData.items, payment_confirmed: true }
         }).catch(e => console.error('Error enviando email de pago confirmado:', e));
+
+        await issueGiftCards(supabase, orderData);
       }
     }
 
