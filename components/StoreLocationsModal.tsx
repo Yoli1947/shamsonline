@@ -8,14 +8,6 @@ interface StoreLocationsModalProps {
 
 const PICKUP_LOCATIONS = [
     {
-        id: 'local_favorita',
-        name: 'PERRAMUS-SHAMS (LA FAVORITA)',
-        address: 'Córdoba 1101, Rosario (Local en La Favorita)',
-        schedule: 'Lunes a Sábado de 10:00 a 20:00',
-        embedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3348.6!2d-60.6505!3d-32.9468!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95b6534689af3c71%3A0x9dba4e23b06e4a44!2sCórdoba%201101%2C%20Rosario%2C%20Santa%20Fe!5e0!3m2!1ses!2sar!4v1700000001',
-        mapUrl: 'https://www.google.com/maps/search/?api=1&query=Cordoba+1101,+Rosario,+Santa+Fe',
-    },
-    {
         id: 'perramus_siglo',
         name: 'PERRAMUS-HUNTER (SHOPPING DEL SIGLO)',
         address: 'Pte. Roca 844, Rosario (Local 110)',
@@ -41,7 +33,7 @@ const PICKUP_LOCATIONS = [
     },
     {
         id: 'shams_store_cordoba',
-        name: 'SHAMS - ROSARIO',
+        name: 'PERRAMUS-HUNTER-NAUTICA',
         address: 'Córdoba 1646, Rosario',
         schedule: 'Lun a Vie 9:30 a 19:30 | Sáb 9:30 a 19:00',
         embedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3348.6!2d-60.6552!3d-32.9474!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95b6534b5c2d41a7%3A0x1!2sCórdoba+1646%2C+Rosario%2C+Santa+Fe!5e0!3m2!1ses!2sar!4v1700000005',

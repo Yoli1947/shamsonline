@@ -7,3 +7,9 @@
 // ninguna gift card online, así que bloquearla no afecta ventas existentes.
 // Para reactivar: cambiar a `true` y volver a compilar.
 export const GIFT_CARDS_ENABLED = false;
+
+// Pago con Nave (Naranja X / Banco Galicia): oculto en el checkout porque el
+// backend (create-nave-preference) todavía apunta a la API sandbox de Nave,
+// no a producción. Para reactivar: confirmar que el backend ya usa la URL
+// de producción, cambiar a `true` y volver a compilar.
+export const NAVE_ENABLED = false;

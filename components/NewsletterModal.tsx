@@ -82,16 +82,18 @@ const NewsletterModal: React.FC = () => {
 
                         {/* Visual Side - imagen con overlay oscuro (intencional) */}
                         <div style={{ width: '42%', position: 'relative', backgroundColor: '#111', flexShrink: 0 }} className="hidden md:block">
-                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent, rgba(0,0,0,0.3))', zIndex: 10 }} />
                             <img
-                                src="/newsletter_shams.png"
+                                src="/banners/trimarca.jpg"
                                 alt="Multibrand"
                                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }}
                             />
-                            <div style={{ position: 'relative', zIndex: 20, padding: '32px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '100%' }}>
+                            <div style={{
+                                position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 20,
+                                padding: '28px 32px', background: 'linear-gradient(to top, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.75) 75%, transparent)'
+                            }}>
                                 <span style={{ color: '#fff', fontSize: '9px', fontWeight: 900, letterSpacing: '0.4em', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>CLUB MULTIBRAND</span>
-                                <h2 style={{ color: '#fff', fontSize: '32px', fontWeight: 900, letterSpacing: '-0.02em', textTransform: 'uppercase', fontStyle: 'italic', lineHeight: 0.9 }}>
-                                    VESTÍ EL <br /> ÉXITO
+                                <h2 style={{ color: '#fff', fontSize: '30px', fontWeight: 900, letterSpacing: '-0.02em', textTransform: 'uppercase', fontStyle: 'italic', lineHeight: 0.95 }}>
+                                    TRES MARCAS. <br /> UN SOLO CLUB.
                                 </h2>
                             </div>
                         </div>

@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, Loader, MapPin, ExternalLink } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import GiftCardInput, { GiftCardData, redeemGiftCard } from './GiftCardInput';
+import { NAVE_ENABLED } from '../lib/featureFlags';
 
 interface CheckoutModalProps {
     isOpen: boolean;
@@ -43,7 +44,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
             floor: saved.floor || '',
             apartment: saved.apartment || '',
             shippingMethod: 'envio',
-            pickupLocationId: 'local_favorita',
+            pickupLocationId: 'perramus_siglo',
             paymentMethod: 'mercadopago'
         };
     });
@@ -136,13 +137,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
     // Puntos de Retiro
     const PICKUP_LOCATIONS = [
         {
-            id: 'local_favorita',
-            name: 'PERRAMUS-SHAMS (LA FAVORITA)',
-            address: 'Córdoba 1101, Rosario (Local en La Favorita)',
-            mapUrl: 'https://www.google.com/maps/search/?api=1&query=Cordoba+1101,+Rosario,+Santa+Fe',
-            schedule: 'Lunes a Sábado de 10:00 a 20:00'
-        },
-        {
             id: 'perramus_siglo',
             name: 'PERRAMUS-HUNTER (SHOPPING DEL SIGLO)',
             address: 'Pte. Roca 844, Rosario (Local 110)',
@@ -165,7 +159,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
         },
         {
             id: 'shams_store_cordoba',
-            name: 'SHAMS - ROSARIO',
+            name: 'PERRAMUS-HUNTER-NAUTICA',
             address: 'Córdoba 1646, Rosario',
             mapUrl: 'https://www.google.com/maps/search/?api=1&query=Cordoba+1646,+Rosario,+Santa+Fe',
             schedule: 'Lun a Vie 9:30 a 19:30 | Sáb 9:30 a 19:00'
@@ -559,7 +553,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                         { id: 'efectivo', label: `${transferDiscount}% OFF — Efectivo en sucursal`, desc: `Abonás en el local al retirar tu pedido y obtenés un ${transferDiscount}% de descuento.` },
                                         { id: 'mercadopago_saldo', label: 'Mercado Pago — Saldo o Tarjetas Guardadas', desc: null },
                                         { id: 'mercadopago', label: 'Mercado Pago — Tarjeta de Crédito o Débito', desc: null },
-                                        { id: 'nave', label: 'Nave (Naranja X / Galicia) — Tarjeta de Crédito o Débito', desc: 'Pagá con tu tarjeta a través de Nave, la plataforma de pagos de Banco Galicia y NaranjaX.' },
+                                        ...(NAVE_ENABLED ? [{ id: 'nave', label: 'Nave (Naranja X / Galicia) — Tarjeta de Crédito o Débito', desc: 'Pagá con tu tarjeta a través de Nave, la plataforma de pagos de Banco Galicia y NaranjaX.' }] : []),
                                     ].map(method => {
                                         const isSelected = formData.paymentMethod === method.id;
                                         return (
