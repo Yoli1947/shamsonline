@@ -8,6 +8,22 @@
 
 import { getCorsHeaders } from '../_shared/cors.ts';
 
+// Los dos sitios (shamsonline.com.ar y multibrandrosario.com) llaman a esta misma
+// función mientras dure la migración de dominio. El back_url tiene que devolver al
+// cliente al MISMO dominio desde el que compró, así que se toma del Origin del
+// request en vez de un único APP_URL fijo (que rompería uno de los dos sitios).
+const APP_DOMAINS: Record<string, string> = {
+  'https://shamsonline.com.ar': 'https://shamsonline.com.ar',
+  'https://www.shamsonline.com.ar': 'https://shamsonline.com.ar',
+  'https://multibrandrosario.com': 'https://multibrandrosario.com',
+  'https://www.multibrandrosario.com': 'https://multibrandrosario.com',
+};
+
+function resolveAppUrl(req: Request): string {
+  const origin = req.headers.get('Origin') || '';
+  return APP_DOMAINS[origin] || Deno.env.get('APP_URL') || 'https://shamsonline.com.ar';
+}
+
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
 
@@ -33,7 +49,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const appUrl = Deno.env.get('APP_URL') || 'https://shamsonline.com.ar';
+    const appUrl = resolveAppUrl(req);
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
 
     const preference = {
