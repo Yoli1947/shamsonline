@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { ShoppingBag, Search, Menu, User, X, Heart, Settings, Gift, Coffee } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { GIFT_CARDS_ENABLED } from '../lib/featureFlags';
 
 interface NavbarProps {
   cartCount: number;
@@ -141,14 +142,16 @@ const Navbar: React.FC<NavbarProps> = ({
               <Coffee size={12} />
               SPECIALITY COFFEE
             </button>
-            <button
-              className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5 flex items-center gap-1"
-              style={{ color: '#000000' }}
-              onClick={() => navigate('/gift-cards')}
-            >
-              <Gift size={12} />
-              GIFT CARDS
-            </button>
+            {GIFT_CARDS_ENABLED && (
+              <button
+                className="hover:text-black transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/5 pb-0.5 flex items-center gap-1"
+                style={{ color: '#000000' }}
+                onClick={() => navigate('/gift-cards')}
+              >
+                <Gift size={12} />
+                GIFT CARDS
+              </button>
+            )}
             {isAdmin && (
               <button
                 className="flex items-center gap-2 hover:text-black transition-all font-normal uppercase text-[10px] lg:text-[12px] border-l border-zinc-200 pl-8 ml-4 tracking-[0.12em]"
@@ -325,16 +328,18 @@ const Navbar: React.FC<NavbarProps> = ({
             <div className="w-1.5 h-1.5 bg-black scale-0 group-hover:scale-100 transition-transform" />
           </button>
 
-          <button 
-            onClick={() => { setIsMobileMenuOpen(false); navigate('/gift-cards'); }}
-            className="group flex items-center justify-between w-full py-5 text-left border-b border-black/5 transition-all hover:pl-2"
-          >
-            <div className="flex items-center gap-3">
-              <Gift size={18} className="text-black" />
-              <span className="text-lg font-black tracking-[0.1em] text-black uppercase">GIFT CARDS</span>
-            </div>
-            <div className="w-1.5 h-1.5 bg-black scale-0 group-hover:scale-100 transition-transform" />
-          </button>
+          {GIFT_CARDS_ENABLED && (
+            <button
+              onClick={() => { setIsMobileMenuOpen(false); navigate('/gift-cards'); }}
+              className="group flex items-center justify-between w-full py-5 text-left border-b border-black/5 transition-all hover:pl-2"
+            >
+              <div className="flex items-center gap-3">
+                <Gift size={18} className="text-black" />
+                <span className="text-lg font-black tracking-[0.1em] text-black uppercase">GIFT CARDS</span>
+              </div>
+              <div className="w-1.5 h-1.5 bg-black scale-0 group-hover:scale-100 transition-transform" />
+            </button>
+          )}
 
           {isAdmin && (
             <button 
