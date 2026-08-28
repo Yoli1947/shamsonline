@@ -2,6 +2,7 @@ node_modules/
 dist/
 .supabase/
 .env
+.env.*
 *.local
 *.log
 *.tar.gz

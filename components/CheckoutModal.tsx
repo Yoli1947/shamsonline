@@ -244,6 +244,13 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
             const gcDiscount = giftCard ? giftCard.amountToApply : 0;
             const amountToChargeMP = Math.max(0, afterShipping - gcDiscount);
 
+            // El pago parcial con gift card (tarjeta + Mercado Pago/Nave/transferencia por el resto)
+            // no está implementado: el saldo restante no descuenta el monto de la gift card en ningún
+            // método de pago. Solo se permite cuando la gift card cubre el total completo.
+            if (giftCard && amountToChargeMP > 0) {
+                throw new Error('Esta gift card no cubre el total del pedido. Por ahora solo podés usarla si cubre el 100% de la compra — quitala para pagar el resto con otro método.');
+            }
+
             const giftCardApplied = giftCard ? {
                 code: giftCard.code,
                 hash_token: giftCard.hash_token,
@@ -330,7 +337,10 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
     const subtotal = total;
     const afterDiscounts = Math.round(subtotal * paymentDiscountFactor);
     const gcDiscount = giftCard ? giftCard.amountToApply : 0;
-    const finalTotal = Math.max(0, afterDiscounts + shipping - gcDiscount);
+    // El pago parcial con gift card no está soportado todavía (ver handleSubmit): solo se
+    // puede usar si cubre el total completo del pedido con el método de pago elegido.
+    const giftCardIsPartial = giftCard != null && gcDiscount > 0 && (afterDiscounts + shipping - gcDiscount) > 0;
+    const finalTotal = giftCardIsPartial ? (afterDiscounts + shipping) : Math.max(0, afterDiscounts + shipping - gcDiscount);
     const paymentDesc = formData.paymentMethod === 'transferencia'
         ? `${transferDiscount}% OFF - Transferencia / Depósito bancario`
         : formData.paymentMethod === 'efectivo'
@@ -515,7 +525,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                                 <td className="p-2 text-right font-semibold text-green-700">-${(subtotal - afterDiscounts).toLocaleString()}</td>
                                             </tr>
                                         )}
-                                        {gcDiscount > 0 && (
+                                        {gcDiscount > 0 && !giftCardIsPartial && (
                                             <tr className="border-b border-[#e0e0e0]">
                                                 <td className="p-2 text-[#555]">Gift Card</td>
                                                 <td className="p-2 text-right font-semibold text-green-700">-${gcDiscount.toLocaleString()}</td>
@@ -534,6 +544,11 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                         const orderTotal = Math.round(subtotal) + shipping;
                                         return <GiftCardInput orderTotal={orderTotal} applied={giftCard} onApply={setGiftCard} onRemove={() => setGiftCard(null)} />;
                                     })()}
+                                    {giftCardIsPartial && (
+                                        <p className="mt-2 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 p-2">
+                                            Esta gift card tiene menos saldo que el total del pedido. Por ahora solo se puede usar una gift card que cubra el 100% de la compra — quitala para pagar todo con otro método.
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* Métodos de pago */}
@@ -564,9 +579,9 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                     })}
                                 </div>
 
-                                <button type="submit" disabled={loading}
+                                <button type="submit" disabled={loading || giftCardIsPartial}
                                     className="w-full bg-black text-white font-black uppercase tracking-widest py-4 hover:bg-zinc-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-sm">
-                                    {loading ? <Loader className="animate-spin" size={18} /> : 'Realizar el pedido'}
+                                    {loading ? <Loader className="animate-spin" size={18} /> : giftCardIsPartial ? 'QUITÁ LA GIFT CARD PARA CONTINUAR' : 'Realizar el pedido'}
                                 </button>
                             </div>
                         </div>
