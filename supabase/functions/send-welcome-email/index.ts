@@ -62,6 +62,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: "Multibrand Online <tienda@shamsonline.com.ar>",
+        reply_to: "admteruzyolanda@gmail.com",
         to: [email],
         subject: "🎉 ¡Bienvenido a Multibrand Online!",
         html: emailHtml,
