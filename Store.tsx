@@ -1786,7 +1786,7 @@ const Store: React.FC = () => {
                         <h2 className="font-heading text-2xl md:text-3xl font-black tracking-[0.3em] uppercase mb-3">Join Us</h2>
                         <p className="text-[11px] font-bold tracking-[0.3em] uppercase mb-2">Suscribite al Newsletter</p>
                         <p className="text-[10px] text-[var(--color-text-muted)] tracking-[0.15em] uppercase mb-8 leading-relaxed">
-                            Recibí un 10% de descuento en tu primera compra y beneficios exclusivos
+                            Beneficios exclusivos
                         </p>
                         {footerSubStatus === 'success' ? (
                             <div className="flex items-center justify-center gap-3 py-4 border-y border-[#e0e0e0]">

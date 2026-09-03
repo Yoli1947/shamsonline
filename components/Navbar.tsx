@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { ShoppingBag, Search, Menu, User, X, Heart, Settings, Gift, Coffee, Tag } from 'lucide-react';
+import { ShoppingBag, Search, Menu, User, X, Heart, Settings, Gift, Coffee, Tag, MapPin } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { GIFT_CARDS_ENABLED } from '../lib/featureFlags';
@@ -103,6 +103,10 @@ const Navbar: React.FC<NavbarProps> = ({
               style={{ fontFamily: "'Arial Black', 'Helvetica Neue', Arial, sans-serif" }}
             >
               MULTIBRAND<br />STORE
+            </span>
+            <span className="flex items-center gap-1 mt-1 md:mt-1.5 text-white/60 uppercase text-[8px] md:text-[11px] font-bold tracking-[0.15em] whitespace-nowrap">
+              <MapPin size={10} className="md:w-3 md:h-3 flex-shrink-0" />
+              Rosario
             </span>
           </div>
           <div className="flex items-center gap-1.5 md:gap-5 flex-shrink-0">
