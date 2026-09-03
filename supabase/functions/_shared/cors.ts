@@ -12,6 +12,7 @@ const ALLOWED_ORIGINS = [
   // los dos sitios conviven mientras dure la transición.
   'https://multibrandrosario.com',
   'https://www.multibrandrosario.com',
+  'https://preview.multibrandrosario.com',
   'https://multibrandrosario.com.ar',
   'https://www.multibrandrosario.com.ar',
   'https://multibrandrosario.ar',

@@ -17,6 +17,7 @@ const APP_DOMAINS: Record<string, string> = {
   'https://www.shamsonline.com.ar': 'https://shamsonline.com.ar',
   'https://multibrandrosario.com': 'https://multibrandrosario.com',
   'https://www.multibrandrosario.com': 'https://multibrandrosario.com',
+  'https://preview.multibrandrosario.com': 'https://preview.multibrandrosario.com',
 };
 
 function resolveAppUrl(req: Request): string {
