@@ -7,15 +7,17 @@ import BrandMarquee from './components/BrandMarquee';
 import ProductCard from './components/ProductCard';
 import CartDrawer from './components/CartDrawer';
 import FavoritesDrawer from './components/FavoritesDrawer';
+import PopularDrawer from './components/PopularDrawer';
 import ProductDetail from './components/ProductDetail';
 // import { PRODUCTS } from './constants'; // Removed static products
 // ... (previous imports)
 import { getAllProducts, getBrands, getCategories, getLastSyncDate, getProductBySku } from './lib/admin'; // Import DB function
 import { supabase } from './lib/supabase';
 import { createOrder } from './lib/orders';
+import { mapProductsToUI } from './lib/products';
 import { usePageSEO } from './lib/seo';
 import { Product, CartItem } from './types';
-import { Filter, Loader, X, Ruler, Trash2, Tag, Search, Users, Mail, Phone, MapPin, HelpCircle, ShoppingBag, Instagram, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Filter, Loader, X, Ruler, Trash2, Tag, Search, Users, Mail, Phone, MapPin, HelpCircle, ShoppingBag, Instagram, ShieldCheck, ChevronLeft, ChevronRight, Flame, Truck, RefreshCw, CreditCard, ArrowRight } from 'lucide-react';
 import CheckoutModal from './components/CheckoutModal';
 import CustomerAuthModal from './components/CustomerAuthModal';
 import OrderSuccessModal from './components/OrderSuccessModal';
@@ -34,6 +36,7 @@ const Store: React.FC = () => {
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [favorites, setFavorites] = useState<string[]>([]);
     const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+    const [isPopularOpen, setIsPopularOpen] = useState(false);
     const [isAuthOpen, setIsAuthOpen] = useState(false);
     const [customer, setCustomer] = useState<{ email: string; name: string } | null>(null);
     const { user } = useAuth();
@@ -130,11 +133,33 @@ const Store: React.FC = () => {
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [availableSizes, setAvailableSizes] = useState<string[]>([]);
     const [isOrderFilterOpen, setIsOrderFilterOpen] = useState(false);
+
+    // Paginado "cargar más": la grilla no muestra toda la colección de una, para
+    // que el footer sea alcanzable y la carga inicial sea más liviana.
+    const PRODUCTS_PAGE_SIZE = 24;
+    const [visibleProductsCount, setVisibleProductsCount] = useState(PRODUCTS_PAGE_SIZE);
+    // Solo en colecciones filtradas (marca/categoría/género/búsqueda/descuento):
+    // este centinela dispara la carga automática al acercarse al final, sin
+    // botón. En la home "TODA LA COLECCIÓN" sigue siendo manual (a pedido).
+    const autoLoadSentinelRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const el = autoLoadSentinelRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0]?.isIntersecting) {
+                setVisibleProductsCount(v => v + PRODUCTS_PAGE_SIZE);
+            }
+        }, { rootMargin: '600px' });
+        observer.observe(el);
+        return () => observer.disconnect();
+    });
     const [availableCategories, setAvailableCategories] = useState<string[]>([]);
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [footerEmail, setFooterEmail] = useState('');
     const [footerSubStatus, setFooterSubStatus] = useState<'idle' | 'loading' | 'success'>('idle');
+    const [footerBirthDay, setFooterBirthDay] = useState('');
+    const [footerBirthMonth, setFooterBirthMonth] = useState('');
     const [successOrderData, setSuccessOrderData] = useState<{
         order: any;
         bankDetails: any;
@@ -150,74 +175,6 @@ const Store: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Función auxiliar para mapear base de datos a UI
-    const mapProductsToUI = (dbProducts: any[]) => {
-        const cleanProductName = (name: string) => {
-            if (!name) return 'Sin Nombre';
-            let cleaned = name;
-            cleaned = cleaned.replace(/\s*\d+X\d+\s*/gi, ' ');
-            cleaned = cleaned.replace(/\bPROMO\b|\bPROMOCIÓN\b|\bPROMOCION\b/gi, ' ');
-            cleaned = cleaned.replace(/\s*[\(\[]\s*([a-z0-9]{1,4})\s*[\)\]]\s*/gi, ' ');
-            return cleaned.replace(/\s+/g, ' ').trim();
-        };
-
-        const mapped = dbProducts.map((p: any) => {
-            const GENDER_VALUES = ['Mujer', 'Hombre', 'Unisex'];
-            let features = p.features || [];
-            if (p.gender) {
-                // Si tiene género en DB, reemplazar cualquier género viejo en features
-                features = features.filter((f: string) => !GENDER_VALUES.includes(f));
-                const normalizedGender = p.gender.charAt(0).toUpperCase() + p.gender.slice(1).toLowerCase();
-                features.push(normalizedGender);
-            }
-            // Si gender es null, conservar el género que ya estaba en features
-
-            const galleryImages: any[] = [];
-            if (p.images && p.images.length > 0) {
-                p.images.forEach((img: any) => galleryImages.push({ url: img.url, color: img.alt_text || 'Principal' }));
-            }
-
-            const legacyUrls = [p.image_url, p.image_url_2, p.image_url_3, p.image_url_4].filter(Boolean);
-            legacyUrls.forEach(url => {
-                if (!galleryImages.some(gi => gi.url === url)) {
-                    galleryImages.push({ url, color: 'Principal' });
-                }
-            });
-
-            return {
-                id: p.id,
-                name: cleanProductName(p.name),
-                brand: p.brand?.name || 'MULTIBRAND',
-                price: p.sale_price && p.sale_price < p.price ? p.sale_price : p.price,
-                originalPrice: p.price,
-                compareAtPrice: p.compare_at_price && p.compare_at_price > p.price ? p.compare_at_price : null,
-                image: galleryImages[0]?.url || 'https://via.placeholder.com/400x500?text=No+Image',
-                images: galleryImages.map(gi => gi.url),
-                imageObjects: galleryImages,
-                category: p.category?.name || 'General',
-                description: p.description || '',
-                features: features,
-                variants: p.variants,
-                is_published: p.is_published,
-                is_active: p.is_active,
-                sort_order: p.sort_order,
-                brandCardUrl: p.brand?.card_image_url,
-                is_featured: p.is_featured,
-                sku: p.sku || null
-            };
-        });
-
-        return mapped.sort((a, b) => {
-            const sortA = a.sort_order || 99999;
-            const sortB = b.sort_order || 99999;
-            if (sortA !== sortB) {
-                return sortA - sortB;
-            }
-            const nameA = a.name || '';
-            const nameB = b.name || '';
-            return nameA.localeCompare(nameB, 'es', { sensitivity: 'base' });
-        });
-    };
 
     const [isProductDeepLinkLoading, setIsProductDeepLinkLoading] = useState(!!skuParam);
 
@@ -543,6 +500,12 @@ const Store: React.FC = () => {
         window.scrollTo({ top: 0, behavior: 'instant' });
     }, [selectedCategory, selectedBrand, selectedGender]);
 
+    // Reiniciar el paginado "cargar más" cada vez que cambia cualquier filtro,
+    // para que la nueva colección arranque mostrando la primera tanda.
+    useEffect(() => {
+        setVisibleProductsCount(PRODUCTS_PAGE_SIZE);
+    }, [selectedCategory, selectedBrand, selectedGender, searchQuery, selectedSize, selectedOrder]);
+
     // Handle openFilter URL parameter (from Navbar or other links)
     useEffect(() => {
         const openFilter = searchParams.get('openFilter');
@@ -552,7 +515,7 @@ const Store: React.FC = () => {
             setIsSizeFilterOpen(false);
             setIsGenderFilterOpen(false);
             setIsOrderFilterOpen(false);
-            
+
             const newParams = new URLSearchParams(searchParams);
             newParams.delete('openFilter');
             navigate(`/?${newParams.toString()}#new`, { replace: true });
@@ -664,8 +627,12 @@ const Store: React.FC = () => {
         e.preventDefault();
         if (!footerEmail || footerSubStatus !== 'idle') return;
         setFooterSubStatus('loading');
+        // Guardamos día/mes de cumpleaños con un año neutro (no preguntamos el año).
+        const birthdayISO = footerBirthDay && footerBirthMonth
+            ? `2000-${footerBirthMonth.padStart(2, '0')}-${footerBirthDay.padStart(2, '0')}`
+            : null;
         try {
-            await supabase.from('newsletter_subscribers').insert({ email: footerEmail });
+            await supabase.from('newsletter_subscribers').insert({ email: footerEmail, birthday: birthdayISO });
             await supabase.functions.invoke('send-welcome-email', {
                 body: { email: footerEmail }
             });
@@ -971,6 +938,18 @@ const Store: React.FC = () => {
             .slice(0, 12);
     }, [products, quickDiscountBrands, activeBrandNames]);
 
+    const popularProducts = useMemo(() => {
+        return products
+            .filter((p: any) => {
+                if (!p.is_featured) return false;
+                if (p.is_published === false || p.is_active === false) return false;
+                const totalStock = (p.variants || []).reduce((sum: number, v: any) => sum + (v.stock || 0), 0);
+                if (!p.variants || p.variants.length === 0 || totalStock === 0) return false;
+                return true;
+            })
+            .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
+    }, [products]);
+
     const filteredProducts = useMemo(() => products.filter(p => {
         // Si hay una búsqueda por nombre activa, ignoramos categoría/marca/género:
         // se busca en toda la tienda, no solo dentro de la sección actual.
@@ -1124,7 +1103,7 @@ const Store: React.FC = () => {
                 onSelectProduct={openProduct}
             />
 
-            <main>
+            <main style={{ paddingTop: 'var(--navbar-height, 220px)' }}>
                 {(loading || (skuParam && !selectedProduct && isProductDeepLinkLoading)) && !selectedProduct ? (
                     <div className="flex flex-col items-center justify-center py-20 min-h-[50vh]">
                         <Loader className="animate-spin text-black mb-4" size={48} />
@@ -1214,6 +1193,14 @@ const Store: React.FC = () => {
                             // Calculamos precio de lista y precio actual de forma genérica para cubrir ambas.
                             const papaItems = products
                                 .filter((p: any) => p.image && !p.image.includes('placeholder') && !p.image.includes('No+Image'))
+                                .filter((p: any) => {
+                                    // Mismo criterio de "producto visible" que la grilla principal:
+                                    // no mostrar en Sale lo que no se muestra en la tienda (sin stock, despublicado, etc.)
+                                    if (p.is_published === false || p.is_active === false) return false;
+                                    const totalStock = (p.variants || []).reduce((sum: number, v: any) => sum + (v.stock || 0), 0);
+                                    if (!p.variants || p.variants.length === 0 || totalStock === 0) return false;
+                                    return true;
+                                })
                                 .map((p: any) => {
                                     const hasNewSaleFlag = !!p.compareAtPrice && p.compareAtPrice > p.originalPrice;
                                     const listPrice = hasNewSaleFlag ? p.compareAtPrice : p.originalPrice;
@@ -1287,14 +1274,16 @@ const Store: React.FC = () => {
                     </>
                 )}
 
-                {/* Collection Section */}
-                <section 
+                {/* Collection Section: se muestra siempre, incluso en la home "pelada" —
+                    ahí aparece como "TODA LA COLECCIÓN" debajo de "Nuestros Elegidos en Sale",
+                    paginada igual que cualquier otra colección (24 a la vez + "seguir cargando"). */}
+                <section
                     className={`pb-32 px-0.5 md:px-12 max-w-screen-2xl mx-auto ${(selectedBrand || selectedGender || selectedCategory) ? 'pt-6 md:pt-8' : 'pt-4'}`}
                     id="new"
                     style={{ scrollMarginTop: '200px' }}
                 >
                     <div className="flex flex-col md:flex-row md:items-start justify-between mb-6 px-1.5 md:px-0 gap-6 md:gap-10">
-                        <div className="pt-0">
+                        <div className={`pt-0 ${selectedBrand === 'HUNTER' ? 'w-full md:flex-1' : ''}`}>
                             <span className="text-[#999] uppercase tracking-[0.4em] text-[10px] block mb-2 font-bold">
                                 {selectedBrand === 'PERRAMUS' ? (
                                     <span className="flex items-center gap-2">
@@ -1305,7 +1294,15 @@ const Store: React.FC = () => {
                                 ) : (selectedBrand || isBrandFilterOpen ? 'COLECCIÓN EXCLUSIVA' : '')}
                             </span>
                             <h2 className="font-heading text-lg md:text-2xl font-bold tracking-tighter text-[var(--color-text)] leading-tight mt-6 md:mt-10">
-                                {selectedBrand ? (
+                                {selectedBrand === 'HUNTER' ? (
+                                    <div className="flex flex-col items-start leading-tight animate-in fade-in slide-in-from-left-8 duration-700 mt-2 w-full">
+                                        <img
+                                            src="/banners/banner hunter.png"
+                                            alt="Hunter"
+                                            className="w-full h-auto block"
+                                        />
+                                    </div>
+                                ) : selectedBrand ? (
                                     <div className="flex flex-col items-start leading-tight animate-in fade-in slide-in-from-left-8 duration-700 mt-2">
                                         <span className="text-2xl md:text-4xl font-black text-[var(--color-text)] tracking-[0.1em] uppercase">
                                             {selectedBrand}
@@ -1331,9 +1328,12 @@ const Store: React.FC = () => {
                     </div>
 
                     {/* Barra de Filtros Sticky y Compacta - Diseño Premium */}
-                    <div className="sticky top-[105px] md:top-[130px] z-[90] w-full bg-white backdrop-blur-md py-4 px-3 md:px-6 mb-6 md:mb-8 border-y border-[var(--color-text)]/5 shadow-[0_15px_35px_rgba(0,0,0,0.04)]">
+                    <div className="sticky z-[90] w-full bg-white backdrop-blur-md py-4 px-3 md:px-6 mb-6 md:mb-8 border-y border-[var(--color-text)]/5 shadow-[0_15px_35px_rgba(0,0,0,0.04)]" style={{ top: 'var(--navbar-height, 130px)' }}>
                         <div className="flex flex-col gap-2 md:gap-3">
-                            <div className="flex flex-col xl:flex-row xl:items-center justify-end gap-3 md:gap-4">
+                            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 md:gap-4">
+                                <p className="text-[10px] md:text-xs font-black tracking-[0.2em] uppercase text-[var(--color-text)]/50 shrink-0">
+                                    Refiná tu búsqueda
+                                </p>
                                 <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar w-full xl:w-auto relative [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                                     <button
                                         onClick={() => { setIsBrandFilterOpen(!isBrandFilterOpen); setIsCategoryFilterOpen(false); setIsSizeFilterOpen(false); setIsGenderFilterOpen(false); setIsOrderFilterOpen(false); }}
@@ -1379,6 +1379,7 @@ const Store: React.FC = () => {
                                         <span>{selectedSize ? `TALLE: ${selectedSize}` : 'TALLE'}</span>
                                     </button>
 
+
                                     <button
                                         onClick={() => { setIsOrderFilterOpen(!isOrderFilterOpen); setIsBrandFilterOpen(false); setIsCategoryFilterOpen(false); setIsGenderFilterOpen(false); setIsSizeFilterOpen(false); }}
                                         className={`flex items-center gap-1.5 px-3 py-2 md:px-5 md:py-2.5 rounded-none border transition-all text-[10px] md:text-xs font-black tracking-[0.1em] md:tracking-[0.15em] uppercase whitespace-nowrap shrink-0 active:scale-95 ${isOrderFilterOpen || selectedOrder
@@ -1407,7 +1408,7 @@ const Store: React.FC = () => {
                                                 setIsGenderFilterOpen(false);
                                                 setIsOrderFilterOpen(false);
                                             }}
-                                            className="group flex items-center gap-1.5 px-3 py-1.5 md:px-5 md:py-2.5 rounded-none border border-black text-black text-[9px] md:text-sm font-black tracking-[0.1em] md:tracking-[0.2em] uppercase transition-all hover:bg-black hover:text-white whitespace-nowrap shrink-0"
+                                            className="group flex items-center gap-1.5 px-3 py-1.5 md:px-5 md:py-2.5 rounded-none border border-black text-black text-[9px] md:text-sm font-black tracking-[0.1em] md:tracking-[0.2em] uppercase transition-all invert-hover-btn whitespace-nowrap shrink-0"
                                         >
                                             <Trash2 size={12} className="group-hover:rotate-12 transition-transform" />
                                             <span>BORRAR</span>
@@ -1677,6 +1678,7 @@ const Store: React.FC = () => {
                                         </div>
                                     </div>
                                 )}
+
                             </div>
                         </div>
                     </div>
@@ -1686,59 +1688,89 @@ const Store: React.FC = () => {
                             <p className="text-xl font-bold tracking-[0.2em] uppercase mb-4 text-[var(--color-text)]">No se encontraron productos</p>
                             <p className="text-[var(--color-text)] italic tracking-widest text-sm uppercase font-medium">Intenta con otros filtros de búsqueda.</p>
                         </div>
-                    ) : (
-                        (!selectedBrand && !selectedGender && !selectedCategory && !searchQuery) ? (
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-0.5 sm:gap-6 gap-y-4 sm:gap-y-12 min-h-[50vh]">
-                                {(() => {
-                                    const isBottom = (p: any) => { const cat = (p.category || '').toUpperCase(); return cat.includes('ACCESORIO') || cat.includes('CALZADO') || cat.includes('BOLSO') || cat.includes('CARTERA'); };
-                                    const isAbrigo = (p: any) => { const cat = (p.category || '').toUpperCase(); return cat.includes('ABRIGO') || cat.includes('CAMPERA') || cat.includes('PAÑO') || cat.includes('PILOTO'); };
-                                    const getGenders = (p: any) => (p.features || []).map((f: string) => f?.toLowerCase());
+                    ) : (!selectedBrand && !selectedGender && !selectedCategory && !searchQuery) ? (
+                        (() => {
+                            const isBottom = (p: any) => { const cat = (p.category || '').toUpperCase(); return cat.includes('ACCESORIO') || cat.includes('CALZADO') || cat.includes('BOLSO') || cat.includes('CARTERA'); };
+                            const isAbrigo = (p: any) => { const cat = (p.category || '').toUpperCase(); return cat.includes('ABRIGO') || cat.includes('CAMPERA') || cat.includes('PAÑO') || cat.includes('PILOTO'); };
+                            const getGenders = (p: any) => (p.features || []).map((f: string) => f?.toLowerCase());
 
-                                    const clothing = filteredProducts.filter(p => !isBottom(p));
-                                    const accessories = filteredProducts.filter(p => isBottom(p));
+                            const clothing = filteredProducts.filter(p => !isBottom(p));
+                            const accessories = filteredProducts.filter(p => isBottom(p));
 
-                                    // Prioriza los abrigos más caros al frente de cada cola de género
-                                    const byAbrigoCaroFirst = (a: any, b: any) => {
-                                        const aAb = isAbrigo(a) ? 1 : 0;
-                                        const bAb = isAbrigo(b) ? 1 : 0;
-                                        if (aAb !== bAb) return bAb - aAb;
-                                        return (b.price || 0) - (a.price || 0);
-                                    };
+                            // Prioriza los abrigos más caros al frente de cada cola de género
+                            const byAbrigoCaroFirst = (a: any, b: any) => {
+                                const aAb = isAbrigo(a) ? 1 : 0;
+                                const bAb = isAbrigo(b) ? 1 : 0;
+                                if (aAb !== bAb) return bAb - aAb;
+                                return (b.price || 0) - (a.price || 0);
+                            };
 
-                                    const hombreQueue = clothing.filter(p => getGenders(p).includes('hombre')).sort(byAbrigoCaroFirst);
-                                    const mujerQueue = clothing.filter(p => getGenders(p).includes('mujer')).sort(byAbrigoCaroFirst);
-                                    const otrosQueue = clothing.filter(p => { const g = getGenders(p); return !g.includes('hombre') && !g.includes('mujer'); }).sort(byAbrigoCaroFirst);
+                            const hombreQueue = clothing.filter(p => getGenders(p).includes('hombre')).sort(byAbrigoCaroFirst);
+                            const mujerQueue = clothing.filter(p => getGenders(p).includes('mujer')).sort(byAbrigoCaroFirst);
+                            const otrosQueue = clothing.filter(p => { const g = getGenders(p); return !g.includes('hombre') && !g.includes('mujer'); }).sort(byAbrigoCaroFirst);
 
-                                    // Round-robin Hombre/Mujer/Otros para que la colección se vea mezclada, como armando conjuntos
-                                    const queues = [hombreQueue, mujerQueue, otrosQueue];
-                                    const result: any[] = [];
-                                    while (queues.some(q => q.length > 0)) { for (const q of queues) { if (q.length > 0) result.push(q.shift()); } }
+                            // Round-robin Hombre/Mujer/Otros para que la colección se vea mezclada, como armando conjuntos
+                            const queues = [hombreQueue, mujerQueue, otrosQueue];
+                            const result: any[] = [];
+                            while (queues.some(q => q.length > 0)) { for (const q of queues) { if (q.length > 0) result.push(q.shift()); } }
 
-                                    return [...result, ...accessories].map(product => (
-                                        <ProductCard key={product.id} product={product} onAddToCart={addToCart} onOpenDetail={(p) => openProduct(p)} isFavorite={favorites.includes(product.id)} onToggleFavorite={toggleFavorite} />
-                                    ));
-                                })()}
-                            </div>
-                        ) : (
-                            <div>
-                                {selectedCategory?.toLowerCase() === 'cafeteria' && (
-                                    <div style={{ position: 'relative', width: '100%', minHeight: '180px', marginBottom: '2rem', background: '#1a2a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem' }}>
-                                        <img src="/IMG_3793.PNG" alt="Monacle Speciality Coffee" style={{ maxHeight: '120px', maxWidth: '80%', objectFit: 'contain' }} />
+                            const ordered = [...result, ...accessories];
+                            const visible = ordered.slice(0, visibleProductsCount);
+
+                            return (
+                                <>
+                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-0.5 sm:gap-6 gap-y-4 sm:gap-y-12 min-h-[50vh]">
+                                        {visible.map(product => (
+                                            <ProductCard key={product.id} product={product} onAddToCart={addToCart} onOpenDetail={(p) => openProduct(p)} isFavorite={favorites.includes(product.id)} onToggleFavorite={toggleFavorite} />
+                                        ))}
                                     </div>
-                                )}
-                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-0.5 sm:gap-6 gap-y-4 sm:gap-y-12 min-h-[50vh]">
-                                    {filteredProducts.sort((a, b) => {
-                                        const isBottom = (p: any) => {
-                                            const cat = (p.category?.name || '').toUpperCase();
-                                            return cat.includes('ACCESORIO') || cat.includes('CALZADO') || cat.includes('BOLSO') || cat.includes('CARTERA') ? 1 : 0;
-                                        };
-                                        return isBottom(a) - isBottom(b);
-                                    }).map(product => (
-                                        <ProductCard key={product.id} product={product} onAddToCart={addToCart} onOpenDetail={(p) => openProduct(p)} isFavorite={favorites.includes(product.id)} onToggleFavorite={toggleFavorite} />
-                                    ))}
+                                    {visibleProductsCount < ordered.length && (
+                                        <div className="flex flex-col items-center gap-3 mt-12">
+                                            <p className="text-[10px] tracking-[0.2em] uppercase text-[#999]">
+                                                Mostrando {visible.length} de {ordered.length}
+                                            </p>
+                                            <button
+                                                onClick={(e) => { setVisibleProductsCount(v => v + PRODUCTS_PAGE_SIZE); e.currentTarget.blur(); }}
+                                                className="px-10 py-4 border border-black text-black text-[10px] font-black tracking-[0.3em] uppercase invert-hover-btn transition-all"
+                                            >
+                                                Seguir cargando productos
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        })()
+                    ) : (
+                        (() => {
+                            const ordered = [...filteredProducts].sort((a, b) => {
+                                const isBottom = (p: any) => {
+                                    const cat = (p.category?.name || '').toUpperCase();
+                                    return cat.includes('ACCESORIO') || cat.includes('CALZADO') || cat.includes('BOLSO') || cat.includes('CARTERA') ? 1 : 0;
+                                };
+                                return isBottom(a) - isBottom(b);
+                            });
+                            const visible = ordered.slice(0, visibleProductsCount);
+
+                            return (
+                                <div>
+                                    {selectedCategory?.toLowerCase() === 'cafeteria' && (
+                                        <div style={{ position: 'relative', width: '100%', minHeight: '180px', marginBottom: '2rem', background: '#1a2a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem' }}>
+                                            <img src="/IMG_3793.PNG" alt="Monacle Speciality Coffee" style={{ maxHeight: '120px', maxWidth: '80%', objectFit: 'contain' }} />
+                                        </div>
+                                    )}
+                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-0.5 sm:gap-6 gap-y-4 sm:gap-y-12 min-h-[50vh]">
+                                        {visible.map(product => (
+                                            <ProductCard key={product.id} product={product} onAddToCart={addToCart} onOpenDetail={(p) => openProduct(p)} isFavorite={favorites.includes(product.id)} onToggleFavorite={toggleFavorite} />
+                                        ))}
+                                    </div>
+                                    {visibleProductsCount < ordered.length && (
+                                        <div ref={autoLoadSentinelRef} className="flex justify-center py-12">
+                                            <Loader className="animate-spin text-black/30" size={24} />
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
-                        )
+                            );
+                        })()
                     )}
                 </section>
                 </>
@@ -1747,82 +1779,140 @@ const Store: React.FC = () => {
 
 
                 {/* Footer */}
-                <footer className="py-24 px-6 bg-[var(--color-background-alt)] relative overflow-hidden text-[var(--color-text)] border-t border-[var(--color-border)]">
-                    <div className="absolute top-0 right-1/4 w-96 h-96 bg-black/5 blur-[120px] rounded-none" />
-                    <div className="max-w-screen-2xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-20 relative z-10">
-                        <div>
-                            <h1 className="font-heading text-3xl font-black tracking-[0.6em] mb-12 uppercase">MULTIBRAND</h1>
+                <footer className="bg-[var(--color-background-alt)] text-[var(--color-text)] border-t border-[var(--color-border)]">
 
-                            <div className="space-y-6">
-                                <h5 className="text-[11px] font-semibold tracking-[0.5em] text-[#999] mb-6 uppercase">Contacto</h5>
-                                <div className="space-y-5">
-                                    <a href="mailto:admteruzyolanda@gmail.com" className="flex items-center gap-4 group">
-                                        <Mail size={16} strokeWidth={1.5} className="text-[var(--color-text-muted)] group-hover:text-black transition-colors" />
-                                        <span className="text-[10px] font-medium tracking-[0.2em] text-[var(--color-text-muted)] group-hover:text-[var(--color-text)] transition-colors uppercase">admteruzyolanda@gmail.com</span>
-                                    </a>
-                                    <a href="https://wa.me/5493412175258" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group">
-                                        <Phone size={16} strokeWidth={1.5} className="text-[var(--color-text-muted)] group-hover:text-[#25D366] transition-colors" />
-                                        <span className="text-[10px] font-medium tracking-[0.2em] text-[var(--color-text-muted)] group-hover:text-[var(--color-text)] transition-colors uppercase">3412175258</span>
-                                    </a>
-                                    <button
-                                        onClick={() => setIsLocationsOpen(true)}
-                                        className="flex items-center gap-4 group w-full text-left"
-                                    >
-                                        <MapPin size={16} strokeWidth={1.5} className="text-[var(--color-text-muted)] group-hover:text-black transition-colors" />
-                                        <span className="text-[10px] font-medium tracking-[0.2em] text-[var(--color-text-muted)] group-hover:text-[var(--color-text)] transition-colors uppercase">Locales</span>
-                                    </button>
-
-                                    <a href="https://www.instagram.com/perramusrosario/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group">
-                                        <Instagram size={16} strokeWidth={1.5} className="text-[var(--color-text-muted)] group-hover:text-[#E4405F] transition-colors" />
-                                        <span className="text-[10px] font-medium tracking-[0.2em] text-[var(--color-text-muted)] group-hover:text-[var(--color-text)] transition-colors uppercase">@perramusrosario</span>
-                                    </a>
-                                </div>
+                    {/* Join Us — newsletter */}
+                    <div className="max-w-xl mx-auto text-center py-16 px-6">
+                        <h2 className="font-heading text-2xl md:text-3xl font-black tracking-[0.3em] uppercase mb-3">Join Us</h2>
+                        <p className="text-[11px] font-bold tracking-[0.3em] uppercase mb-2">Suscribite al Newsletter</p>
+                        <p className="text-[10px] text-[var(--color-text-muted)] tracking-[0.15em] uppercase mb-8 leading-relaxed">
+                            Recibí un 10% de descuento en tu primera compra y beneficios exclusivos
+                        </p>
+                        {footerSubStatus === 'success' ? (
+                            <div className="flex items-center justify-center gap-3 py-4 border-y border-[#e0e0e0]">
+                                <span className="text-black text-lg">✓</span>
+                                <span className="text-[10px] font-semibold tracking-[0.3em] text-black uppercase">¡Bienvenido/a al Club Multibrand!</span>
                             </div>
-                        </div>
-
-                        <div>
-                            <h5 className="text-[11px] font-semibold tracking-[0.5em] text-[#999] mb-10 uppercase">POLÍTICAS</h5>
-                            <ul className="space-y-6 text-[10px] font-medium tracking-[0.3em] text-[var(--color-text-muted)] uppercase">
-                                <li><Link to="/como-comprar" className="hover:text-[var(--color-text)] transition-colors">CÓMO COMPRAR</Link></li>
-                                <li><Link to="/envios" className="hover:text-[var(--color-text)] transition-colors">ENVÍOS Y SEGUIMIENTO</Link></li>
-                                <li><Link to="/preguntas-frecuentes" className="hover:text-[var(--color-text)] transition-colors">FORMAS DE PAGO</Link></li>
-                                <li><Link to="/politicas-de-privacidad" className="hover:text-[var(--color-text)] transition-colors">POLÍTICAS DE PRIVACIDAD</Link></li>
-                                <li><Link to="/arrepentimiento" className="hover:text-[var(--color-text)] transition-colors">ARREPENTIMIENTO DE COMPRA</Link></li>
-                                <li><Link to="/preguntas-frecuentes" className="hover:text-[var(--color-text)] transition-colors">PREGUNTAS FRECUENTES</Link></li>
-                            </ul>
-                        </div>
-
-                        <div>
-                            <h5 className="text-[11px] font-semibold tracking-[0.5em] text-[#999] mb-10 uppercase">COMUNIDAD</h5>
-                            <p className="text-[11px] text-[var(--color-text-muted)] mb-8 tracking-[0.2em] font-medium uppercase">Sé el primero en acceder a los "Drops" exclusivos.</p>
-                            {footerSubStatus === 'success' ? (
-                                <div className="flex items-center gap-3 py-4 border-b border-[#e0e0e0]">
-                                    <span className="text-black text-lg">✓</span>
-                                    <span className="text-[10px] font-semibold tracking-[0.3em] text-black uppercase">¡Bienvenido/a al Club Multibrand!</span>
-                                </div>
-                            ) : (
-                                <form onSubmit={handleFooterSubscribe} className="flex border-b border-[var(--color-border)] pb-4 group focus-within:border-black/40 transition-colors">
+                        ) : (
+                            <form onSubmit={handleFooterSubscribe} className="space-y-4 text-left">
+                                <div className="flex items-center border border-[var(--color-border)] focus-within:border-black/40 transition-colors">
                                     <input
                                         type="email"
                                         value={footerEmail}
                                         onChange={e => setFooterEmail(e.target.value)}
-                                        placeholder="TU EMAIL"
+                                        placeholder="Ingresá tu correo electrónico"
                                         required
-                                        className="bg-transparent text-[10px] font-medium tracking-[0.3em] w-full focus:outline-none placeholder:text-[var(--color-text-muted)]/50 text-[var(--color-text)] uppercase"
+                                        className="flex-1 bg-[var(--color-background)] px-4 py-3 text-[10px] font-medium tracking-[0.2em] uppercase focus:outline-none placeholder:text-[var(--color-text-muted)]/60"
                                     />
                                     <button
                                         type="submit"
                                         disabled={footerSubStatus === 'loading'}
-                                        className="text-[10px] font-semibold tracking-[0.4em] text-[#999] hover:text-[var(--color-text)] transition-colors disabled:opacity-50 whitespace-nowrap"
+                                        aria-label="Suscribirme"
+                                        className="px-4 py-3 bg-[var(--color-background)] text-[var(--color-text)] hover:text-black transition-colors disabled:opacity-50"
                                     >
-                                        {footerSubStatus === 'loading' ? '...' : 'UNIRSE'}
+                                        {footerSubStatus === 'loading' ? '...' : <ArrowRight size={16} />}
                                     </button>
-                                </form>
-                            )}
+                                </div>
+                                <p className="text-[9px] font-bold tracking-[0.3em] uppercase text-[#999] text-center pt-2">Tu cumpleaños (opcional)</p>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <select
+                                        value={footerBirthDay}
+                                        onChange={e => setFooterBirthDay(e.target.value)}
+                                        className="bg-[var(--color-background)] border border-[var(--color-border)] px-4 py-3 text-[10px] font-medium tracking-[0.2em] uppercase focus:outline-none"
+                                    >
+                                        <option value="">Día</option>
+                                        {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+                                            <option key={d} value={String(d)}>{d}</option>
+                                        ))}
+                                    </select>
+                                    <select
+                                        value={footerBirthMonth}
+                                        onChange={e => setFooterBirthMonth(e.target.value)}
+                                        className="bg-[var(--color-background)] border border-[var(--color-border)] px-4 py-3 text-[10px] font-medium tracking-[0.2em] uppercase focus:outline-none"
+                                    >
+                                        <option value="">Mes</option>
+                                        {['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'].map((m, i) => (
+                                            <option key={m} value={String(i + 1)}>{m}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </form>
+                        )}
+                    </div>
+
+                    {/* Envíos / Cambios / Pagos / Pick-up */}
+                    <div className="border-y border-[var(--color-border)] grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-[var(--color-border)]">
+                        {[
+                            { icon: Truck, title: 'Envíos a todo el país', desc: 'Recibí tu pedido sin moverte de tu casa' },
+                            { icon: RefreshCw, title: 'Cambios y devoluciones', desc: 'Realizá tu primer cambio o devolución sin cargo' },
+                            { icon: CreditCard, title: 'Medios de pago', desc: 'Aboná en cuotas sin interés, transferencia o efectivo' },
+                            { icon: MapPin, title: 'Pick-up point', desc: 'Podés solicitar que enviemos tu pedido y retirarlo personalmente en nuestros stores habilitados', onClick: () => setIsLocationsOpen(true) },
+                        ].map(({ icon: Icon, title, desc, onClick }) => (
+                            <div
+                                key={title}
+                                onClick={onClick}
+                                className={`p-6 md:p-8 flex flex-col gap-3 text-left ${onClick ? 'cursor-pointer hover:bg-black/[0.03] transition-colors' : ''}`}
+                            >
+                                <Icon size={26} strokeWidth={1.2} />
+                                <p className="text-[10px] font-black tracking-[0.15em] uppercase">{title}</p>
+                                <p className="text-[9px] text-[var(--color-text-muted)] tracking-[0.05em] uppercase leading-relaxed">{desc}</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Links */}
+                    <div className="max-w-screen-2xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-10 py-16 px-6">
+                        <div>
+                            <h5 className="text-[11px] font-semibold tracking-[0.5em] text-[#999] mb-6 uppercase">Contacto</h5>
+                            <div className="space-y-5">
+                                <a href="mailto:admteruzyolanda@gmail.com" className="flex items-center gap-4 group">
+                                    <Mail size={16} strokeWidth={1.5} className="text-[var(--color-text-muted)] group-hover:text-black transition-colors" />
+                                    <span className="text-[10px] font-medium tracking-[0.2em] text-[var(--color-text-muted)] group-hover:text-[var(--color-text)] transition-colors uppercase">admteruzyolanda@gmail.com</span>
+                                </a>
+                                <a href="https://wa.me/5493412175258" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group">
+                                    <Phone size={16} strokeWidth={1.5} className="text-[var(--color-text-muted)] group-hover:text-[#25D366] transition-colors" />
+                                    <span className="text-[10px] font-medium tracking-[0.2em] text-[var(--color-text-muted)] group-hover:text-[var(--color-text)] transition-colors uppercase">3412175258</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h5 className="text-[11px] font-semibold tracking-[0.5em] text-[#999] mb-6 uppercase">Tienda</h5>
+                            <ul className="space-y-5 text-[10px] font-medium tracking-[0.2em] text-[var(--color-text-muted)] uppercase">
+                                <li><Link to="/como-comprar" className="hover:text-[var(--color-text)] transition-colors">Cómo comprar</Link></li>
+                                <li><Link to="/envios" className="hover:text-[var(--color-text)] transition-colors">Método de envío</Link></li>
+                                <li><Link to="/preguntas-frecuentes" className="hover:text-[var(--color-text)] transition-colors">Formas de pago</Link></li>
+                                <li><Link to="/arrepentimiento" className="hover:text-[var(--color-text)] transition-colors">Cambios y devoluciones</Link></li>
+                                <li>
+                                    <button onClick={() => setIsLocationsOpen(true)} className="hover:text-[var(--color-text)] transition-colors text-left">Locales</button>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h5 className="text-[11px] font-semibold tracking-[0.5em] text-[#999] mb-6 uppercase">Ayuda</h5>
+                            <ul className="space-y-5 text-[10px] font-medium tracking-[0.2em] text-[var(--color-text-muted)] uppercase">
+                                <li><Link to="/preguntas-frecuentes" className="hover:text-[var(--color-text)] transition-colors">Preguntas frecuentes</Link></li>
+                                <li>
+                                    <button onClick={() => setIsAuthOpen(true)} className="hover:text-[var(--color-text)] transition-colors text-left">Creá tu cuenta</button>
+                                </li>
+                                <li><Link to="/politicas-de-privacidad" className="hover:text-[var(--color-text)] transition-colors">Políticas de privacidad</Link></li>
+                                <li><Link to="/arrepentimiento" className="hover:text-[var(--color-text)] transition-colors">Arrepentimiento de compra</Link></li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h5 className="text-[11px] font-semibold tracking-[0.5em] text-[#999] mb-6 uppercase">Seguinos en</h5>
+                            <div className="space-y-5">
+                                <a href="https://www.instagram.com/perramusrosario/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group">
+                                    <Instagram size={16} strokeWidth={1.5} className="text-[var(--color-text-muted)] group-hover:text-[#E4405F] transition-colors" />
+                                    <span className="text-[10px] font-medium tracking-[0.2em] text-[var(--color-text-muted)] group-hover:text-[var(--color-text)] transition-colors uppercase">@perramusrosario</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="mt-24 pt-10 border-t border-[var(--color-border)] text-center space-y-3">
+                    <div className="pt-10 pb-24 px-6 border-t border-[var(--color-border)] text-center space-y-3">
                         <p className="text-[10px] text-[var(--color-text-muted)] tracking-[0.4em] font-medium uppercase">
                             AGUSTIN MASOERO — CUIT: 20-29140387-6 — RESPONSABLE INSCRIPTO
                         </p>
@@ -1838,7 +1928,7 @@ const Store: React.FC = () => {
                         >
                             Defensa del Consumidor
                         </a>
-                        <p className="text-[8px] text-[#999] tracking-[0.2em] font-medium mb-4">Diseño web Vince</p>
+                        <p className="text-[8px] text-[#999] tracking-[0.2em] font-medium mb-4">Diseño web Sonia Etchevarne</p>
                         
                         <div className="flex justify-center pt-2">
                              <a
@@ -1905,6 +1995,43 @@ const Store: React.FC = () => {
                 onRemoveFavorite={toggleFavorite}
                 onOpenDetail={(p) => openProduct(p)}
             />
+
+            <PopularDrawer
+                isOpen={isPopularOpen}
+                onClose={() => setIsPopularOpen(false)}
+                products={popularProducts}
+                onOpenDetail={(p) => openProduct(p)}
+            />
+
+            {popularProducts.length > 0 && (
+                <button
+                    onClick={() => setIsPopularOpen(true)}
+                    aria-label="Ver productos más populares"
+                    style={{
+                        position: 'fixed',
+                        bottom: '28px',
+                        left: '28px',
+                        zIndex: 9999,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        background: '#e60000',
+                        color: '#fff',
+                        borderRadius: '50px',
+                        padding: '12px 20px',
+                        boxShadow: '0 4px 24px rgba(230,0,0,0.45)',
+                        fontWeight: 800,
+                        fontSize: '13px',
+                        letterSpacing: '0.02em',
+                        border: 'none',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                    }}
+                >
+                    <Flame size={18} fill="white" />
+                    Más populares
+                </button>
+            )}
 
             {
                 selectedProduct && (

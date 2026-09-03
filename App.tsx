@@ -37,6 +37,7 @@ const EnviosYSeguimiento = lazy(() => import('./pages/EnviosYSeguimiento'));
 const PreguntasFrecuentes = lazy(() => import('./pages/PreguntasFrecuentes'));
 const OrderSuccess = lazy(() => import('./pages/OrderSuccess'));
 const GiftCardPage = lazy(() => import('./pages/GiftCardPage'));
+const SaleLastChance = lazy(() => import('./pages/SaleLastChance'));
 const OutletMaintenance = lazy(() => import('./pages/OutletMaintenance'));
 
 const ScrollToTop = () => {
@@ -91,6 +92,7 @@ const App: React.FC = () => {
             <Route path="/envios" element={<EnviosYSeguimiento />} />
             <Route path="/preguntas-frecuentes" element={<PreguntasFrecuentes />} />
             <Route path="/gift-cards" element={<GiftCardPage />} />
+            <Route path="/sale" element={<SaleLastChance />} />
             <Route path="/outlet" element={<OutletMaintenance />} />
             <Route path="/orden/exito" element={<OrderSuccess />} />
             <Route path="/orden/pendiente" element={<OrderSuccess />} />

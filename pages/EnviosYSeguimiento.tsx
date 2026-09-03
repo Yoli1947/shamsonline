@@ -83,7 +83,7 @@ const EnviosYSeguimiento: React.FC = () => {
                             { name: 'PERRAMUS - HUNTER - NAUTICA (Fisherton Plaza)', address: 'Alberto J. Paz 1065 bis, Rosario', schedule: 'Lun a Dom 10:00–20:00' },
                             { name: 'PERRAMUS-HUNTER (PLAZA PRINGLES)', address: 'Córdoba 1543, Rosario', schedule: 'Lun a Vie 9:30–19:30 | Sáb 9:30–19:00' },
                             { name: 'PERRAMUS-HUNTER-NAUTICA', address: 'Córdoba 1646, Rosario', schedule: 'Lun a Vie 9:30–19:30 | Sáb 9:30–19:00' },
-                            { name: 'MONACLE TIENDA', address: 'Pte Roca 871, Rosario', schedule: 'Lun a Sáb 10:00–20:00' },
+                            { name: 'MONACLE TIENDA HUNTER', address: 'Pte Roca 871, Rosario', schedule: 'Lun a Sáb 10:00–20:00' },
                         ].map((local, i, arr) => (
                             <div key={local.name} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '12px 0', borderBottom: i < arr.length - 1 ? '1px solid #e5e5e5' : 'none' }}>
                                 <MapPin size={12} color="#000" style={{ marginTop: '2px', flexShrink: 0 }} />

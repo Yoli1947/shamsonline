@@ -40,19 +40,21 @@ const BrandMarquee: React.FC = () => {
   const displayItems = brands.length > 0 ? brands : [{ name: 'MULTIBRAND', logo_url: null }];
 
   return (
-    <div className="py-4 md:py-6 border-y border-[var(--color-border)] overflow-hidden bg-white relative z-10">
-      <div className="animate-marquee flex items-center min-w-full">
-        {[...displayItems, ...displayItems, ...displayItems, ...displayItems].map((brand, idx) => (
-          <div
-            key={idx}
-            className="flex items-center px-2 md:px-3 group shrink-0"
-            onClick={() => handleBrandClick(brand.name)}
-          >
-            <span className="text-[10px] md:text-sm font-medium px-4 py-2 md:px-6 md:py-2.5 rounded-none border border-[#e0e0e0] bg-white text-[#999] transition-all duration-300 group-hover:bg-[#f0f0f0] group-hover:text-[#333] group-hover:border-[#ccc] group-hover:scale-105 cursor-pointer whitespace-nowrap uppercase tracking-widest">
-              {brand.name}
-            </span>
-          </div>
-        ))}
+    <div className="py-4 md:py-6 border-y border-[var(--color-border)] bg-white relative z-10">
+      <div className="max-w-screen-2xl mx-auto px-4 md:px-12 overflow-hidden">
+        <div className="animate-marquee flex items-center justify-center min-w-full">
+          {[...displayItems, ...displayItems, ...displayItems, ...displayItems].map((brand, idx) => (
+            <div
+              key={idx}
+              className="flex items-center px-2 md:px-3 group shrink-0"
+              onClick={() => handleBrandClick(brand.name)}
+            >
+              <span className="text-[10px] md:text-sm font-medium px-4 py-2 md:px-6 md:py-2.5 rounded-none border border-[#e0e0e0] bg-white text-[#999] shadow-md transition-all duration-300 group-hover:bg-[#f0f0f0] group-hover:text-[#333] group-hover:border-[#ccc] group-hover:shadow-lg group-hover:scale-105 cursor-pointer whitespace-nowrap uppercase tracking-widest">
+                {brand.name}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

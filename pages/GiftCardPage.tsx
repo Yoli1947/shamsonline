@@ -1,13 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Gift, User, Mail, Phone, MessageSquare, ChevronRight, Loader } from 'lucide-react';
+import { ArrowLeft, User, Mail, Phone, Loader } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { usePageSEO } from '../lib/seo';
 
-const PRESET_AMOUNTS = [800, 150000, 200000, 300000, 500000];
+const PRESET_AMOUNTS = [100000, 200000, 300000, 400000, 500000];
+const MIN_AMOUNT = PRESET_AMOUNTS[0];
+const MAX_AMOUNT = PRESET_AMOUNTS[PRESET_AMOUNTS.length - 1];
 
 const FUNCTIONS_URL = import.meta.env.VITE_SUPABASE_FUNCTIONS_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+// Borrador del formulario: se guarda en este navegador para que si el
+// comprador sale de la página (o se le corta) no tenga que volver a
+// escribir todo. Se borra solo cuando el pedido se envía con éxito.
+const DRAFT_KEY = 'shams_giftcard_draft_v1';
+
+function loadDraft(): Record<string, any> {
+    try {
+        const raw = localStorage.getItem(DRAFT_KEY);
+        return raw ? JSON.parse(raw) : {};
+    } catch {
+        return {};
+    }
+}
 
 function generateOrderNumber() {
     const ts = Date.now().toString(36).toUpperCase();
@@ -19,71 +35,67 @@ const GiftCardPage: React.FC = () => {
     const navigate = useNavigate();
 
     usePageSEO({
-        title: 'Gift Cards | Multibrand Rosario',
+        title: 'Gift Card | Multibrand Rosario',
         description: 'Regalá una Gift Card de Multibrand Rosario: el destinatario la recibe al instante por WhatsApp.',
     });
 
-    const [isGift, setIsGift] = useState(false);
-    const [amount, setAmount] = useState(200000);
-    const [customAmount, setCustomAmount] = useState('200000');
-    const [useCustom, setUseCustom] = useState(true);
+    const [draft] = useState(loadDraft);
+
+    const [amount, setAmount] = useState(draft.amount ?? PRESET_AMOUNTS[1]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [showPreview, setShowPreview] = useState(false);
+    const [sendTiming, setSendTiming] = useState<'now' | 'later'>(draft.sendTiming ?? 'now');
+    const [scheduledDate, setScheduledDate] = useState(draft.scheduledDate ?? '');
 
-    // Datos del comprador
-    const [buyerName, setBuyerName] = useState('');
-    const [buyerEmail, setBuyerEmail] = useState('');
-    const [buyerPhone, setBuyerPhone] = useState('');
+    // Remitente / destinatario (tal como se muestra en la tarjeta)
+    const [senderName, setSenderName] = useState(draft.senderName ?? '');
+    const [recipientName, setRecipientName] = useState(draft.recipientName ?? '');
+    const [recipientEmail, setRecipientEmail] = useState(draft.recipientEmail ?? '');
+    const [message, setMessage] = useState(draft.message ?? '');
 
-    // Datos del destinatario (si es regalo)
-    const [recipientName, setRecipientName] = useState('');
-    const [recipientPhone, setRecipientPhone] = useState('');
-    const [recipientEmail, setRecipientEmail] = useState('');
-    const [message, setMessage] = useState('');
+    // Datos de contacto del comprador (necesarios para la orden y el pago)
+    const [buyerEmail, setBuyerEmail] = useState(draft.buyerEmail ?? '');
+    const [buyerPhone, setBuyerPhone] = useState(draft.buyerPhone ?? '');
 
-    const effectiveAmount = useCustom ? Number(customAmount.replace(/\D/g, '')) : amount;
-
-    const handleAmountSelect = (val: number) => {
-        setAmount(val);
-        setCustomAmount(val.toString());
-        setUseCustom(true);
-    };
-
-    const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const raw = e.target.value.replace(/\D/g, '');
-        setCustomAmount(raw);
-        setUseCustom(true);
-    };
+    // Guardar el borrador en este navegador cada vez que cambia algo
+    useEffect(() => {
+        try {
+            localStorage.setItem(DRAFT_KEY, JSON.stringify({
+                amount, sendTiming, scheduledDate, senderName, recipientName,
+                recipientEmail, message, buyerEmail, buyerPhone,
+            }));
+        } catch { }
+    }, [amount, sendTiming, scheduledDate, senderName, recipientName, recipientEmail, message, buyerEmail, buyerPhone]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
 
-        if (!buyerName.trim() || !buyerEmail.trim() || !buyerPhone.trim()) {
-            setError('Completá tus datos de contacto.');
+        if (!senderName.trim()) {
+            setError('Ingresá tu nombre.');
             return;
         }
-        if (effectiveAmount < 800) {
-            setError('El monto mínimo es $100.000.');
-            return;
-        }
-        if (isGift && !recipientName.trim()) {
+        if (!recipientName.trim()) {
             setError('Ingresá el nombre del destinatario.');
             return;
         }
-        if (isGift && recipientPhone && !/^\+54/.test(recipientPhone.trim())) {
-            setError('El teléfono del destinatario debe comenzar con +54 (ej: +5493413001234).');
+        if (!buyerEmail.trim() || !buyerPhone.trim()) {
+            setError('Completá tu email y teléfono de contacto.');
+            return;
+        }
+        if (sendTiming === 'later' && !scheduledDate) {
+            setError('Elegí una fecha para el envío programado.');
             return;
         }
 
         setLoading(true);
         try {
             const orderNumber = generateOrderNumber();
-            const nameParts = buyerName.trim().split(' ');
-            const firstName = nameParts[0] || buyerName;
+            const nameParts = senderName.trim().split(' ');
+            const firstName = nameParts[0] || senderName;
             const lastName = nameParts.slice(1).join(' ') || '-';
 
-            // 1. Crear la orden en Supabase
             const { data: order, error: orderError } = await supabase
                 .from('orders')
                 .insert({
@@ -97,10 +109,10 @@ const GiftCardPage: React.FC = () => {
                     shipping_city: '-',
                     shipping_province: '-',
                     shipping_postal_code: '0000',
-                    subtotal: effectiveAmount,
+                    subtotal: amount,
                     shipping_cost: 0,
                     discount: 0,
-                    total: effectiveAmount,
+                    total: amount,
                     payment_method: 'mercadopago',
                     status: 'pending',
                     payment_status: 'pending',
@@ -110,31 +122,29 @@ const GiftCardPage: React.FC = () => {
 
             if (orderError) throw new Error(orderError.message);
 
-            // Insertar item de gift card
             await supabase.from('order_items').insert({
                 order_id: order.id,
                 product_id: null,
                 variant_id: null,
-                product_name: `Gift Card $${effectiveAmount.toLocaleString('es-AR')}`,
+                product_name: `Gift Card $${amount.toLocaleString('es-AR')}`,
                 product_brand: 'MULTIBRAND',
                 product_image: null,
                 size: 'ÚNICO',
                 color: null,
-                unit_price: effectiveAmount,
+                unit_price: amount,
                 quantity: 1,
-                subtotal: effectiveAmount,
-                // Datos extra de gift card almacenados en metadata
+                subtotal: amount,
                 type: 'gift_card',
                 product_type: 'gift_card',
-                is_gift: isGift,
-                recipient_name: isGift ? recipientName.trim() : null,
-                recipient_phone: isGift && recipientPhone ? recipientPhone.trim() : null,
-                recipient_email: isGift && recipientEmail ? recipientEmail.trim() : null,
-                sender_name: buyerName.trim(),
+                is_gift: true,
+                recipient_name: recipientName.trim(),
+                recipient_phone: null,
+                recipient_email: recipientEmail.trim() || null,
+                sender_name: senderName.trim(),
                 message: message.trim() || null,
+                scheduled_send_at: sendTiming === 'later' ? scheduledDate : null,
             });
 
-            // 2. Crear preferencia de MercadoPago
             const mpRes = await fetch(`${FUNCTIONS_URL}/create-mp-preference`, {
                 method: 'POST',
                 headers: {
@@ -151,10 +161,10 @@ const GiftCardPage: React.FC = () => {
                         email: buyerEmail.trim(),
                         phone: buyerPhone.trim(),
                     },
-                    total: effectiveAmount,
+                    total: amount,
                     items: [{
-                        name: `Gift Card Multibrand $${effectiveAmount.toLocaleString('es-AR')}`,
-                        price: effectiveAmount,
+                        name: `Gift Card Multibrand $${amount.toLocaleString('es-AR')}`,
+                        price: amount,
                         quantity: 1,
                     }],
                 }),
@@ -163,7 +173,7 @@ const GiftCardPage: React.FC = () => {
             const mpData = await mpRes.json();
             if (!mpData.init_point) throw new Error(mpData.error || 'No se pudo crear el link de pago.');
 
-            // 3. Redirigir a MercadoPago
+            try { localStorage.removeItem(DRAFT_KEY); } catch { }
             window.location.href = mpData.init_point;
 
         } catch (err: any) {
@@ -172,34 +182,28 @@ const GiftCardPage: React.FC = () => {
         }
     };
 
-    const inputStyle: React.CSSProperties = {
+    const fieldStyle: React.CSSProperties = {
         width: '100%',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#fff',
         border: '1px solid #e0e0e0',
-        padding: '12px 16px 12px 48px',
-        fontSize: '11px',
-        fontWeight: 700,
-        letterSpacing: '0.1em',
+        padding: '9px 14px',
+        fontSize: '12px',
+        fontWeight: 500,
         color: '#000',
         outline: 'none',
-        textTransform: 'uppercase',
     };
-    const iconStyle: React.CSSProperties = {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        left: 0,
-        paddingLeft: '16px',
-        display: 'flex',
-        alignItems: 'center',
-        pointerEvents: 'none',
-        color: '#999',
+    const labelStyle: React.CSSProperties = {
+        fontSize: '11px',
+        fontWeight: 700,
+        color: '#000',
+        marginBottom: '6px',
+        display: 'block',
     };
 
     return (
         <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', color: '#000' }}>
             {/* Header */}
-            <div style={{ borderBottom: '1px solid #e5e5e5', padding: '20px 24px', display: 'flex', alignItems: 'center', gap: '16px', position: 'sticky', top: 0, backgroundColor: '#ffffff', zIndex: 50 }}>
+            <div style={{ borderBottom: '1px solid #e5e5e5', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: '16px', position: 'sticky', top: 0, backgroundColor: '#ffffff', zIndex: 50 }}>
                 <button
                     onClick={() => navigate(-1)}
                     className="flex items-center gap-2 transition-colors text-xs font-black tracking-widest uppercase"
@@ -209,227 +213,205 @@ const GiftCardPage: React.FC = () => {
                     Volver
                 </button>
                 <span style={{ color: '#ccc' }}>|</span>
-                <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#000', textTransform: 'uppercase' }}>Gift Cards</span>
+                <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#000', textTransform: 'uppercase' }}>Gift Card</span>
             </div>
 
-            <div className="max-w-2xl mx-auto px-6 py-16">
+            <form
+                onSubmit={handleSubmit}
+                onKeyDown={(e) => {
+                    // Evita que Enter en un campo de texto (típico al aceptar una
+                    // sugerencia de autocompletar del navegador, ej. en el email)
+                    // dispare el envío del formulario sin que el usuario haya
+                    // tocado "Agregar al Carrito".
+                    if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
+                        e.preventDefault();
+                    }
+                }}
+                style={{ display: 'flex', flexWrap: 'wrap' }}
+            >
 
-                {/* Título */}
-                <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-                    <Gift size={32} color="#000" style={{ margin: '0 auto 16px' }} />
-                    <h1 style={{ fontSize: '40px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.02em', marginBottom: '12px' }}>
-                        Gift Card<br /><span style={{ fontStyle: 'italic' }}>Multibrand</span>
-                    </h1>
-                    <p style={{ color: '#666', fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', lineHeight: 1.8 }}>
-                        El regalo perfecto. El destinatario la recibe por WhatsApp al instante.
-                    </p>
+                {/* Imagen de la tarjeta */}
+                <div style={{ flex: '1 1 480px', minWidth: '320px', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 32px' }}>
+                    <div style={{ width: '100%', maxWidth: '520px', aspectRatio: '1.586 / 1', backgroundColor: '#111', borderRadius: '20px', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '32px', boxShadow: '0 24px 55px rgba(0,0,0,0.25)' }}>
+                        <p style={{ color: '#fff', fontWeight: 900, fontSize: 'clamp(18px, 3.2vw, 24px)', letterSpacing: '-0.01em' }}>
+                            ${amount.toLocaleString('es-AR')}
+                        </p>
+                        <div style={{ textAlign: 'center' }}>
+                            <p style={{ color: '#fff', fontWeight: 900, fontSize: 'clamp(28px, 6vw, 40px)', letterSpacing: '-0.02em', lineHeight: 1, marginBottom: '10px' }}>MULTIBRAND</p>
+                            <p style={{ color: '#fff', opacity: 0.55, fontSize: 'clamp(9px, 1.4vw, 11px)', fontWeight: 600, letterSpacing: '0.15em' }}>
+                                PERRAMUS · HUNTER · NAUTICA · MONACLE
+                            </p>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                            <span style={{ color: '#fff', fontSize: '11px', fontWeight: 700, letterSpacing: '0.25em' }}>GIFT</span>
+                            <span style={{ color: '#fff', fontSize: '11px', fontWeight: 700, letterSpacing: '0.25em' }}>CARD</span>
+                        </div>
+
+                        {showPreview && (recipientName || message) && (
+                            <div style={{ position: 'absolute', inset: 0, borderRadius: '16px', backgroundColor: 'rgba(0,0,0,0.9)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: '20px', gap: '6px' }}>
+                                {recipientName && (
+                                    <p style={{ color: '#fff', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', opacity: 0.6 }}>Para {recipientName}</p>
+                                )}
+                                <p style={{ color: '#fff', fontSize: '18px', fontWeight: 900 }}>${amount.toLocaleString('es-AR')}</p>
+                                {message && (
+                                    <p style={{ color: '#fff', fontSize: '10px', lineHeight: 1.5, maxWidth: '260px' }}>{message}</p>
+                                )}
+                                {senderName && (
+                                    <p style={{ color: '#fff', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', opacity: 0.6, marginTop: '6px' }}>De {senderName}</p>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                {/* Info + formulario */}
+                <div style={{ flex: '1 1 420px', minWidth: '320px', padding: '14px 32px 20px' }}>
 
-                    {/* SECCIÓN: Monto */}
-                    <div>
-                        <p style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '0.4em', textTransform: 'uppercase', color: '#999', marginBottom: '12px' }}>Monto de la Gift Card</p>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: '8px', marginBottom: '12px' }}>
+                    <h1 style={{ fontSize: '18px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.02em', marginBottom: '3px' }}>Gift Card Multibrand</h1>
+                    <p style={{ fontSize: '9px', color: '#999', letterSpacing: '0.05em', marginBottom: '8px' }}>SKU: GIFTCARD-MULTIBRAND</p>
+                    <p style={{ fontSize: '16px', fontWeight: 700, marginBottom: '3px' }}>
+                        ${MIN_AMOUNT.toLocaleString('es-AR')} – ${MAX_AMOUNT.toLocaleString('es-AR')}
+                    </p>
+                    <p style={{ fontSize: '9px', color: '#999', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '10px' }}>
+                        Exclusivo online y también en tiendas físicas de Rosario
+                    </p>
+
+                    <div style={{ borderTop: '1px solid #eee', paddingTop: '10px', marginBottom: '10px' }}>
+                        <span style={{ ...labelStyle, marginBottom: '8px' }}>Valor de la Gift Card ARS</span>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                             {PRESET_AMOUNTS.map(val => (
                                 <button
                                     key={val}
                                     type="button"
-                                    onClick={() => handleAmountSelect(val)}
+                                    onClick={(e) => { setAmount(val); e.currentTarget.blur(); }}
                                     style={{
-                                        padding: '12px 8px',
-                                        border: effectiveAmount === val ? '2px solid #000' : '1px solid #e0e0e0',
-                                        backgroundColor: effectiveAmount === val ? '#000' : '#fff',
-                                        color: effectiveAmount === val ? '#fff' : '#000',
-                                        fontWeight: 900,
-                                        fontSize: '11px',
-                                        letterSpacing: '0.05em',
+                                        padding: '8px 12px',
+                                        border: amount === val ? '2px solid #000' : '1px solid #e0e0e0',
+                                        backgroundColor: amount === val ? '#000' : '#fff',
+                                        color: amount === val ? '#fff' : '#000',
+                                        fontWeight: 700,
+                                        fontSize: '12px',
                                         cursor: 'pointer',
-                                        transition: 'all 0.15s',
                                     }}
                                 >
-                                    ${(val / 800).toLocaleString('es-AR')} MIL
+                                    ${val.toLocaleString('es-AR')}
                                 </button>
                             ))}
                         </div>
-                        <div style={{ position: 'relative' }}>
-                            <input
-                                type="text"
-                                inputMode="numeric"
-                                placeholder="OTRO MONTO (MÍN. $100.000)"
-                                value={useCustom && customAmount !== '' ? `$${Number(customAmount).toLocaleString('es-AR')}` : ''}
-                                onChange={handleCustomAmountChange}
-                                onFocus={() => setUseCustom(true)}
-                                style={{
-                                    width: '100%',
-                                    backgroundColor: useCustom ? '#f5f5f5' : '#fafafa',
-                                    border: useCustom ? '2px solid #000' : '1px solid #e0e0e0',
-                                    padding: '12px 16px',
-                                    fontSize: '11px',
-                                    fontWeight: 700,
-                                    letterSpacing: '0.1em',
-                                    color: '#000',
-                                    outline: 'none',
-                                    textTransform: 'uppercase',
-                                }}
-                            />
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '10px' }}>
+                        <div>
+                            <label style={labelStyle}>Tu nombre</label>
+                            <input required type="text" name="sender-name" autoComplete="name" placeholder="Nombre del remitente" value={senderName}
+                                onChange={e => setSenderName(e.target.value)} style={fieldStyle} />
                         </div>
-                        {effectiveAmount > 0 && effectiveAmount < 800 && (
-                            <p style={{ fontSize: '9px', color: '#c00', marginTop: '6px', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 900 }}>
-                                El monto mínimo es $100.000
-                            </p>
+                        <div>
+                            <label style={labelStyle}>Nombre del destinatario</label>
+                            <input required type="text" name="recipient-name" autoComplete="off" placeholder="Nombre del destinatario" value={recipientName}
+                                onChange={e => setRecipientName(e.target.value)} style={fieldStyle} />
+                        </div>
+                    </div>
+
+                    <div style={{ marginBottom: '10px' }}>
+                        <label style={labelStyle}>Email del destinatario</label>
+                        <input type="email" name="recipient-email" autoComplete="off" placeholder="Email del destinatario (opcional)" value={recipientEmail}
+                            onChange={e => setRecipientEmail(e.target.value)} style={fieldStyle} />
+                    </div>
+
+                    <div style={{ marginBottom: '10px' }}>
+                        <label style={labelStyle}>Mensaje</label>
+                        <textarea placeholder="Escribí tu mensaje" value={message} rows={2}
+                            onChange={e => setMessage(e.target.value)} style={{ ...fieldStyle, resize: 'none' }} />
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={(e) => { setShowPreview(v => !v); e.currentTarget.blur(); }}
+                        style={{ padding: '7px 16px', border: '1px solid #000', backgroundColor: showPreview ? '#000' : '#fff', color: showPreview ? '#fff' : '#000', fontSize: '11px', fontWeight: 700, cursor: 'pointer', marginBottom: '10px' }}
+                    >
+                        Vista Previa
+                    </button>
+
+                    <div style={{ borderTop: '1px solid #eee', paddingTop: '10px', marginBottom: '10px' }}>
+                        <span style={{ ...labelStyle, marginBottom: '6px' }}>Programar Envío</span>
+                        <div style={{ display: 'flex', gap: '20px', marginBottom: sendTiming === 'later' ? '10px' : 0 }}>
+                            {[
+                                { val: 'now' as const, label: 'Enviar Ahora' },
+                                { val: 'later' as const, label: 'Enviar Después' },
+                            ].map(opt => (
+                                <label key={opt.val} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', cursor: 'pointer' }}>
+                                    <span style={{
+                                        width: '16px', height: '16px', borderRadius: '50%', border: '1px solid #000',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                                    }}>
+                                        {sendTiming === opt.val && <span style={{ width: '9px', height: '9px', borderRadius: '50%', backgroundColor: '#000' }} />}
+                                    </span>
+                                    <input type="radio" name="sendTiming" checked={sendTiming === opt.val} onChange={() => setSendTiming(opt.val)} style={{ display: 'none' }} />
+                                    {opt.label}
+                                </label>
+                            ))}
+                        </div>
+                        {sendTiming === 'later' && (
+                            <input
+                                type="datetime-local"
+                                value={scheduledDate}
+                                onChange={e => setScheduledDate(e.target.value)}
+                                style={fieldStyle}
+                            />
                         )}
                     </div>
 
-                    {/* SECCIÓN: Para quién */}
-                    <div>
-                        <p style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '0.4em', textTransform: 'uppercase', color: '#999', marginBottom: '12px' }}>¿Para quién es?</p>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                            {[
-                                { val: false, label: 'Para mí' },
-                                { val: true, label: 'Para regalar' },
-                            ].map(opt => (
-                                <button
-                                    key={String(opt.val)}
-                                    type="button"
-                                    onClick={() => setIsGift(opt.val)}
-                                    style={{
-                                        padding: '14px',
-                                        border: isGift === opt.val ? '2px solid #000' : '1px solid #e0e0e0',
-                                        backgroundColor: isGift === opt.val ? '#000' : '#fff',
-                                        color: isGift === opt.val ? '#fff' : '#666',
-                                        fontWeight: 900,
-                                        fontSize: '11px',
-                                        letterSpacing: '0.15em',
-                                        textTransform: 'uppercase',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.15s',
-                                    }}
-                                >
-                                    {opt.label}
-                                </button>
-                            ))}
+                    {/* Datos de contacto (necesarios para procesar el pago) */}
+                    <div style={{ borderTop: '1px solid #eee', paddingTop: '10px', marginBottom: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <span style={labelStyle}>Tus datos de contacto</span>
+                        <div style={{ position: 'relative' }}>
+                            <Mail size={14} style={{ position: 'absolute', top: '50%', left: '12px', transform: 'translateY(-50%)', color: '#999' }} />
+                            <input required type="email" name="email" autoComplete="email" placeholder="Tu email" value={buyerEmail}
+                                onChange={e => setBuyerEmail(e.target.value)} style={{ ...fieldStyle, paddingLeft: '36px' }} />
+                        </div>
+                        <div style={{ position: 'relative' }}>
+                            <Phone size={14} style={{ position: 'absolute', top: '50%', left: '12px', transform: 'translateY(-50%)', color: '#999' }} />
+                            <input required type="tel" name="tel" autoComplete="tel" placeholder="Tu teléfono" value={buyerPhone}
+                                onChange={e => setBuyerPhone(e.target.value)} style={{ ...fieldStyle, paddingLeft: '36px' }} />
                         </div>
                     </div>
 
-                    {/* SECCIÓN: Datos del destinatario (si es regalo) */}
-                    {isGift && (
-                        <div style={{ padding: '24px', border: '1px solid #e0e0e0', backgroundColor: '#fafafa', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <p style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '0.4em', textTransform: 'uppercase', color: '#999', marginBottom: '4px' }}>Datos del destinatario</p>
-
-                            <div style={{ position: 'relative' }}>
-                                <div style={iconStyle}><User size={16} /></div>
-                                <input required type="text" placeholder="NOMBRE DEL DESTINATARIO *" value={recipientName}
-                                    onChange={e => setRecipientName(e.target.value)} style={inputStyle} />
-                            </div>
-
-                            <div style={{ position: 'relative' }}>
-                                <div style={iconStyle}><Phone size={16} /></div>
-                                <input type="text" placeholder="+5493413001234 (PARA WHATSAPP)" value={recipientPhone}
-                                    onChange={e => setRecipientPhone(e.target.value)} style={inputStyle} />
-                            </div>
-
-                            <div style={{ position: 'relative' }}>
-                                <div style={iconStyle}><Mail size={16} /></div>
-                                <input type="email" placeholder="EMAIL DEL DESTINATARIO (OPCIONAL)" value={recipientEmail}
-                                    onChange={e => setRecipientEmail(e.target.value)} style={inputStyle} />
-                            </div>
-
-                            <div style={{ position: 'relative' }}>
-                                <div style={{ ...iconStyle, top: '12px', bottom: 'auto' }}><MessageSquare size={16} /></div>
-                                <textarea
-                                    placeholder="MENSAJE PERSONAL (OPCIONAL)"
-                                    value={message}
-                                    onChange={e => setMessage(e.target.value)}
-                                    rows={3}
-                                    style={{ ...inputStyle, paddingTop: '12px', resize: 'none', paddingLeft: '48px' }}
-                                />
-                            </div>
-                        </div>
-                    )}
-
-                    {/* SECCIÓN: Tus datos */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <p style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '0.4em', textTransform: 'uppercase', color: '#999' }}>Tus datos de contacto</p>
-
-                        <div style={{ position: 'relative' }}>
-                            <div style={iconStyle}><User size={16} /></div>
-                            <input required type="text" placeholder="TU NOMBRE COMPLETO *" value={buyerName}
-                                onChange={e => setBuyerName(e.target.value)} style={inputStyle} />
-                        </div>
-
-                        <div style={{ position: 'relative' }}>
-                            <div style={iconStyle}><Mail size={16} /></div>
-                            <input required type="email" placeholder="TU EMAIL *" value={buyerEmail}
-                                onChange={e => setBuyerEmail(e.target.value)} style={inputStyle} />
-                        </div>
-
-                        <div style={{ position: 'relative' }}>
-                            <div style={iconStyle}><Phone size={16} /></div>
-                            <input required type="tel" placeholder="TU TELÉFONO *" value={buyerPhone}
-                                onChange={e => setBuyerPhone(e.target.value)} style={inputStyle} />
-                        </div>
-                    </div>
-
-                    {/* Error */}
                     {error && (
-                        <p style={{ backgroundColor: '#fff0f0', border: '1px solid #fca5a5', padding: '12px 16px', fontSize: '11px', fontWeight: 700, color: '#c00', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                        <p style={{ backgroundColor: '#fff0f0', border: '1px solid #fca5a5', padding: '12px 16px', fontSize: '11px', fontWeight: 700, color: '#c00', marginBottom: '16px' }}>
                             {error}
                         </p>
                     )}
 
-                    {/* Resumen + Botón */}
-                    <div style={{ borderTop: '1px solid #e5e5e5', paddingTop: '24px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                            <div>
-                                <p style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '0.4em', textTransform: 'uppercase', color: '#999' }}>Total a pagar</p>
-                                <p style={{ fontSize: '32px', fontWeight: 900, color: '#000', lineHeight: 1 }}>
-                                    ${effectiveAmount.toLocaleString('es-AR')}
-                                </p>
-                            </div>
-                            <div style={{ textAlign: 'right' }}>
-                                <p style={{ fontSize: '9px', color: '#999', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Envío</p>
-                                <p style={{ fontSize: '11px', fontWeight: 900, color: '#000' }}>Gratis</p>
-                            </div>
-                        </div>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        style={{
+                            width: '100%',
+                            backgroundColor: '#000',
+                            color: '#fff',
+                            border: 'none',
+                            padding: '13px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '10px',
+                            fontWeight: 900,
+                            fontSize: '12px',
+                            letterSpacing: '0.15em',
+                            textTransform: 'uppercase',
+                            cursor: loading ? 'not-allowed' : 'pointer',
+                            opacity: loading ? 0.6 : 1,
+                        }}
+                    >
+                        {loading ? <Loader size={18} className="animate-spin" /> : 'Agregar al Carrito'}
+                    </button>
 
-                        <button
-                            type="submit"
-                            disabled={loading || effectiveAmount < 800}
-                            style={{
-                                width: '100%',
-                                backgroundColor: effectiveAmount < 800 ? '#ccc' : '#000',
-                                color: '#fff',
-                                border: 'none',
-                                padding: '18px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '10px',
-                                fontWeight: 900,
-                                fontSize: '12px',
-                                letterSpacing: '0.2em',
-                                textTransform: 'uppercase',
-                                cursor: loading || effectiveAmount < 800 ? 'not-allowed' : 'pointer',
-                            }}
-                        >
-                            {loading ? (
-                                <Loader size={18} className="animate-spin" />
-                            ) : (
-                                <>Pagar con Mercado Pago <ChevronRight size={18} strokeWidth={3} /></>
-                            )}
-                        </button>
-
-                        <p style={{ textAlign: 'center', fontSize: '9px', color: '#999', marginTop: '12px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-                            Pago seguro · La gift card se envía por WhatsApp tras la confirmación
-                        </p>
-                    </div>
-                </form>
-
-                <div style={{ marginTop: '64px', textAlign: 'center', opacity: 0.4 }}>
-                    <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.4em', color: '#666', textTransform: 'uppercase' }}>Multibrand — Rosario, Santa Fe, Argentina</p>
+                    <p style={{ textAlign: 'center', fontSize: '9px', color: '#999', marginTop: '8px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                        Pago seguro con Mercado Pago · Se envía por WhatsApp tras la confirmación
+                    </p>
                 </div>
-            </div>
+            </form>
         </div>
     );
 };

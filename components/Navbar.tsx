@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { ShoppingBag, Search, Menu, User, X, Heart, Settings, Gift, Coffee } from 'lucide-react';
+import { ShoppingBag, Search, Menu, User, X, Heart, Settings, Gift, Coffee, Tag } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { GIFT_CARDS_ENABLED } from '../lib/featureFlags';
@@ -44,6 +44,14 @@ const Navbar: React.FC<NavbarProps> = ({
     if (!query || !products || products.length === 0) return [];
     const terms = query.split(/\s+/);
     return products
+      .filter((p: any) => {
+        // Mismo criterio de "producto visible" que la grilla principal (Store.tsx):
+        // no mostrar en el buscador lo que no se muestra en la tienda.
+        if (p.is_published === false || p.is_active === false) return false;
+        const totalStock = (p.variants || []).reduce((sum: number, v: any) => sum + (v.stock || 0), 0);
+        if (!p.variants || p.variants.length === 0 || totalStock === 0) return false;
+        return true;
+      })
       .filter((p: any) => terms.every(term =>
         p.name?.toLowerCase().includes(term) ||
         p.brand?.toLowerCase().includes(term) ||
@@ -56,10 +64,28 @@ const Navbar: React.FC<NavbarProps> = ({
   const navigate = useNavigate();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
+  const navRef = useRef<HTMLElement>(null);
+
+  // El logo del header es una imagen a ancho completo (altura variable según el
+  // ancho de pantalla), así que medimos su altura real y la exponemos como
+  // variable CSS para que el contenido de abajo (ej. el Hero) no quede tapado
+  // por el nav fijo.
+  useEffect(() => {
+    const el = navRef.current;
+    if (!el) return;
+    const updateHeight = () => {
+      document.documentElement.style.setProperty('--navbar-height', `${el.offsetHeight}px`);
+    };
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <>
     <nav
+      ref={navRef}
       className="fixed top-0 left-0 right-0 z-[100] border-b border-white/10 shadow-sm"
       style={{ backgroundColor: '#000000', opacity: 1 }}
     >
@@ -67,18 +93,42 @@ const Navbar: React.FC<NavbarProps> = ({
       <div className="relative w-full">
         <div
           onClick={() => navigate('/')}
-          className="cursor-pointer"
+          className="cursor-pointer flex items-center justify-between gap-1.5 md:gap-3 px-3 md:px-8 pt-3 md:pt-6 pb-12 md:pb-20"
           style={{ WebkitTapHighlightColor: 'transparent' }}
         >
-          <img
-            src="/banners/multibrandmembrete.png"
-            alt="Multibrand"
-            className="w-full h-auto block"
-          />
+          <div className="flex flex-col leading-none flex-shrink-0">
+            <span className="block w-2 md:w-4 h-[2px] bg-white mb-1 md:mb-2" />
+            <span
+              className="text-white font-black uppercase text-[13px] md:text-3xl leading-[0.95] tracking-tight whitespace-nowrap"
+              style={{ fontFamily: "'Arial Black', 'Helvetica Neue', Arial, sans-serif" }}
+            >
+              MULTIBRAND<br />STORE
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 md:gap-5 flex-shrink-0">
+            {[
+              { name: 'PERRAMUS', src: '/banners/PERRAMUS MULTIBRAND.png', extraClass: '' },
+              { name: 'HUNTER', src: '/banners/HUNTER MULTIBRAND.png', extraClass: '' },
+              { name: 'NAUTICA', src: '/banners/NAUTICA MULTIBRAND (1).png', extraClass: 'bg-white px-1' },
+            ].map((b) => (
+              <img
+                key={b.name}
+                src={b.src}
+                alt={b.name}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/?marca=${encodeURIComponent(b.name)}#new`);
+                  const el = document.getElementById('new');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className={`h-7 md:h-16 w-auto block cursor-pointer hover:opacity-80 transition-opacity ${b.extraClass}`}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Navigation Links (Desktop) and Actions, superpuestos sobre la imagen */}
-        <div className="absolute bottom-0 left-0 right-0 flex items-center w-full px-4 md:px-8 pb-3 md:pb-4">
+        <div className="absolute bottom-0 left-0 right-0 flex items-center w-full px-4 md:px-8 pb-3 md:pb-4 gap-4 lg:gap-8">
 
           {/* LEFT - Mobile hamburger / Desktop spacer */}
           <div className="flex-1 flex items-center">
@@ -122,19 +172,20 @@ const Navbar: React.FC<NavbarProps> = ({
               ACCESORIOS
             </button>
             <button
-              className="hover:text-white transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-white/20 pb-0.5"
-              style={{ color: '#ffffff' }}
-              onClick={() => navigate('/marcas')}
-            >
-              MARCAS
-            </button>
-            <button
               className="hover:text-white transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-white/20 pb-0.5 flex items-center gap-1"
               style={{ color: '#ffffff' }}
               onClick={() => navigate('/?categoria=CAFETERIA#new')}
             >
               <Coffee size={12} />
               SPECIALITY COFFEE
+            </button>
+            <button
+              className="hover:text-white transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-white/20 pb-0.5 flex items-center gap-1"
+              style={{ color: '#ffffff' }}
+              onClick={() => navigate('/sale')}
+            >
+              <Tag size={12} />
+              SALE | LAST CHANCE
             </button>
             {GIFT_CARDS_ENABLED && (
               <button
@@ -299,7 +350,6 @@ const Navbar: React.FC<NavbarProps> = ({
             { label: 'HOMBRE', action: () => navigate('/?genero=Hombre#new') },
             { label: 'UNISEX', action: () => navigate('/?genero=Unisex#new') },
             { label: 'ACCESORIOS', action: () => navigate('/?categoria=ACCESORIOS#new') },
-            { label: 'MARCAS', action: () => navigate('/marcas') },
           ].map((item, index) => (
             <button 
               key={index} 
@@ -318,6 +368,17 @@ const Navbar: React.FC<NavbarProps> = ({
             <div className="flex items-center gap-3">
               <Coffee size={18} className="text-black" />
               <span className="text-lg font-black tracking-[0.1em] text-black uppercase">SPECIALITY COFFEE</span>
+            </div>
+            <div className="w-1.5 h-1.5 bg-black scale-0 group-hover:scale-100 transition-transform" />
+          </button>
+
+          <button
+            onClick={() => { setIsMobileMenuOpen(false); navigate('/sale'); }}
+            className="group flex items-center justify-between w-full py-5 text-left border-b border-black/5 transition-all hover:pl-2"
+          >
+            <div className="flex items-center gap-3">
+              <Tag size={18} className="text-black" />
+              <span className="text-lg font-black tracking-[0.1em] text-black uppercase">SALE | LAST CHANCE</span>
             </div>
             <div className="w-1.5 h-1.5 bg-black scale-0 group-hover:scale-100 transition-transform" />
           </button>

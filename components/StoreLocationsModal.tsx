@@ -41,7 +41,7 @@ const PICKUP_LOCATIONS = [
     },
     {
         id: 'monacle_tienda',
-        name: 'MONACLE TIENDA',
+        name: 'MONACLE TIENDA HUNTER',
         address: 'Pte Roca 871, Rosario',
         schedule: 'Lunes a Sábados de 10:00 a 20:00',
         embedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3348.6!2d-60.6393!3d-32.9483!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95b65348c0f4b1c3%3A0x1!2sPte+Roca+871%2C+Rosario%2C+Santa+Fe!5e0!3m2!1ses!2sar!4v1700000006',

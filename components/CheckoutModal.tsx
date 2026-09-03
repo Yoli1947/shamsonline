@@ -166,7 +166,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
         },
         {
             id: 'monacle_tienda',
-            name: 'MONACLE TIENDA',
+            name: 'MONACLE TIENDA HUNTER',
             address: 'Pte Roca 871, Rosario',
             mapUrl: 'https://www.google.com/maps/search/?api=1&query=Pte+Roca+871,+Rosario,+Santa+Fe',
             schedule: 'Lunes a Sábados de 10:00 a 20:00'

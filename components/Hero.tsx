@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const slides = [
   {
-    image: "/banners/perramus-banner.jpg",
+    image: "/banners/sale 40.jpg",
     title: "MULTIBRAND / PERRAMUS",
     subtitle: "WINTER SALE",
     description: "Calidad y diseño de vanguardia. Descubrí la Winter Sale de Perramus en Multibrand.",
     objectPosition: "center",
     letterbox: true,
-    split: { overlaySrc: "/banners/perramus-sale.png" },
-    hideOverlayText: true,
-    grayscale: true
+    split: { overlaySrc: "/banners/perramus-sale.png", videoSrc: "/banners/videosale.mp4", width: '50%', side: 'right' },
+    hideOverlayText: true
   },
   {
     image: "/banners/hunter-22.webp",
@@ -38,6 +38,7 @@ const slides = [
 
 const Hero: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const navigate = useNavigate();
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -49,19 +50,25 @@ const Hero: React.FC = () => {
 
   useEffect(() => {
     const isMobile = window.innerWidth < 768;
-    const timer = setInterval(nextSlide, isMobile ? 2500 : 4000);
-    return () => clearInterval(timer);
-  }, [nextSlide]);
+    // El slide con video necesita más tiempo: el archivo tarda unos segundos en
+    // empezar a reproducirse, y con la duración normal (4s) rotaba antes de que
+    // se llegara a ver.
+    const hasVideo = !!(slides[currentSlide] as any)?.split?.videoSrc;
+    const duration = hasVideo ? (isMobile ? 7000 : 10000) : (isMobile ? 2500 : 4000);
+    const timer = setTimeout(nextSlide, duration);
+    return () => clearTimeout(timer);
+  }, [nextSlide, currentSlide]);
 
   const scrollToCollection = () => {
-    const section = document.getElementById('new');
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth' });
-    }
+    // El Hero solo se muestra en la home "pelada" (sin filtro activo), donde
+    // la grilla de productos (#new) no existe todavía — hay que navegar a la
+    // colección de la marca del slide actual, no solo scrollear.
+    const brand = slides[currentSlide].title.split(' / ')[1];
+    navigate(`/?marca=${encodeURIComponent(brand)}#new`);
   };
 
   return (
-    <div className="relative h-[90vh] md:h-[100vh] w-full flex flex-col items-center justify-center overflow-hidden pt-12 md:pt-0 group bg-black">
+    <div className="relative h-[calc(90vh-var(--navbar-height,220px))] md:h-[calc(100vh-var(--navbar-height,220px))] w-full flex flex-col items-center justify-center overflow-hidden pt-12 md:pt-0 group bg-black">
       
       {/* Slides */}
       {slides.map((slide, index) => (
@@ -77,50 +84,84 @@ const Hero: React.FC = () => {
                 <img
                   src={slide.image}
                   alt={slide.title}
-                  className="w-full h-full object-cover"
+                  className="h-full"
                   style={{
+                    position: (slide as any).split ? 'absolute' : undefined,
+                    top: 0,
+                    left: (slide as any).split && (slide as any).split.side !== 'right' ? undefined : 0,
+                    right: (slide as any).split && (slide as any).split.side === 'right' ? undefined : 0,
+                    width: (slide as any).split ? `calc(100% - ${(slide as any).split.width || '32.8%'})` : '100%',
+                    objectFit: 'cover',
                     objectPosition: slide.objectPosition,
                     filter: (slide as any).grayscale ? 'grayscale(1)' : undefined
                   }}
                 />
                 {(slide as any).split && (
                   <div
-                    className="absolute top-0 left-0 h-full flex items-center justify-center overflow-hidden"
-                    style={{ width: '32.8%', backgroundColor: '#3a0a0a' }}
+                    className={`absolute top-0 h-full flex items-center justify-center overflow-hidden ${(slide as any).split.side === 'right' ? 'right-0' : 'left-0'}`}
+                    style={{ width: (slide as any).split.width || '32.8%', backgroundColor: '#3a0a0a' }}
                   >
-                    <img
-                      src={(slide as any).split.overlaySrc}
-                      alt={`${slide.title} — Sale`}
-                      className="h-full w-auto"
-                    />
+                    {(slide as any).split.videoSrc ? (
+                      <video
+                        src={(slide as any).split.videoSrc}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        preload="auto"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <img
+                        src={(slide as any).split.overlaySrc}
+                        alt={`${slide.title} — Sale`}
+                        className="h-full w-auto"
+                      />
+                    )}
                   </div>
                 )}
                 {/* Texto y marca superpuestos sobre la imagen (lado de la foto, no sobre el panel izquierdo) */}
-                <div
-                  className="absolute inset-0 flex flex-col items-center justify-center gap-2 md:gap-4 text-center px-3 py-3"
-                  style={{ paddingLeft: '32.8%' }}
-                >
-                  {(slide as any).captionLogo ? (
-                    <img
-                      src={(slide as any).captionLogo}
-                      alt={slide.title}
-                      className="h-6 md:h-11 drop-shadow-lg"
-                    />
-                  ) : (
-                    <h2 className="font-serif font-bold text-xl sm:text-2xl md:text-6xl text-white tracking-tight drop-shadow-2xl">
-                      {slide.title.split(' / ')[1]}
-                    </h2>
-                  )}
-                  <p className="text-white text-[9px] md:text-sm tracking-[0.2em] uppercase font-light max-w-[220px] md:max-w-xl drop-shadow-2xl leading-relaxed">
-                    {slide.description}
-                  </p>
-                  <button
-                    onClick={scrollToCollection}
-                    className="mt-1 md:mt-3 bg-white text-black px-5 py-2.5 md:px-10 md:py-4 rounded-none font-bold text-[8px] md:text-xs tracking-[0.3em] md:tracking-[0.4em] hover:bg-black hover:text-white transition-all flex items-center gap-2 md:gap-3 shadow-2xl uppercase border border-white/20 group relative z-[70] cursor-pointer"
+                {!(slide as any).split && (
+                  <div
+                    className="absolute inset-0 flex flex-col items-center justify-center gap-2 md:gap-4 text-center px-3 py-3"
+                    style={{ paddingLeft: '32.8%' }}
                   >
-                    VER COLECCIÓN <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
-                  </button>
-                </div>
+                    {(slide as any).captionLogo ? (
+                      <img
+                        src={(slide as any).captionLogo}
+                        alt={slide.title}
+                        className="h-6 md:h-11 drop-shadow-lg"
+                      />
+                    ) : (
+                      <h2 className="font-serif font-bold text-xl sm:text-2xl md:text-6xl text-white tracking-tight drop-shadow-2xl">
+                        {slide.title.split(' / ')[1]}
+                      </h2>
+                    )}
+                    <p className="text-white text-[9px] md:text-sm tracking-[0.2em] uppercase font-light max-w-[220px] md:max-w-xl drop-shadow-2xl leading-relaxed">
+                      {slide.description}
+                    </p>
+                    <button
+                      onClick={scrollToCollection}
+                      className="mt-1 md:mt-3 bg-white text-black px-5 py-2.5 md:px-10 md:py-4 rounded-none font-bold text-[8px] md:text-xs tracking-[0.3em] md:tracking-[0.4em] ver-coleccion-btn transition-all flex items-center gap-2 md:gap-3 shadow-2xl uppercase border border-white/20 group relative z-[70] cursor-pointer"
+                    >
+                      VER COLECCIÓN <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
+                    </button>
+                  </div>
+                )}
+                {/* Para slides con split (imagen + video): solo el botón, abajo de la imagen */}
+                {(slide as any).split && (
+                  <div
+                    className={`absolute bottom-3 md:bottom-6 flex justify-center ${(slide as any).split.side === 'right' ? 'left-0' : 'right-0'}`}
+                    style={{ width: `calc(100% - ${(slide as any).split.width || '32.8%'})` }}
+                  >
+                    <button
+                      onClick={scrollToCollection}
+                      className="bg-white text-black px-5 py-2.5 md:px-10 md:py-4 rounded-none font-bold text-[8px] md:text-xs tracking-[0.3em] md:tracking-[0.4em] ver-coleccion-btn transition-all flex items-center gap-2 md:gap-3 shadow-2xl uppercase border border-white/20 group relative z-[70] cursor-pointer"
+                    >
+                      VER COLECCIÓN <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ) : (
@@ -181,7 +222,7 @@ const Hero: React.FC = () => {
           {/* Button */}
           <button
             onClick={scrollToCollection}
-            className="bg-white text-black px-12 py-4 md:px-16 md:py-5 rounded-none font-bold text-[11px] md:text-xs tracking-[0.5em] hover:bg-black hover:text-white transition-all flex items-center gap-4 mx-auto shadow-2xl uppercase border border-white/20 group relative z-[70] cursor-pointer"
+            className="bg-white text-black px-12 py-4 md:px-16 md:py-5 rounded-none font-bold text-[11px] md:text-xs tracking-[0.5em] ver-coleccion-btn transition-all flex items-center gap-4 mx-auto shadow-2xl uppercase border border-white/20 group relative z-[70] cursor-pointer"
           >
             VER COLECCIÓN <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
           </button>

@@ -80,19 +80,19 @@ const NewsletterModal: React.FC = () => {
                             <X size={16} />
                         </button>
 
-                        {/* Visual Side - imagen con overlay oscuro (intencional) */}
-                        <div style={{ width: '42%', position: 'relative', backgroundColor: '#111', flexShrink: 0 }} className="hidden md:block">
-                            <img
-                                src="/banners/trimarca.jpg"
-                                alt="Multibrand"
-                                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }}
-                            />
-                            <div style={{
-                                position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 20,
-                                padding: '28px 32px', background: 'linear-gradient(to top, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.75) 75%, transparent)'
-                            }}>
-                                <span style={{ color: '#fff', fontSize: '9px', fontWeight: 900, letterSpacing: '0.4em', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>CLUB MULTIBRAND</span>
-                                <h2 style={{ color: '#fff', fontSize: '30px', fontWeight: 900, letterSpacing: '-0.02em', textTransform: 'uppercase', fontStyle: 'italic', lineHeight: 0.95 }}>
+                        {/* Visual Side - las 3 marcas completas arriba (chicas), texto en bloque aparte abajo */}
+                        <div style={{ width: '42%', position: 'relative', backgroundColor: '#ffffff', flexShrink: 0, display: 'flex', flexDirection: 'column' }} className="hidden md:block">
+                            <div style={{ padding: '28px 28px 12px', display: 'flex', justifyContent: 'center' }}>
+                                <img
+                                    src="/banners/trimarca.jpg"
+                                    alt="Multibrand"
+                                    style={{ width: '70%', height: 'auto', display: 'block' }}
+                                />
+                            </div>
+                            <div style={{ flex: 1 }} />
+                            <div style={{ backgroundColor: 'transparent', padding: '20px 24px', flexShrink: 0 }}>
+                                <span style={{ color: '#000', fontSize: '9px', fontWeight: 900, letterSpacing: '0.4em', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>CLUB MULTIBRAND</span>
+                                <h2 style={{ color: '#000', fontSize: '26px', fontWeight: 900, letterSpacing: '-0.02em', textTransform: 'uppercase', fontStyle: 'italic', lineHeight: 0.95 }}>
                                     TRES MARCAS. <br /> UN SOLO CLUB.
                                 </h2>
                             </div>

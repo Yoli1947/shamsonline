@@ -77,7 +77,7 @@ const BrandPage: React.FC = () => {
                 onOpenAuth={() => {}}
             />
 
-            <main className="relative pt-4 px-4 md:px-12 max-w-screen-2xl mx-auto z-10">
+            <main className="relative px-4 md:px-12 max-w-screen-2xl mx-auto z-10" style={{ paddingTop: 'calc(var(--navbar-height, 220px) + 16px)' }}>
                 <header className="mb-8 text-center max-w-4xl mx-auto">
                     <span className="text-[var(--color-text-muted)] uppercase tracking-[0.8em] text-[10px] font-black mb-6 block animate-in fade-in slide-in-from-bottom-4 duration-1000">
                         CURATED SELECTION
