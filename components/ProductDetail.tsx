@@ -158,16 +158,24 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
         setCheckingStock(true);
         try {
             // Verificación final en vivo justo antes de agregar, por si el talle se vendió
-            // en los segundos desde que se abrió la ficha.
+            // en los segundos desde que se abrió la ficha. Tiene un límite de tiempo corto:
+            // si la red anda lenta no queremos trabar el clic, porque igual hay un chequeo
+            // definitivo de nuevo al crear el pedido (assertStockAvailable en lib/orders.js).
             const variant = effectiveVariants.find(v => v.size === selectedSize && (!selectedColor || v.color === selectedColor));
             if (variant?.id) {
-                let { data, error } = await supabase.from('product_variants').select('stock, has_defect').eq('id', variant.id).maybeSingle();
-                if (error) {
-                    // La columna has_defect puede no existir todavía: reintentamos solo por stock.
-                    ({ data, error } = await supabase.from('product_variants').select('stock').eq('id', variant.id).maybeSingle());
-                }
-                // Si la consulta falla igual (ej. sin conexión), no bloqueamos la compra acá:
-                // el chequeo definitivo se hace de nuevo al crear el pedido.
+                const checkStock = async () => {
+                    let { data, error } = await supabase.from('product_variants').select('stock, has_defect').eq('id', variant.id).maybeSingle();
+                    if (error) {
+                        // La columna has_defect puede no existir todavía: reintentamos solo por stock.
+                        ({ data, error } = await supabase.from('product_variants').select('stock').eq('id', variant.id).maybeSingle());
+                    }
+                    return { data, error };
+                };
+                const timeout = new Promise<{ data: null; error: null }>(resolve =>
+                    setTimeout(() => resolve({ data: null, error: null }), 1500)
+                );
+                const { data, error } = await Promise.race([checkStock(), timeout]);
+
                 if (!error && data && (data.has_defect || (data.stock || 0) <= 0)) {
                     setAddError('Este talle ya no tiene stock disponible.');
                     setLiveVariants(prev => (prev || effectiveVariants).map(v => v.id === variant.id ? { ...v, stock: 0 } : v));

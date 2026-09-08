@@ -140,8 +140,28 @@ const SaleLastChance: React.FC = () => {
                     <span className="text-[var(--color-text-muted)] uppercase tracking-[0.8em] text-[10px] font-black mb-6 block animate-in fade-in slide-in-from-bottom-4 duration-1000">
                         HASTA 50% OFF
                     </span>
-                    <h1 className="text-4xl sm:text-5xl md:text-8xl font-black tracking-tighter text-[var(--color-text)] mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 uppercase italic leading-tight">
-                        SALE <span className="text-[var(--color-text-muted)]">| LAST CHANCE</span>
+                    <h1 className="mb-8 flex justify-center items-stretch gap-3 flex-wrap animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
+                        <img
+                            src="/banners/perramus-sale.png"
+                            alt="Sale | Last Chance — Perramus Winter Sale"
+                            className="max-h-40 sm:max-h-56 w-auto"
+                        />
+                        <div
+                            className="max-h-40 sm:max-h-56 aspect-[466/507] bg-[#E2001A] text-white flex flex-col justify-center px-5 sm:px-7 font-black uppercase leading-[1.05] text-lg sm:text-2xl md:text-3xl"
+                        >
+                            <span>Hunter</span>
+                            <span>Sale</span>
+                            <span>20% off</span>
+                            <span>Selected</span>
+                            <span>items</span>
+                        </div>
+                        <div
+                            className="max-h-40 sm:max-h-56 aspect-[466/507] bg-[#2557EC] text-white flex flex-col items-center justify-center text-center px-4 font-black uppercase"
+                        >
+                            <span className="text-sm sm:text-lg tracking-widest leading-none mb-1">Nautica</span>
+                            <span className="text-3xl sm:text-5xl leading-none mb-2">Sale</span>
+                            <span className="text-xs sm:text-sm tracking-[0.2em] leading-tight">30% off<br />selected items</span>
+                        </div>
                     </h1>
                     <div className="w-24 h-[1px] bg-black mx-auto mb-12" />
                 </header>

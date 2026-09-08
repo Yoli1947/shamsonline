@@ -697,6 +697,7 @@ const Store: React.FC = () => {
                             province: formData.province,
                             postalCode: formData.postalCode,
                         },
+                        items: orderItems.map(i => ({ price: i.price, quantity: i.quantity })),
                     }),
                 }).catch(e => console.warn('correo-import error (no crítico):', e));
             }
