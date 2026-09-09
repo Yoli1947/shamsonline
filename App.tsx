@@ -7,7 +7,6 @@ import { SettingsProvider } from './context/SettingsContext';
 // Carga inmediata: Store principal y widgets siempre visibles
 import Store from './Store';
 import WhatsAppButton from './components/WhatsAppButton';
-import InstagramButton from './components/InstagramButton';
 import BackToTopButton from './components/BackToTopButton';
 
 // Carga diferida: admin y páginas secundarias (solo se descargan cuando se navega a ellas)
@@ -62,7 +61,6 @@ const PublicFloatingWidgets = () => {
   return (
     <>
       <WhatsAppButton />
-      <InstagramButton />
       <BackToTopButton />
     </>
   );
