@@ -1866,9 +1866,9 @@ const Store: React.FC = () => {
                         <div>
                             <h5 className="text-[11px] font-semibold tracking-[0.5em] text-[#999] mb-6 uppercase">Contacto</h5>
                             <div className="space-y-5">
-                                <a href="mailto:admteruzyolanda@gmail.com" className="flex items-center gap-4 group">
-                                    <Mail size={16} strokeWidth={1.5} className="text-[var(--color-text-muted)] group-hover:text-black transition-colors" />
-                                    <span className="text-[10px] font-medium tracking-[0.2em] text-[var(--color-text-muted)] group-hover:text-[var(--color-text)] transition-colors uppercase">admteruzyolanda@gmail.com</span>
+                                <a href="mailto:admteruzyolanda@gmail.com" className="flex items-start gap-4 group">
+                                    <Mail size={16} strokeWidth={1.5} className="text-[var(--color-text-muted)] group-hover:text-black transition-colors flex-shrink-0 mt-0.5" />
+                                    <span className="text-[10px] font-medium tracking-[0.2em] text-[var(--color-text-muted)] group-hover:text-[var(--color-text)] transition-colors uppercase break-all">admteruzyolanda@gmail.com</span>
                                 </a>
                                 <a href="https://wa.me/5493412175258" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group">
                                     <Phone size={16} strokeWidth={1.5} className="text-[var(--color-text-muted)] group-hover:text-[#25D366] transition-colors" />

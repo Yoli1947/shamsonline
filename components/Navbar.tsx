@@ -86,8 +86,8 @@ const Navbar: React.FC<NavbarProps> = ({
     <>
     <nav
       ref={navRef}
-      className="fixed top-0 left-0 right-0 z-[100] border-b border-white/10 shadow-sm"
-      style={{ backgroundColor: '#000000', opacity: 1 }}
+      className="fixed top-0 left-0 right-0 z-[100] border-b border-black/10 shadow-sm"
+      style={{ backgroundColor: '#ffffff', opacity: 1 }}
     >
       {/* Logo de fondo, con los links superpuestos abajo */}
       <div className="relative w-full">
@@ -97,36 +97,36 @@ const Navbar: React.FC<NavbarProps> = ({
           style={{ WebkitTapHighlightColor: 'transparent' }}
         >
           <div className="flex flex-col leading-none flex-shrink-0">
-            <span className="block w-2 md:w-4 h-[2px] bg-white mb-1 md:mb-2" />
+            <span className="block w-2 md:w-4 h-[2px] bg-black mb-1 md:mb-2" />
             <span
-              className="text-white font-black uppercase text-[13px] md:text-3xl leading-[0.95] tracking-tight whitespace-nowrap"
+              className="text-black font-black uppercase text-[13px] md:text-3xl leading-[0.95] tracking-tight whitespace-nowrap"
               style={{ fontFamily: "'Arial Black', 'Helvetica Neue', Arial, sans-serif" }}
             >
               MULTIBRAND<br />STORE
             </span>
-            <span className="flex items-center gap-1 mt-1 md:mt-1.5 text-white/60 uppercase text-[8px] md:text-[11px] font-bold tracking-[0.15em] whitespace-nowrap">
+            <span className="flex items-center gap-1 mt-1 md:mt-1.5 text-black/60 uppercase text-[8px] md:text-[11px] font-bold tracking-[0.15em] whitespace-nowrap">
               <MapPin size={10} className="md:w-3 md:h-3 flex-shrink-0" />
               Rosario
             </span>
           </div>
-          <div className="flex items-center gap-1.5 md:gap-5 flex-shrink-0">
+          <div className="flex items-center gap-1.5 md:gap-3 flex-shrink-0">
             {[
-              { name: 'PERRAMUS', src: '/banners/PERRAMUS MULTIBRAND.png', extraClass: '' },
-              { name: 'HUNTER', src: '/banners/HUNTER MULTIBRAND.png', extraClass: '' },
-              { name: 'NAUTICA', src: '/banners/NAUTICA MULTIBRAND (1).png', extraClass: 'bg-white px-1' },
+              { name: 'PERRAMUS', src: '/banners/PERRAMUS MULTIBRAND.png', framed: true },
+              { name: 'HUNTER', src: '/banners/HUNTER MULTIBRAND.png', framed: false },
+              { name: 'NAUTICA', src: '/banners/NAUTICA MULTIBRAND (1).png', framed: true },
             ].map((b) => (
-              <img
+              <div
                 key={b.name}
-                src={b.src}
-                alt={b.name}
                 onClick={(e) => {
                   e.stopPropagation();
                   navigate(`/?marca=${encodeURIComponent(b.name)}#new`);
                   const el = document.getElementById('new');
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className={`h-7 md:h-16 w-auto block cursor-pointer hover:opacity-80 transition-opacity ${b.extraClass}`}
-              />
+                className={`h-7 md:h-16 flex items-center bg-white px-1.5 md:px-3 cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0 ${b.framed ? 'border-2 border-black' : ''}`}
+              >
+                <img src={b.src} alt={b.name} className="h-full w-auto object-contain" />
+              </div>
             ))}
           </div>
         </div>
@@ -138,7 +138,7 @@ const Navbar: React.FC<NavbarProps> = ({
           <div className="flex-1 flex items-center">
             <button
               className="md:hidden hover:text-white transition-colors"
-              style={{ color: '#ffffff' }}
+              style={{ color: '#000000' }}
               onClick={() => setIsMobileMenuOpen(true)}
             >
               <Menu size={22} />
@@ -148,44 +148,44 @@ const Navbar: React.FC<NavbarProps> = ({
           {/* Desktop Links (Centered) */}
           <div className="hidden md:flex items-center gap-6 lg:gap-10">
             <button
-              className="hover:text-white transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-white/20 pb-0.5"
-              style={{ color: '#ffffff' }}
+              className="hover:text-white transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/20 pb-0.5"
+              style={{ color: '#000000' }}
               onClick={() => navigate('/?genero=Mujer#new')}
             >
               MUJER
             </button>
             <button
-              className="hover:text-white transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-white/20 pb-0.5"
-              style={{ color: '#ffffff' }}
+              className="hover:text-white transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/20 pb-0.5"
+              style={{ color: '#000000' }}
               onClick={() => navigate('/?genero=Hombre#new')}
             >
               HOMBRE
             </button>
             <button
-              className="hover:text-white transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-white/20 pb-0.5"
-              style={{ color: '#ffffff' }}
+              className="hover:text-white transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/20 pb-0.5"
+              style={{ color: '#000000' }}
               onClick={() => navigate('/?genero=Unisex#new')}
             >
               UNISEX
             </button>
             <button
-              className="hover:text-white transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-white/20 pb-0.5"
-              style={{ color: '#ffffff' }}
+              className="hover:text-white transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/20 pb-0.5"
+              style={{ color: '#000000' }}
               onClick={() => navigate('/?categoria=ACCESORIOS#new')}
             >
               ACCESORIOS
             </button>
             <button
-              className="hover:text-white transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-white/20 pb-0.5 flex items-center gap-1"
-              style={{ color: '#ffffff' }}
+              className="hover:text-white transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/20 pb-0.5 flex items-center gap-1"
+              style={{ color: '#000000' }}
               onClick={() => navigate('/?categoria=CAFETERIA#new')}
             >
               <Coffee size={12} />
               SPECIALITY COFFEE
             </button>
             <button
-              className="hover:text-white transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-white/20 pb-0.5 flex items-center gap-1"
-              style={{ color: '#ffffff' }}
+              className="hover:text-white transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/20 pb-0.5 flex items-center gap-1"
+              style={{ color: '#000000' }}
               onClick={() => navigate('/sale')}
             >
               <Tag size={12} />
@@ -193,8 +193,8 @@ const Navbar: React.FC<NavbarProps> = ({
             </button>
             {GIFT_CARDS_ENABLED && (
               <button
-                className="hover:text-white transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-white/20 pb-0.5 flex items-center gap-1"
-                style={{ color: '#ffffff' }}
+                className="hover:text-white transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/20 pb-0.5 flex items-center gap-1"
+                style={{ color: '#000000' }}
                 onClick={() => navigate('/gift-cards')}
               >
                 <Gift size={12} />
@@ -203,7 +203,7 @@ const Navbar: React.FC<NavbarProps> = ({
             )}
             {isAdmin && (
               <button
-                className="flex items-center gap-2 hover:text-white transition-all font-normal uppercase text-[10px] lg:text-[12px] border-l border-white/20 pl-8 ml-4 tracking-[0.12em]"
+                className="flex items-center gap-2 hover:text-white transition-all font-normal uppercase text-[10px] lg:text-[12px] border-l border-black/20 pl-8 ml-4 tracking-[0.12em]"
                 style={{ color: '#999999' }}
                 onClick={() => navigate('/admin/login')}
               >
@@ -234,15 +234,15 @@ const Navbar: React.FC<NavbarProps> = ({
                     }
                   }}
                   placeholder="BUSCAR..."
-                  className="bg-transparent border-b border-white/30 text-[13px] uppercase font-bold tracking-widest focus:outline-none w-full pb-1"
-                  style={{ color: '#ffffff' }}
+                  className="bg-transparent border-b border-black/30 text-[13px] uppercase font-bold tracking-widest focus:outline-none w-full pb-1"
+                  style={{ color: '#000000' }}
                   autoFocus={isSearchOpen}
                 />
               </div>
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 className={`hover:text-white transition-colors p-2 ${isSearchOpen ? 'text-white' : ''}`}
-                style={{ color: '#ffffff' }}
+                style={{ color: '#000000' }}
               >
                 <Search size={24} />
               </button>
@@ -293,7 +293,7 @@ const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={onOpenAuth}
               className="hover:text-white transition-colors"
-              style={{ color: '#ffffff' }}
+              style={{ color: '#000000' }}
               title={customerName ? `Hola, ${customerName}` : 'Cuenta'}
             >
               <User size={20} />
@@ -303,11 +303,11 @@ const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={onOpenFavorites}
               className="relative hover:text-red-500 transition-colors p-2"
-              style={{ color: '#ffffff' }}
+              style={{ color: '#000000' }}
             >
               <Heart size={20} className={favoritesCount > 0 ? 'fill-red-500 text-red-500' : ''} />
               {favoritesCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-white text-black text-[8px] font-black h-4 w-4 flex items-center justify-center rounded-none font-sans">
+                <span className="absolute -top-1 -right-1 bg-black text-white text-[8px] font-black h-4 w-4 flex items-center justify-center rounded-none font-sans">
                   {favoritesCount}
                 </span>
               )}
@@ -317,11 +317,11 @@ const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={onOpenCart}
               className="relative hover:text-white transition-colors p-2"
-              style={{ color: '#ffffff' }}
+              style={{ color: '#000000' }}
             >
               <ShoppingBag size={20} />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-white text-black text-[8px] font-black h-4 w-4 flex items-center justify-center rounded-none font-sans">
+                <span className="absolute -top-1 -right-1 bg-black text-white text-[8px] font-black h-4 w-4 flex items-center justify-center rounded-none font-sans">
                   {cartCount}
                 </span>
               )}

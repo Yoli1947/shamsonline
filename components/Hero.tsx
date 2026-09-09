@@ -79,7 +79,7 @@ const Hero: React.FC = () => {
           } ${(slide as any).bgColor || 'bg-black'}`}
         >
           {(slide as any).letterbox ? (
-            <div className={`absolute inset-0 flex flex-col items-center justify-center gap-6 md:gap-10 px-4 ${(slide as any).bgColor || 'bg-black'}`}>
+            <div className={`absolute inset-0 flex flex-col items-center justify-start md:justify-center pt-4 md:pt-0 gap-6 md:gap-10 px-4 ${(slide as any).bgColor || 'bg-black'}`}>
               <div className="relative w-full aspect-[4/3] md:aspect-[1920/636]">
                 <img
                   src={slide.image}
