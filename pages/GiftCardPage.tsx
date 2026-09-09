@@ -42,6 +42,8 @@ const GiftCardPage: React.FC = () => {
     const [draft] = useState(loadDraft);
 
     const [amount, setAmount] = useState(draft.amount ?? PRESET_AMOUNTS[1]);
+    const [isCustomAmount, setIsCustomAmount] = useState(draft.isCustomAmount ?? false);
+    const [customAmountInput, setCustomAmountInput] = useState(draft.customAmountInput ?? '');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showPreview, setShowPreview] = useState(false);
@@ -62,16 +64,20 @@ const GiftCardPage: React.FC = () => {
     useEffect(() => {
         try {
             localStorage.setItem(DRAFT_KEY, JSON.stringify({
-                amount, sendTiming, scheduledDate, senderName, recipientName,
+                amount, isCustomAmount, customAmountInput, sendTiming, scheduledDate, senderName, recipientName,
                 recipientEmail, message, buyerEmail, buyerPhone,
             }));
         } catch { }
-    }, [amount, sendTiming, scheduledDate, senderName, recipientName, recipientEmail, message, buyerEmail, buyerPhone]);
+    }, [amount, isCustomAmount, customAmountInput, sendTiming, scheduledDate, senderName, recipientName, recipientEmail, message, buyerEmail, buyerPhone]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
 
+        if (isCustomAmount && (!Number.isFinite(amount) || amount < MIN_AMOUNT || amount > MAX_AMOUNT)) {
+            setError(`El monto debe estar entre $${MIN_AMOUNT.toLocaleString('es-AR')} y $${MAX_AMOUNT.toLocaleString('es-AR')}.`);
+            return;
+        }
         if (!senderName.trim()) {
             setError('Ingresá tu nombre.');
             return;
@@ -283,12 +289,12 @@ const GiftCardPage: React.FC = () => {
                                 <button
                                     key={val}
                                     type="button"
-                                    onClick={(e) => { setAmount(val); e.currentTarget.blur(); }}
+                                    onClick={(e) => { setAmount(val); setIsCustomAmount(false); e.currentTarget.blur(); }}
                                     style={{
                                         padding: '8px 12px',
-                                        border: amount === val ? '2px solid #000' : '1px solid #e0e0e0',
-                                        backgroundColor: amount === val ? '#000' : '#fff',
-                                        color: amount === val ? '#fff' : '#000',
+                                        border: !isCustomAmount && amount === val ? '2px solid #000' : '1px solid #e0e0e0',
+                                        backgroundColor: !isCustomAmount && amount === val ? '#000' : '#fff',
+                                        color: !isCustomAmount && amount === val ? '#fff' : '#000',
                                         fontWeight: 700,
                                         fontSize: '12px',
                                         cursor: 'pointer',
@@ -297,7 +303,48 @@ const GiftCardPage: React.FC = () => {
                                     ${val.toLocaleString('es-AR')}
                                 </button>
                             ))}
+                            <button
+                                type="button"
+                                onClick={(e) => { setIsCustomAmount(true); e.currentTarget.blur(); }}
+                                style={{
+                                    padding: '8px 12px',
+                                    border: isCustomAmount ? '2px solid #000' : '1px solid #e0e0e0',
+                                    backgroundColor: isCustomAmount ? '#000' : '#fff',
+                                    color: isCustomAmount ? '#fff' : '#000',
+                                    fontWeight: 700,
+                                    fontSize: '12px',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                Otro monto
+                            </button>
                         </div>
+                        {isCustomAmount && (
+                            <div style={{ marginTop: '8px' }}>
+                                <input
+                                    type="number"
+                                    inputMode="numeric"
+                                    min={MIN_AMOUNT}
+                                    max={MAX_AMOUNT}
+                                    step={1000}
+                                    autoFocus
+                                    placeholder={`Entre $${MIN_AMOUNT.toLocaleString('es-AR')} y $${MAX_AMOUNT.toLocaleString('es-AR')}`}
+                                    value={customAmountInput}
+                                    onChange={(e) => {
+                                        const raw = e.target.value;
+                                        setCustomAmountInput(raw);
+                                        const parsed = Number(raw);
+                                        if (raw.trim() !== '' && Number.isFinite(parsed)) setAmount(parsed);
+                                    }}
+                                    style={fieldStyle}
+                                />
+                                {customAmountInput.trim() !== '' && (amount < MIN_AMOUNT || amount > MAX_AMOUNT) && (
+                                    <p style={{ fontSize: '10px', color: '#c0392b', marginTop: '4px' }}>
+                                        Tiene que estar entre ${MIN_AMOUNT.toLocaleString('es-AR')} y ${MAX_AMOUNT.toLocaleString('es-AR')}.
+                                    </p>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '10px' }}>

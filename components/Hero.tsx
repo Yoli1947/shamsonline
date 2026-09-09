@@ -27,8 +27,9 @@ const slides = [
     title: "MULTIBRAND / NAUTICA",
     subtitle: "AUTUMN / WINTER 2026",
     description: "Herencia náutica, mirada contemporánea.",
-    objectPosition: "right",
+    objectPosition: "80% center",
     letterbox: true,
+    mobileAspect: "3/4",
     captionLogo: "/banners/nautica-logo.png",
     hideOverlayText: true,
     bgColor: "bg-white",
@@ -80,7 +81,7 @@ const Hero: React.FC = () => {
         >
           {(slide as any).letterbox ? (
             <div className={`absolute inset-0 flex flex-col items-center justify-start md:justify-center pt-4 md:pt-0 gap-6 md:gap-10 px-4 ${(slide as any).bgColor || 'bg-black'}`}>
-              <div className="relative w-full aspect-[4/3] md:aspect-[1920/636]">
+              <div className={`relative w-full ${(slide as any).mobileAspect === '3/4' || (slide as any).split ? 'aspect-[3/4]' : 'aspect-[4/3]'} md:aspect-[1920/636]`}>
                 <img
                   src={slide.image}
                   alt={slide.title}
@@ -124,13 +125,12 @@ const Hero: React.FC = () => {
                 {!(slide as any).split && (
                   <div
                     className="absolute inset-0 flex flex-col items-center justify-center gap-2 md:gap-4 text-center px-3 py-3"
-                    style={{ paddingLeft: '32.8%' }}
                   >
                     {(slide as any).captionLogo ? (
                       <img
                         src={(slide as any).captionLogo}
                         alt={slide.title}
-                        className="h-6 md:h-11 drop-shadow-lg"
+                        className="h-9 md:h-14 drop-shadow-lg"
                       />
                     ) : (
                       <h2 className="font-serif font-bold text-xl sm:text-2xl md:text-6xl text-white tracking-tight drop-shadow-2xl">
@@ -142,23 +142,23 @@ const Hero: React.FC = () => {
                     </p>
                     <button
                       onClick={scrollToCollection}
-                      className="mt-1 md:mt-3 bg-white text-black px-5 py-2.5 md:px-10 md:py-4 rounded-none font-bold text-[8px] md:text-xs tracking-[0.3em] md:tracking-[0.4em] ver-coleccion-btn transition-all flex items-center gap-2 md:gap-3 shadow-2xl uppercase border border-white/20 group relative z-[70] cursor-pointer"
+                      className="mt-1 md:mt-3 bg-white text-black px-6 py-3 md:px-12 md:py-4 rounded-none font-bold text-[10px] md:text-xs tracking-[0.3em] md:tracking-[0.4em] ver-coleccion-btn transition-all flex items-center gap-2 md:gap-3 shadow-2xl uppercase border border-white/20 group relative z-[70] cursor-pointer"
                     >
-                      VER COLECCIÓN <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
+                      SHOP NOW <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
                     </button>
                   </div>
                 )}
                 {/* Para slides con split (imagen + video): solo el botón, abajo de la imagen */}
                 {(slide as any).split && (
                   <div
-                    className={`absolute bottom-3 md:bottom-6 flex justify-center ${(slide as any).split.side === 'right' ? 'left-0' : 'right-0'}`}
+                    className={`absolute top-[68%] md:top-auto md:bottom-6 flex justify-center ${(slide as any).split.side === 'right' ? 'left-0' : 'right-0'}`}
                     style={{ width: `calc(100% - ${(slide as any).split.width || '32.8%'})` }}
                   >
                     <button
                       onClick={scrollToCollection}
-                      className="bg-white text-black px-5 py-2.5 md:px-10 md:py-4 rounded-none font-bold text-[8px] md:text-xs tracking-[0.3em] md:tracking-[0.4em] ver-coleccion-btn transition-all flex items-center gap-2 md:gap-3 shadow-2xl uppercase border border-white/20 group relative z-[70] cursor-pointer"
+                      className="bg-white text-black px-6 py-3 md:px-12 md:py-4 rounded-none font-bold text-[10px] md:text-xs tracking-[0.3em] md:tracking-[0.4em] ver-coleccion-btn transition-all flex items-center gap-2 md:gap-3 shadow-2xl uppercase border border-white/20 group relative z-[70] cursor-pointer"
                     >
-                      VER COLECCIÓN <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
+                      SHOP NOW <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
                     </button>
                   </div>
                 )}
@@ -222,9 +222,9 @@ const Hero: React.FC = () => {
           {/* Button */}
           <button
             onClick={scrollToCollection}
-            className="bg-white text-black px-12 py-4 md:px-16 md:py-5 rounded-none font-bold text-[11px] md:text-xs tracking-[0.5em] ver-coleccion-btn transition-all flex items-center gap-4 mx-auto shadow-2xl uppercase border border-white/20 group relative z-[70] cursor-pointer"
+            className="bg-white text-black px-12 py-4 md:px-16 md:py-5 rounded-none font-bold text-[11px] md:text-xs tracking-[0.5em] ver-coleccion-btn transition-all flex items-center gap-4 mx-auto shadow-2xl uppercase border-2 border-[#E2001A] group relative z-[70] cursor-pointer"
           >
-            VER COLECCIÓN <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
+            SHOP NOW <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
           </button>
         </div>
       </div>
