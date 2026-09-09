@@ -2015,22 +2015,18 @@ const Store: React.FC = () => {
                         zIndex: 9999,
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px',
+                        justifyContent: 'center',
+                        width: '52px',
+                        height: '52px',
                         background: '#e60000',
                         color: '#fff',
-                        borderRadius: '50px',
-                        padding: '12px 20px',
+                        borderRadius: '50%',
                         boxShadow: '0 4px 24px rgba(230,0,0,0.45)',
-                        fontWeight: 800,
-                        fontSize: '13px',
-                        letterSpacing: '0.02em',
                         border: 'none',
                         cursor: 'pointer',
-                        whiteSpace: 'nowrap',
                     }}
                 >
-                    <Flame size={18} fill="white" />
-                    Más populares
+                    <Flame size={22} fill="white" />
                 </button>
             )}
 

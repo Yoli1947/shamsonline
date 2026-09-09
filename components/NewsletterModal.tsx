@@ -80,16 +80,13 @@ const NewsletterModal: React.FC = () => {
                             <X size={16} />
                         </button>
 
-                        {/* Visual Side - las 3 marcas completas arriba (chicas), texto en bloque aparte abajo */}
+                        {/* Visual Side - las 3 marcas sueltas, mismo tamaño, centradas en el espacio disponible */}
                         <div style={{ width: '42%', position: 'relative', backgroundColor: '#ffffff', flexShrink: 0, display: 'flex', flexDirection: 'column' }} className="hidden md:block">
-                            <div style={{ padding: '28px 28px 12px', display: 'flex', justifyContent: 'center' }}>
-                                <img
-                                    src="/banners/trimarca.jpg"
-                                    alt="Multibrand"
-                                    style={{ width: '70%', height: 'auto', display: 'block' }}
-                                />
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '28px', padding: '32px' }}>
+                                <img src="/banners/PERRAMUS MULTIBRAND.png" alt="Perramus" style={{ height: '48px', width: 'auto', display: 'block' }} />
+                                <img src="/banners/HUNTER MULTIBRAND.png" alt="Hunter" style={{ height: '48px', width: 'auto', display: 'block' }} />
+                                <img src="/banners/NAUTICA MULTIBRAND (1).png" alt="Nautica" style={{ height: '48px', width: 'auto', display: 'block' }} />
                             </div>
-                            <div style={{ flex: 1 }} />
                             <div style={{ backgroundColor: 'transparent', padding: '20px 24px', flexShrink: 0 }}>
                                 <span style={{ color: '#000', fontSize: '9px', fontWeight: 900, letterSpacing: '0.4em', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>CLUB MULTIBRAND</span>
                                 <h2 style={{ color: '#000', fontSize: '26px', fontWeight: 900, letterSpacing: '-0.02em', textTransform: 'uppercase', fontStyle: 'italic', lineHeight: 0.95 }}>
