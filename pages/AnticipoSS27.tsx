@@ -130,8 +130,8 @@ const AnticipoSS27: React.FC = () => {
                     <span className="text-[var(--color-text-muted)] uppercase tracking-[0.8em] text-[10px] font-black mb-6 block">
                         PRIMAVERA / VERANO 2027
                     </span>
-                    <h1 className="text-4xl sm:text-5xl md:text-8xl font-black tracking-tighter text-[var(--color-text)] mb-8 uppercase italic leading-tight">
-                        Anticipo SS27
+                    <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-[var(--color-text)] mb-8 uppercase italic leading-tight">
+                        Anticipo
                     </h1>
                     <div className="w-24 h-[1px] bg-black mx-auto" />
                 </header>
