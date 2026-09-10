@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Plus, Search, Edit, Trash2, Image, X, Check, Loader, RefreshCw, UploadCloud, Maximize2, Minimize2, Star } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, Image, X, Check, Loader, RefreshCw, UploadCloud, Maximize2, Minimize2, Star, Tag } from 'lucide-react'
 import { getAllProducts, deleteProduct, updateProduct, saveProductVariants, uploadImage, getSeasons } from '../../lib/admin'
 import { supabase } from '../../lib/supabase'
 import { getBrands, getCategories } from '../../lib/api'
@@ -192,6 +192,17 @@ export default function Products() {
             await updateProduct(product.id, { isFeatured: newVal })
         } catch (e) {
             setProducts(prev => prev.map(p => p.id === product.id ? { ...p, is_featured: !newVal } : p))
+            alert('Error al actualizar: ' + e.message)
+        }
+    }
+
+    const toggleSalePick = async (product) => {
+        const newVal = !product.is_sale_pick
+        setProducts(prev => prev.map(p => p.id === product.id ? { ...p, is_sale_pick: newVal } : p))
+        try {
+            await updateProduct(product.id, { isSalePick: newVal })
+        } catch (e) {
+            setProducts(prev => prev.map(p => p.id === product.id ? { ...p, is_sale_pick: !newVal } : p))
             alert('Error al actualizar: ' + e.message)
         }
     }
@@ -781,6 +792,25 @@ export default function Products() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
                     <span style={{ fontSize: '0.75rem', color: '#666', fontWeight: '800', whiteSpace: 'nowrap' }}>TEMPORADAS:</span>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        <button
+                            onClick={() => setSelectedSeasons([])}
+                            style={{
+                                padding: '6px 16px',
+                                borderRadius: '20px',
+                                fontSize: '11px',
+                                fontWeight: '700',
+                                border: '1px solid',
+                                borderColor: selectedSeasons.length === 0 ? '#DCDCDC' : 'rgba(255,255,255,0.1)',
+                                background: selectedSeasons.length === 0 ? '#DCDCDC10' : 'transparent',
+                                color: selectedSeasons.length === 0 ? '#DCDCDC' : '#666',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em'
+                            }}
+                        >
+                            Todas
+                        </button>
                         {seasons.map((s, idx) => (
                             <button
                                 key={idx}
@@ -1129,6 +1159,14 @@ export default function Products() {
                                             style={{ padding: '0.5rem', color: product.is_featured ? '#F59E0B' : '#9CA3AF', background: product.is_featured ? '#FEF3C7' : undefined }}
                                         >
                                             <Star size={16} fill={product.is_featured ? '#F59E0B' : 'none'} />
+                                        </button>
+                                        <button
+                                            className="admin-btn"
+                                            onClick={() => toggleSalePick(product)}
+                                            title={product.is_sale_pick ? 'Quitar de Nuestros Elegidos en Sale' : 'Agregar a Nuestros Elegidos en Sale'}
+                                            style={{ padding: '0.5rem', color: product.is_sale_pick ? '#DC2626' : '#9CA3AF', background: product.is_sale_pick ? '#FEE2E2' : undefined }}
+                                        >
+                                            <Tag size={16} fill={product.is_sale_pick ? '#DC2626' : 'none'} />
                                         </button>
                                         <button
                                             className="admin-btn admin-btn-secondary"

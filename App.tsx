@@ -28,6 +28,7 @@ const Settings = lazy(() => import('./pages/admin/Settings'));
 const ProductOrder = lazy(() => import('./pages/admin/ProductOrder'));
 const BrandImages = lazy(() => import('./pages/admin/BrandImages'));
 const UltimosIngresos = lazy(() => import('./pages/admin/UltimosIngresos'));
+const AdminAnticipoSS27 = lazy(() => import('./pages/admin/AnticipoSS27'));
 const BrandsPage = lazy(() => import('./pages/BrandPage'));
 const FuturistPreview = lazy(() => import('./pages/FuturistPreview'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
@@ -38,6 +39,7 @@ const PreguntasFrecuentes = lazy(() => import('./pages/PreguntasFrecuentes'));
 const OrderSuccess = lazy(() => import('./pages/OrderSuccess'));
 const GiftCardPage = lazy(() => import('./pages/GiftCardPage'));
 const SaleLastChance = lazy(() => import('./pages/SaleLastChance'));
+const AnticipoSS27 = lazy(() => import('./pages/AnticipoSS27'));
 const OutletMaintenance = lazy(() => import('./pages/OutletMaintenance'));
 
 const ScrollToTop = () => {
@@ -93,6 +95,7 @@ const App: React.FC = () => {
             <Route path="/preguntas-frecuentes" element={<PreguntasFrecuentes />} />
             <Route path="/gift-cards" element={<GiftCardPage />} />
             <Route path="/sale" element={<SaleLastChance />} />
+            <Route path="/anticipo-ss27" element={<AnticipoSS27 />} />
             <Route path="/outlet" element={<OutletMaintenance />} />
             <Route path="/orden/exito" element={<OrderSuccess />} />
             <Route path="/orden/pendiente" element={<OrderSuccess />} />
@@ -119,6 +122,7 @@ const App: React.FC = () => {
               <Route path="configuracion" element={<Settings />} />
               <Route path="orden-productos" element={<ProductOrder />} />
               <Route path="ultimos-ingresos" element={<UltimosIngresos />} />
+              <Route path="anticipo-ss27" element={<AdminAnticipoSS27 />} />
               <Route path="imagenes-marcas" element={<BrandImages />} />
             </Route>
           </Routes>

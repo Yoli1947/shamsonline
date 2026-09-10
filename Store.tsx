@@ -125,6 +125,17 @@ const Store: React.FC = () => {
 
     const brandsScrollRef = useRef<HTMLDivElement>(null);
     const [brandsScrollPos, setBrandsScrollPos] = useState(0);
+    const saleScrollRef = useRef<HTMLDivElement>(null);
+    const [saleScrollPos, setSaleScrollPos] = useState(0);
+    const salePausedRef = useRef(false);
+    const salePauseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    // Pausa el auto-scroll del carrusel de Sale ante cualquier interacción del
+    // usuario (tocar/arrastrar, flechas) y lo retoma solo tras un rato quieto.
+    const pauseSaleAutoScroll = () => {
+        salePausedRef.current = true;
+        if (salePauseTimeoutRef.current) clearTimeout(salePauseTimeoutRef.current);
+        salePauseTimeoutRef.current = setTimeout(() => { salePausedRef.current = false; }, 1800);
+    };
 
     const [isBrandFilterOpen, setIsBrandFilterOpen] = useState(false);
     const [isSizeFilterOpen, setIsSizeFilterOpen] = useState(false);
@@ -168,6 +179,44 @@ const Store: React.FC = () => {
     } | null>(null);
 
     const [products, setProducts] = useState<Product[]>([]);
+
+    // Auto-scroll lento del carrusel de "Nuestros Elegidos en Sale", con loop
+    // al llegar al final. Usa scrollLeft nativo (no una animación CSS) para
+    // convivir con el arrastre táctil real del usuario en el celular.
+    useEffect(() => {
+        const el = saleScrollRef.current;
+        if (!el) return;
+
+        const handleStart = () => {
+            salePausedRef.current = true;
+            if (salePauseTimeoutRef.current) clearTimeout(salePauseTimeoutRef.current);
+        };
+        const handleEnd = () => pauseSaleAutoScroll();
+
+        el.addEventListener('touchstart', handleStart, { passive: true });
+        el.addEventListener('touchend', handleEnd, { passive: true });
+        el.addEventListener('mousedown', handleStart);
+        window.addEventListener('mouseup', handleEnd);
+
+        const intervalId = setInterval(() => {
+            if (salePausedRef.current) return;
+            if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 2) {
+                el.scrollLeft = 0;
+            } else {
+                el.scrollLeft += 1;
+            }
+        }, 30);
+
+        return () => {
+            clearInterval(intervalId);
+            if (salePauseTimeoutRef.current) clearTimeout(salePauseTimeoutRef.current);
+            el.removeEventListener('touchstart', handleStart);
+            el.removeEventListener('touchend', handleEnd);
+            el.removeEventListener('mousedown', handleStart);
+            window.removeEventListener('mouseup', handleEnd);
+        };
+    }, [products]);
+
     const [brands, setBrands] = useState<any[]>([]);
     const [quickDiscountBrands, setQuickDiscountBrands] = useState<{ brand: string; bestDiscount: number; image: string; count: number }[]>([]);
 
@@ -1192,7 +1241,10 @@ const Store: React.FC = () => {
                             // Un producto puede estar en oferta por dos vías: compareAtPrice (mecanismo nuevo)
                             // o sale_price ya aplicado dentro de "price" (mecanismo legado, ej. Hunter).
                             // Calculamos precio de lista y precio actual de forma genérica para cubrir ambas.
+                            // Elegidos a mano en el editor de producto (isSalePick) — ya no es automático
+                            // por descuento, es curaduría manual.
                             const papaItems = products
+                                .filter((p: any) => p.isSalePick)
                                 .filter((p: any) => p.image && !p.image.includes('placeholder') && !p.image.includes('No+Image'))
                                 .filter((p: any) => {
                                     // Mismo criterio de "producto visible" que la grilla principal:
@@ -1215,56 +1267,73 @@ const Store: React.FC = () => {
                                     return discountB - discountA;
                                 });
                             if (papaItems.length === 0) return null;
-                            // Duplicar suficientes veces para que el loop sea suave
-                            const copies = papaItems.length < 4 ? 6 : papaItems.length < 8 ? 4 : 2;
-                            const loopItems = Array.from({ length: copies }, () => papaItems).flat();
-                            // La animación recorre exactamente 1 vuelta de papaItems (0% a -50% del ancho total).
-                            // Fijamos segundos por tarjeta para que la velocidad sea siempre la misma,
-                            // sin importar cuántos productos entren en oferta.
-                            const SECONDS_PER_CARD = 3;
-                            const scrollDurationSec = papaItems.length * SECONDS_PER_CARD;
                             return (
                                 <section className="py-10">
                                     <h2 className="text-center uppercase tracking-[0.3em] text-sm md:text-base font-bold text-[var(--color-text)] mb-6 px-4">
                                         NUESTROS ELEGIDOS EN SALE
                                     </h2>
-                                    <div className="overflow-hidden">
-                                        <div className="animate-papa-scroll gap-1" style={{ width: `${loopItems.length * 22}vw`, animationDuration: `${scrollDurationSec}s` }}>
-                                            {loopItems.map((product: any, idx: number) => {
+                                    <div className="relative px-4 md:px-12">
+                                        {/* Flecha izquierda (solo desktop, el celular se mueve con el dedo) */}
+                                        {saleScrollPos > 20 && (
+                                            <button
+                                                onClick={() => { pauseSaleAutoScroll(); saleScrollRef.current?.scrollBy({ left: -320, behavior: 'smooth' }); }}
+                                                className="hidden md:flex absolute left-1 top-[38%] -translate-y-1/2 z-20 w-11 h-11 rounded-none bg-white border-2 border-[var(--color-text)]/20 items-center justify-center text-[var(--color-text)] active:scale-95 transition-all shadow-xl"
+                                            >
+                                                <ChevronLeft size={22} strokeWidth={2.5} />
+                                            </button>
+                                        )}
+                                        {/* Flecha derecha */}
+                                        <button
+                                            onClick={() => { pauseSaleAutoScroll(); saleScrollRef.current?.scrollBy({ left: 320, behavior: 'smooth' }); }}
+                                            className="hidden md:flex absolute right-1 top-[38%] -translate-y-1/2 z-20 w-11 h-11 rounded-none bg-white border-2 border-[var(--color-text)]/20 items-center justify-center text-[var(--color-text)] active:scale-95 transition-all shadow-xl"
+                                        >
+                                            <ChevronRight size={22} strokeWidth={2.5} />
+                                        </button>
+                                        <div
+                                            ref={saleScrollRef}
+                                            onScroll={(e) => setSaleScrollPos((e.target as HTMLDivElement).scrollLeft)}
+                                            className="flex gap-3 md:gap-4 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
+                                        >
+                                            {papaItems.map((product: any) => {
                                                 const discountPct = Math.round((1 - product.__currentPrice / product.__listPrice) * 100);
                                                 return (
-                                                    <button
-                                                        key={`${product.id}-${idx}`}
+                                                    <div
+                                                        key={product.id}
                                                         onClick={() => setSelectedProduct(product)}
-                                                        className="relative shrink-0 overflow-hidden group cursor-pointer"
-                                                        style={{ width: '21vw', minWidth: '160px' }}
+                                                        className="relative shrink-0 group cursor-pointer flex flex-col"
+                                                        style={{ width: '24vw', minWidth: '190px' }}
                                                     >
-                                                        <div className="aspect-[3/4] relative">
+                                                        <div className="aspect-[3/4] relative overflow-hidden">
                                                             <img
                                                                 src={product.image}
                                                                 alt={product.name}
                                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                                                 loading="lazy"
                                                             />
-                                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors duration-300" />
-                                                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pt-8 pb-2 px-2 md:px-3">
-                                                                <p className="text-white text-[9px] md:text-[11px] font-semibold uppercase tracking-wide truncate mb-1">
-                                                                    {product.name}
-                                                                </p>
-                                                                <div className="flex items-center gap-1.5 flex-wrap">
-                                                                    <span className="text-white/60 text-[8px] md:text-[10px] line-through">
-                                                                        ${product.__listPrice.toLocaleString()}
-                                                                    </span>
-                                                                    <span className="text-white text-[11px] md:text-sm font-black tracking-tighter">
-                                                                        ${product.__currentPrice.toLocaleString()}
-                                                                    </span>
-                                                                    <span className="bg-red-600 text-white text-[8px] md:text-[10px] font-black px-1.5 py-0.5 uppercase tracking-tighter">
-                                                                        -{discountPct}%
-                                                                    </span>
-                                                                </div>
-                                                            </div>
+                                                            <span className="absolute top-3 left-3 bg-red-600 text-white text-[10px] md:text-xs font-black px-2 py-1 uppercase tracking-tighter">
+                                                                -{discountPct}%
+                                                            </span>
                                                         </div>
-                                                    </button>
+                                                        <div className="pt-3 px-1 flex flex-col gap-2">
+                                                            <p className="text-[var(--color-text)] text-[11px] md:text-sm font-semibold uppercase tracking-wide truncate">
+                                                                {product.name}
+                                                            </p>
+                                                            <div className="flex items-center gap-2 flex-wrap">
+                                                                <span className="text-[var(--color-text-muted)] text-[10px] md:text-xs line-through">
+                                                                    ${product.__listPrice.toLocaleString()}
+                                                                </span>
+                                                                <span className="text-[var(--color-text)] text-[13px] md:text-base font-black tracking-tighter">
+                                                                    ${product.__currentPrice.toLocaleString()}
+                                                                </span>
+                                                            </div>
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); setSelectedProduct(product); }}
+                                                                className="mt-1 w-full py-2.5 md:py-3 text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase border border-[var(--color-text)] text-[var(--color-text)] hover:bg-[var(--color-text)] hover:text-white transition-colors"
+                                                            >
+                                                                Comprar
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 );
                                             })}
                                         </div>

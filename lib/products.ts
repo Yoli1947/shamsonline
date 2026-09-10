@@ -24,15 +24,21 @@ export function mapProductsToUI(dbProducts: any[]) {
 
         const galleryImages: any[] = [];
         if (p.images && p.images.length > 0) {
-            p.images.forEach((img: any) => galleryImages.push({ url: img.url, color: img.alt_text || 'Principal' }));
+            p.images.forEach((img: any) => galleryImages.push({ url: img.url, color: img.alt_text || 'Principal', isPrimary: !!img.is_primary }));
         }
 
         const legacyUrls = [p.image_url, p.image_url_2, p.image_url_3, p.image_url_4].filter(Boolean);
         legacyUrls.forEach(url => {
             if (!galleryImages.some(gi => gi.url === url)) {
-                galleryImages.push({ url, color: 'Principal' });
+                galleryImages.push({ url, color: 'Principal', isPrimary: false });
             }
         });
+
+        // La "imagen principal" que se marca a mano en el editor de producto
+        // (ProductForm.jsx, is_primary) es la que debe mostrarse como foto de
+        // portada en toda la tienda — típicamente la del modelo con la prenda
+        // puesta, a diferencia de fotos planas/de detalle que vienen después.
+        const primaryImage = galleryImages.find(gi => gi.isPrimary);
 
         return {
             id: p.id,
@@ -41,7 +47,7 @@ export function mapProductsToUI(dbProducts: any[]) {
             price: p.sale_price && p.sale_price < p.price ? p.sale_price : p.price,
             originalPrice: p.price,
             compareAtPrice: p.compare_at_price && p.compare_at_price > p.price ? p.compare_at_price : null,
-            image: galleryImages[0]?.url || 'https://via.placeholder.com/400x500?text=No+Image',
+            image: primaryImage?.url || galleryImages[0]?.url || 'https://via.placeholder.com/400x500?text=No+Image',
             images: galleryImages.map(gi => gi.url),
             imageObjects: galleryImages,
             category: p.category?.name || 'General',
@@ -53,6 +59,8 @@ export function mapProductsToUI(dbProducts: any[]) {
             sort_order: p.sort_order,
             brandCardUrl: p.brand?.card_image_url,
             is_featured: p.is_featured,
+            isSalePick: !!p.is_sale_pick,
+            isAnticipoSS27: !!p.is_anticipo_ss27,
             sku: p.sku || null
         };
     });

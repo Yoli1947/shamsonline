@@ -34,6 +34,24 @@ const slides = [
     hideOverlayText: true,
     bgColor: "bg-white",
     captionDark: true
+  },
+  {
+    image: "/banners/perramus-verano-foto.jpg",
+    title: "MULTIBRAND / PERRAMUS",
+    subtitle: "NUEVA TEMPORADA",
+    description: "Descubrí la nueva temporada de verano de Perramus en Multibrand.",
+    objectPosition: "center top",
+    letterbox: true,
+    split: { videoSrc: "/banners/perramus-verano-video.mp4", width: '50%', side: 'right', wordmark: "PERRAMUS" },
+    captionOverlay: {
+      kicker: "Preview",
+      title: "Sense of Discovery",
+      subtitle: "(Love of adventure)",
+      brand: "PERRAMUS, SINCE 1922",
+      chapter: "CHAPTER I — THE NEW COLLECTION SS27",
+      cta: "Discover Now"
+    },
+    hideOverlayText: true
   }
 ];
 
@@ -81,7 +99,7 @@ const Hero: React.FC = () => {
         >
           {(slide as any).letterbox ? (
             <div className={`absolute inset-0 flex flex-col items-center justify-start md:justify-center pt-4 md:pt-0 gap-6 md:gap-10 px-4 ${(slide as any).bgColor || 'bg-black'}`}>
-              <div className={`relative w-full ${(slide as any).mobileAspect === '3/4' || (slide as any).split ? 'aspect-[3/4]' : 'aspect-[4/3]'} md:aspect-[1920/636]`}>
+              <div className={`relative w-full ${(slide as any).mobileAspect === '3/4' || (slide as any).split ? 'aspect-[3/4]' : 'aspect-[4/3]'} ${(slide as any).desktopAspect === '3/2' ? 'md:aspect-[3/2]' : 'md:aspect-[1920/636]'}`}>
                 <img
                   src={slide.image}
                   alt={slide.title}
@@ -92,7 +110,7 @@ const Hero: React.FC = () => {
                     left: (slide as any).split && (slide as any).split.side !== 'right' ? undefined : 0,
                     right: (slide as any).split && (slide as any).split.side === 'right' ? undefined : 0,
                     width: (slide as any).split ? `calc(100% - ${(slide as any).split.width || '32.8%'})` : '100%',
-                    objectFit: 'cover',
+                    objectFit: (slide as any).imageFit || 'cover',
                     objectPosition: slide.objectPosition,
                     filter: (slide as any).grayscale ? 'grayscale(1)' : undefined
                   }}
@@ -119,6 +137,46 @@ const Hero: React.FC = () => {
                         className="h-full w-auto"
                       />
                     )}
+                    {(slide as any).split.wordmark && (
+                      <span className="absolute inset-0 flex items-center justify-center px-2 pointer-events-none">
+                        <span className="font-serif font-bold text-white uppercase tracking-tight text-2xl sm:text-4xl md:text-5xl text-center drop-shadow-2xl">
+                          {(slide as any).split.wordmark}
+                        </span>
+                      </span>
+                    )}
+                  </div>
+                )}
+                {/* Bloque editorial sobre el lado de la foto (kicker + título + subtítulo + marca + CTA) */}
+                {(slide as any).captionOverlay && (
+                  <div
+                    className="absolute inset-0 flex items-center z-20 pointer-events-none"
+                    style={{ width: (slide as any).split ? `calc(100% - ${(slide as any).split.width || '32.8%'})` : '100%' }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
+                    <div className="relative z-10 text-white px-6 md:px-10 max-w-[85%] md:max-w-md">
+                      <p className="text-[11px] md:text-sm font-light tracking-[0.2em] uppercase mb-2 md:mb-3 opacity-90">
+                        {(slide as any).captionOverlay.kicker}
+                      </p>
+                      <h3 className="font-black text-2xl md:text-5xl uppercase leading-[1.05] mb-1 tracking-tight">
+                        {(slide as any).captionOverlay.title}
+                      </h3>
+                      <p className="italic font-light text-sm md:text-xl mb-3 md:mb-5 opacity-90">
+                        {(slide as any).captionOverlay.subtitle}
+                      </p>
+                      <div className="w-10 h-[1px] bg-white/50 mb-3 md:mb-5" />
+                      <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] mb-1">
+                        {(slide as any).captionOverlay.brand}
+                      </p>
+                      <p className="text-[9px] md:text-[11px] uppercase tracking-[0.1em] opacity-70 mb-4 md:mb-6">
+                        {(slide as any).captionOverlay.chapter}
+                      </p>
+                      <button
+                        onClick={scrollToCollection}
+                        className="pointer-events-auto text-sm md:text-lg font-bold uppercase tracking-[0.25em] border-b border-white pb-1 hover:opacity-70 transition-opacity cursor-pointer"
+                      >
+                        {(slide as any).captionOverlay.cta}
+                      </button>
+                    </div>
                   </div>
                 )}
                 {/* Texto y marca superpuestos sobre la imagen (lado de la foto, no sobre el panel izquierdo) */}
@@ -148,8 +206,10 @@ const Hero: React.FC = () => {
                     </button>
                   </div>
                 )}
-                {/* Para slides con split (imagen + video): solo el botón, abajo de la imagen */}
-                {(slide as any).split && (
+                {/* Para slides con split (imagen + video): solo el botón, abajo de la imagen.
+                    Si el slide ya tiene su propio bloque editorial (captionOverlay), ese trae
+                    su propio CTA y no hace falta este botón aparte. */}
+                {(slide as any).split && !(slide as any).captionOverlay && (
                   <div
                     className={`absolute top-[68%] md:top-auto md:bottom-6 flex justify-center ${(slide as any).split.side === 'right' ? 'left-0' : 'right-0'}`}
                     style={{ width: `calc(100% - ${(slide as any).split.width || '32.8%'})` }}

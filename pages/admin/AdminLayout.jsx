@@ -17,6 +17,7 @@ import {
     Camera,
     Plus,
     Star,
+    Tag,
     User
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -64,6 +65,7 @@ export default function AdminLayout() {
         { path: '/admin/imagenes', icon: ImageIcon, label: 'Carga de Fotos' },
         { path: '/admin/orden-productos', icon: GripVertical, label: 'Orden Productos' },
         { path: '/admin/ultimos-ingresos', icon: Star, label: 'Últimos Ingresos' },
+        { path: '/admin/anticipo-ss27', icon: Tag, label: 'Anticipo SS27' },
         { path: '/admin/imagenes-marcas', icon: Camera, label: 'Imágenes Marcas' },
         { path: '/admin/configuracion', icon: Settings, label: 'Configuración' },
     ];

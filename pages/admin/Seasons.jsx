@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react'
 import { Plus, Trash2, Save, X, RefreshCw } from 'lucide-react'
-import { getSeasons, saveSeasons, createSeason, deleteSeason } from '../../lib/admin'
+import { getSeasonsWithUsage, createSeason, deleteSeason } from '../../lib/admin'
 
 export default function Seasons() {
     const [seasons, setSeasons] = useState([])
@@ -16,7 +16,7 @@ export default function Seasons() {
     async function loadSeasons() {
         setLoading(true)
         try {
-            const data = await getSeasons()
+            const data = await getSeasonsWithUsage()
             setSeasons(data)
         } catch (error) {
             console.error('Error loading seasons:', error)
@@ -31,8 +31,8 @@ export default function Seasons() {
         
         setIsSaving(true)
         try {
-            const updated = await createSeason(newSeason.trim())
-            setSeasons(updated)
+            await createSeason(newSeason.trim())
+            await loadSeasons()
             setNewSeason('')
         } catch (error) {
             alert('Error al crear temporada: ' + error.message)
@@ -43,11 +43,11 @@ export default function Seasons() {
 
     const handleDelete = async (name) => {
         if (!confirm(`¿Seguro que deseas eliminar la temporada "${name}"?`)) return
-        
+
         setIsSaving(true)
         try {
-            const updated = await deleteSeason(name)
-            setSeasons(updated)
+            await deleteSeason(name)
+            await loadSeasons()
         } catch (error) {
             alert('Error al eliminar: ' + error.message)
         } finally {
@@ -91,25 +91,27 @@ export default function Seasons() {
                     <thead>
                         <tr>
                             <th>Temporada</th>
+                            <th style={{ width: '160px' }}>Productos</th>
                             <th style={{ width: '100px', textAlign: 'right' }}>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         {loading ? (
-                            <tr><td colSpan="2" style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>Cargando temporadas...</td></tr>
+                            <tr><td colSpan="3" style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>Cargando temporadas...</td></tr>
                         ) : seasons.length === 0 ? (
-                            <tr><td colSpan="2" style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>No hay temporadas definidas.</td></tr>
+                            <tr><td colSpan="3" style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>No hay temporadas definidas.</td></tr>
                         ) : (
-                            seasons.map((season, index) => (
-                                <tr key={index}>
-                                    <td style={{ fontWeight: 600, fontSize: '1rem' }}>{season}</td>
+                            seasons.map(({ name, count }) => (
+                                <tr key={name}>
+                                    <td style={{ fontWeight: 600, fontSize: '1rem' }}>{name}</td>
+                                    <td style={{ color: '#999' }}>{count > 0 ? `${count} producto${count === 1 ? '' : 's'}` : '—'}</td>
                                     <td style={{ textAlign: 'right' }}>
-                                        <button 
-                                            onClick={() => handleDelete(season)} 
-                                            className="admin-btn admin-btn-danger" 
-                                            style={{ padding: '0.5rem' }} 
-                                            disabled={isSaving}
-                                            title="Eliminar"
+                                        <button
+                                            onClick={() => handleDelete(name)}
+                                            className="admin-btn admin-btn-danger"
+                                            style={{ padding: '0.5rem' }}
+                                            disabled={isSaving || count > 0}
+                                            title={count > 0 ? 'No se puede eliminar: hay productos con esta temporada' : 'Eliminar'}
                                         >
                                             <Trash2 size={16} />
                                         </button>

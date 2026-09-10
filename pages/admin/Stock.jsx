@@ -1126,6 +1126,25 @@ CREATE POLICY "Full access for variants" ON product_variants FOR ALL TO authenti
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
                     <span style={{ fontSize: '0.75rem', color: '#666', fontWeight: '800', whiteSpace: 'nowrap' }}>TEMPORADAS:</span>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        <button
+                            onClick={() => setSelectedSeasons([])}
+                            style={{
+                                padding: '6px 16px',
+                                borderRadius: '20px',
+                                fontSize: '11px',
+                                fontWeight: '700',
+                                border: '1px solid',
+                                borderColor: selectedSeasons.length === 0 ? '#DCDCDC' : 'rgba(255,255,255,0.1)',
+                                background: selectedSeasons.length === 0 ? '#DCDCDC10' : 'transparent',
+                                color: selectedSeasons.length === 0 ? '#DCDCDC' : '#666',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em'
+                            }}
+                        >
+                            Todas
+                        </button>
                         {seasons.map((s, idx) => (
                             <button
                                 key={idx}

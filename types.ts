@@ -28,6 +28,8 @@ export interface Product {
   sort_order?: number;
   brandCardUrl?: string;
   is_featured?: boolean;
+  isSalePick?: boolean;
+  isAnticipoSS27?: boolean;
   sku?: string;
 }
 

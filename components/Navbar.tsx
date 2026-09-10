@@ -150,6 +150,13 @@ const Navbar: React.FC<NavbarProps> = ({
             <button
               className="hover:text-white transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/20 pb-0.5"
               style={{ color: '#000000' }}
+              onClick={() => navigate('/anticipo-ss27')}
+            >
+              ANTICIPO SS27
+            </button>
+            <button
+              className="hover:text-white transition-all uppercase text-[10px] lg:text-[12px] font-normal tracking-[0.12em] border-b border-transparent hover:border-black/20 pb-0.5"
+              style={{ color: '#000000' }}
               onClick={() => navigate('/?genero=Mujer#new')}
             >
               MUJER
@@ -350,6 +357,7 @@ const Navbar: React.FC<NavbarProps> = ({
         <div className="px-6 py-8 flex flex-col gap-1">
           {[
             { label: 'INICIO', action: () => navigate('/') },
+            { label: 'ANTICIPO SS27', action: () => navigate('/anticipo-ss27') },
             { label: 'MUJER', action: () => navigate('/?genero=Mujer#new') },
             { label: 'HOMBRE', action: () => navigate('/?genero=Hombre#new') },
             { label: 'UNISEX', action: () => navigate('/?genero=Unisex#new') },
