@@ -1255,15 +1255,18 @@ const Store: React.FC = () => {
                                     return true;
                                 })
                                 .map((p: any) => {
+                                    // La curaduría es manual (isSalePick) — un producto puede entrar acá
+                                    // aunque no tenga descuento cargado, así que el precio "de lista"
+                                    // solo se calcula si realmente hay uno.
                                     const hasNewSaleFlag = !!p.compareAtPrice && p.compareAtPrice > p.originalPrice;
-                                    const listPrice = hasNewSaleFlag ? p.compareAtPrice : p.originalPrice;
+                                    const hasLegacySale = !!p.originalPrice && p.originalPrice > p.price;
+                                    const listPrice = hasNewSaleFlag ? p.compareAtPrice : (hasLegacySale ? p.originalPrice : null);
                                     const currentPrice = hasNewSaleFlag ? p.originalPrice : p.price;
                                     return { ...p, __listPrice: listPrice, __currentPrice: currentPrice };
                                 })
-                                .filter((p: any) => p.__listPrice > p.__currentPrice)
                                 .sort((a: any, b: any) => {
-                                    const discountA = (a.__listPrice - a.__currentPrice) / a.__listPrice;
-                                    const discountB = (b.__listPrice - b.__currentPrice) / b.__listPrice;
+                                    const discountA = a.__listPrice ? (a.__listPrice - a.__currentPrice) / a.__listPrice : 0;
+                                    const discountB = b.__listPrice ? (b.__listPrice - b.__currentPrice) / b.__listPrice : 0;
                                     return discountB - discountA;
                                 });
                             if (papaItems.length === 0) return null;
@@ -1295,7 +1298,9 @@ const Store: React.FC = () => {
                                             className="flex gap-3 md:gap-4 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
                                         >
                                             {papaItems.map((product: any) => {
-                                                const discountPct = Math.round((1 - product.__currentPrice / product.__listPrice) * 100);
+                                                const discountPct = product.__listPrice
+                                                    ? Math.round((1 - product.__currentPrice / product.__listPrice) * 100)
+                                                    : null;
                                                 return (
                                                     <div
                                                         key={product.id}
@@ -1310,18 +1315,22 @@ const Store: React.FC = () => {
                                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                                                 loading="lazy"
                                                             />
-                                                            <span className="absolute top-3 left-3 bg-red-600 text-white text-[10px] md:text-xs font-black px-2 py-1 uppercase tracking-tighter">
-                                                                -{discountPct}%
-                                                            </span>
+                                                            {discountPct !== null && (
+                                                                <span className="absolute top-3 left-3 bg-red-600 text-white text-[10px] md:text-xs font-black px-2 py-1 uppercase tracking-tighter">
+                                                                    -{discountPct}%
+                                                                </span>
+                                                            )}
                                                         </div>
                                                         <div className="pt-3 px-1 flex flex-col gap-2">
                                                             <p className="text-[var(--color-text)] text-[11px] md:text-sm font-semibold uppercase tracking-wide truncate">
                                                                 {product.name}
                                                             </p>
                                                             <div className="flex items-center gap-2 flex-wrap">
-                                                                <span className="text-[var(--color-text-muted)] text-[10px] md:text-xs line-through">
-                                                                    ${product.__listPrice.toLocaleString()}
-                                                                </span>
+                                                                {product.__listPrice !== null && (
+                                                                    <span className="text-[var(--color-text-muted)] text-[10px] md:text-xs line-through">
+                                                                        ${product.__listPrice.toLocaleString()}
+                                                                    </span>
+                                                                )}
                                                                 <span className="text-[var(--color-text)] text-[13px] md:text-base font-black tracking-tighter">
                                                                     ${product.__currentPrice.toLocaleString()}
                                                                 </span>
