@@ -4,6 +4,24 @@ import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const slides = [
   {
+    image: "/banners/perramus-verano-foto.jpg",
+    title: "MULTIBRAND / PERRAMUS",
+    subtitle: "NUEVA TEMPORADA",
+    description: "Descubrí la nueva temporada de verano de Perramus en Multibrand.",
+    objectPosition: "center top",
+    letterbox: true,
+    split: { videoSrc: "/banners/perramus-verano-video.mp4", width: '50%', side: 'right', wordmark: "PERRAMUS" },
+    captionOverlay: {
+      kicker: "Preview",
+      title: "Sense of Discovery",
+      subtitle: "(Love of adventure)",
+      brand: "PERRAMUS, SINCE 1922",
+      chapter: "CHAPTER I — THE NEW COLLECTION SS27",
+      cta: "Discover Now"
+    },
+    hideOverlayText: true
+  },
+  {
     image: "/banners/sale 40.jpg",
     title: "MULTIBRAND / PERRAMUS",
     subtitle: "WINTER SALE",
@@ -34,24 +52,6 @@ const slides = [
     hideOverlayText: true,
     bgColor: "bg-white",
     captionDark: true
-  },
-  {
-    image: "/banners/perramus-verano-foto.jpg",
-    title: "MULTIBRAND / PERRAMUS",
-    subtitle: "NUEVA TEMPORADA",
-    description: "Descubrí la nueva temporada de verano de Perramus en Multibrand.",
-    objectPosition: "center top",
-    letterbox: true,
-    split: { videoSrc: "/banners/perramus-verano-video.mp4", width: '50%', side: 'right', wordmark: "PERRAMUS" },
-    captionOverlay: {
-      kicker: "Preview",
-      title: "Sense of Discovery",
-      subtitle: "(Love of adventure)",
-      brand: "PERRAMUS, SINCE 1922",
-      chapter: "CHAPTER I — THE NEW COLLECTION SS27",
-      cta: "Discover Now"
-    },
-    hideOverlayText: true
   }
 ];
 
