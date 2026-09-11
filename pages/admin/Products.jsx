@@ -23,7 +23,6 @@ export default function Products() {
     const [editingProduct, setEditingProduct] = useState(null)
     const [refreshTrigger, setRefreshTrigger] = useState(0)
     const [selectedBrandId, setSelectedBrandId] = useState('')
-    const [selectedCategoryId, setSelectedCategoryId] = useState('')
     const [selectedSeasons, setSelectedSeasons] = useState([])
     const [filterPhoto, setFilterPhoto] = useState('all') // 'all', 'with', 'without'
     const [filterVisibility, setFilterVisibility] = useState('all') // 'all', 'visible', 'hidden'
@@ -507,16 +506,13 @@ export default function Products() {
                 (filterPhoto === 'with' && hasPhoto) ||
                 (filterPhoto === 'without' && !hasPhoto);
 
-            const currentCategoryId = p.category_id || p.category?.id;
-            const matchesCategory = !selectedCategoryId || String(currentCategoryId) === String(selectedCategoryId);
-
             const matchesSeason = !selectedSeasons.length || selectedSeasons.includes(p.season);
 
             const matchesVisibility = filterVisibility === 'all' ||
                 (filterVisibility === 'visible' && p.is_published !== false) ||
                 (filterVisibility === 'hidden' && p.is_published === false);
 
-            return matchesSearch && matchesBrand && matchesPhoto && matchesCategory && matchesSeason && matchesVisibility;
+            return matchesSearch && matchesBrand && matchesPhoto && matchesSeason && matchesVisibility;
         })
 
     const { stats, filteredStats } = useMemo(() => {
@@ -560,7 +556,7 @@ export default function Products() {
                             <p style={{ color: '#666', fontSize: '0.75rem', fontWeight: 'bold' }}>
                                 SIN FOTO: <span style={{ color: '#ef4444' }}>{stats.withoutPhoto}</span>
                             </p>
-                            {searchTerm || selectedBrandId || selectedCategoryId || selectedSeasons.length > 0 ? (
+                            {searchTerm || selectedBrandId || selectedSeasons.length > 0 ? (
                                 <p style={{ color: '#c4956a', fontSize: '0.75rem', fontWeight: 'bold', borderLeft: '1px solid #ddd', paddingLeft: '1rem' }}>
                                     FILTRADOS: {filteredStats.total} ({filteredStats.withPhoto} c/foto | {filteredStats.withoutPhoto} s/foto)
                                 </p>
@@ -756,32 +752,6 @@ export default function Products() {
                         <option value="">Todas las marcas</option>
                         {brands.map(b => (
                             <option key={b.id} value={b.id}>{b.name}</option>
-                        ))}
-                    </select>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '1.5rem' }}>
-                    <span style={{ fontSize: '0.75rem', color: '#666', fontWeight: '800', whiteSpace: 'nowrap' }}>CATEGORÍA:</span>
-                    <select
-                        className="admin-input"
-                        value={selectedCategoryId}
-                        onChange={(e) => setSelectedCategoryId(e.target.value)}
-                        style={{
-                            background: '#fff',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: '8px',
-                            padding: '4px 12px',
-                            fontSize: '0.875rem',
-                            color: '#000',
-                            maxWidth: '180px',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        <option value="">Todas</option>
-                        {categories.map(c => (
-                            <option key={c.id} value={c.id}>
-                                {c.displayName} {c.parentName ? `(${c.parentName})` : ''}
-                            </option>
                         ))}
                     </select>
                 </div>
