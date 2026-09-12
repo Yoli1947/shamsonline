@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Search, X, CheckCircle2, Loader, Tag } from 'lucide-react';
-import { getAllProductsForOrdering, updateProduct } from '../../lib/admin';
+import { getAllProductsForOrdering, updateProduct, getSeasons } from '../../lib/admin';
 
 export default function AnticipoSS27() {
     const [products, setProducts] = useState([]);
     const [search, setSearch] = useState('');
     const [selectedBrand, setSelectedBrand] = useState('');
+    const [selectedSeason, setSelectedSeason] = useState('');
+    const [seasons, setSeasons] = useState([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(null);
     const [savedId, setSavedId] = useState(null);
@@ -15,8 +17,9 @@ export default function AnticipoSS27() {
     const loadProducts = async () => {
         setLoading(true);
         try {
-            const data = await getAllProductsForOrdering();
+            const [data, s] = await Promise.all([getAllProductsForOrdering(), getSeasons()]);
             setProducts(data);
+            setSeasons(s);
         } catch (e) {
             console.error(e);
         } finally {
@@ -52,7 +55,8 @@ export default function AnticipoSS27() {
         const q = search.toLowerCase();
         const matchSearch = !q || p.name?.toLowerCase().includes(q) || p.brand?.name?.toLowerCase().includes(q);
         const matchBrand = !selectedBrand || p.brand?.name === selectedBrand;
-        return matchSearch && matchBrand;
+        const matchSeason = !selectedSeason || p.season === selectedSeason;
+        return matchSearch && matchBrand && matchSeason;
     });
 
     const selected = products.filter(p => p.is_anticipo_ss27);
@@ -118,6 +122,14 @@ export default function AnticipoSS27() {
                 >
                     <option value="">Todas las marcas</option>
                     {brands.map(b => <option key={b} value={b}>{b}</option>)}
+                </select>
+                <select
+                    value={selectedSeason}
+                    onChange={e => setSelectedSeason(e.target.value)}
+                    className="bg-white border border-[var(--color-border)] rounded-xl py-2.5 px-4 text-sm focus:outline-none focus:border-black transition-all min-w-[180px]"
+                >
+                    <option value="">Todas las temporadas</option>
+                    {seasons.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
             </div>
 
