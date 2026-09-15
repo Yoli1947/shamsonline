@@ -22,16 +22,6 @@ const slides = [
     hideOverlayText: true
   },
   {
-    image: "/banners/sale 40.jpg",
-    title: "MULTIBRAND / PERRAMUS",
-    subtitle: "WINTER SALE",
-    description: "Calidad y diseño de vanguardia. Descubrí la Winter Sale de Perramus en Multibrand.",
-    objectPosition: "center",
-    letterbox: true,
-    split: { overlaySrc: "/banners/perramus-sale.png", videoSrc: "/banners/videosale.mp4", width: '50%', side: 'right' },
-    hideOverlayText: true
-  },
-  {
     image: "/banners/hunter-22.webp",
     title: "MULTIBRAND / HUNTER",
     subtitle: "COLECCIÓN EXCLUSIVA",
