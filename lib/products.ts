@@ -57,6 +57,7 @@ export function mapProductsToUI(dbProducts: any[]) {
             is_published: p.is_published,
             is_active: p.is_active,
             sort_order: p.sort_order,
+            createdAt: p.created_at || null,
             brandCardUrl: p.brand?.card_image_url,
             is_featured: p.is_featured,
             isSalePick: !!p.is_sale_pick,
@@ -70,6 +71,10 @@ export function mapProductsToUI(dbProducts: any[]) {
         const sortB = b.sort_order || 99999;
         if (sortA !== sortB) {
             return sortA - sortB;
+        }
+        // Sin sort_order manual, el más nuevo (recién ingresado) va primero.
+        if (a.createdAt && b.createdAt && a.createdAt !== b.createdAt) {
+            return a.createdAt < b.createdAt ? 1 : -1;
         }
         const nameA = a.name || '';
         const nameB = b.name || '';

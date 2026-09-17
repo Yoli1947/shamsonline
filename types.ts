@@ -26,6 +26,7 @@ export interface Product {
   is_published?: boolean;
   is_active?: boolean;
   sort_order?: number;
+  createdAt?: string | null;
   brandCardUrl?: string;
   is_featured?: boolean;
   isSalePick?: boolean;
