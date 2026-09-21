@@ -1269,9 +1269,12 @@ const Store: React.FC = () => {
                                     </section>
                                 )}
 
-                                <div id="brands">
-                                    <BrandMarquee />
-                                </div>
+                                {/* Marquee de marcas oculto a pedido (2026-09-21) - dejar código para reactivar más adelante */}
+                                {false && (
+                                    <div id="brands">
+                                        <BrandMarquee />
+                                    </div>
+                                )}
                         {/* Sección "Modelos más pedidos esta semana" oculta a pedido (2026-08-18) - dejar código para reactivar más adelante */}
                         {false && brandDiscounts.length > 0 && (
                             <section className="py-10 px-4 md:px-12 max-w-screen-2xl mx-auto">
