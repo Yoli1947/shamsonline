@@ -1879,8 +1879,13 @@ const Store: React.FC = () => {
                             const isAbrigo = (p: any) => { const cat = (p.category || '').toUpperCase(); return cat.includes('ABRIGO') || cat.includes('CAMPERA') || cat.includes('PAÑO') || cat.includes('PILOTO'); };
                             const getGenders = (p: any) => (p.features || []).map((f: string) => f?.toLowerCase());
 
-                            const clothing = filteredProducts.filter(p => !isBottom(p));
-                            const accessories = filteredProducts.filter(p => isBottom(p));
+                            // "Anticipo SS27" arranca primero en Toda la Colección, el resto de la
+                            // colección se arma como siempre debajo (sin repetir estos productos).
+                            const anticipoItems = filteredProducts.filter((p: any) => p.isAnticipoSS27);
+                            const restProducts = filteredProducts.filter((p: any) => !p.isAnticipoSS27);
+
+                            const clothing = restProducts.filter(p => !isBottom(p));
+                            const accessories = restProducts.filter(p => isBottom(p));
 
                             // Prioriza los abrigos más caros al frente de cada cola de género
                             const byAbrigoCaroFirst = (a: any, b: any) => {
@@ -1899,7 +1904,7 @@ const Store: React.FC = () => {
                             const result: any[] = [];
                             while (queues.some(q => q.length > 0)) { for (const q of queues) { if (q.length > 0) result.push(q.shift()); } }
 
-                            const ordered = [...result, ...accessories];
+                            const ordered = [...anticipoItems, ...result, ...accessories];
                             const visible = ordered.slice(0, visibleProductsCount);
 
                             return (
