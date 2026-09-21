@@ -137,6 +137,17 @@ const Store: React.FC = () => {
         salePauseTimeoutRef.current = setTimeout(() => { salePausedRef.current = false; }, 1800);
     };
 
+    // Mismo patrón que el carrusel de Sale, para "Nuestros Elegidos" (debajo del Hero).
+    const picksScrollRef = useRef<HTMLDivElement>(null);
+    const [picksScrollPos, setPicksScrollPos] = useState(0);
+    const picksPausedRef = useRef(false);
+    const picksPauseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const pausePicksAutoScroll = () => {
+        picksPausedRef.current = true;
+        if (picksPauseTimeoutRef.current) clearTimeout(picksPauseTimeoutRef.current);
+        picksPauseTimeoutRef.current = setTimeout(() => { picksPausedRef.current = false; }, 1800);
+    };
+
     const [isBrandFilterOpen, setIsBrandFilterOpen] = useState(false);
     const [isSizeFilterOpen, setIsSizeFilterOpen] = useState(false);
     const [isCategoryFilterOpen, setIsCategoryFilterOpen] = useState(false);
@@ -210,6 +221,41 @@ const Store: React.FC = () => {
         return () => {
             clearInterval(intervalId);
             if (salePauseTimeoutRef.current) clearTimeout(salePauseTimeoutRef.current);
+            el.removeEventListener('touchstart', handleStart);
+            el.removeEventListener('touchend', handleEnd);
+            el.removeEventListener('mousedown', handleStart);
+            window.removeEventListener('mouseup', handleEnd);
+        };
+    }, [products]);
+
+    // Auto-scroll del carrusel "Nuestros Elegidos" (debajo del Hero) — mismo mecanismo que el de Sale.
+    useEffect(() => {
+        const el = picksScrollRef.current;
+        if (!el) return;
+
+        const handleStart = () => {
+            picksPausedRef.current = true;
+            if (picksPauseTimeoutRef.current) clearTimeout(picksPauseTimeoutRef.current);
+        };
+        const handleEnd = () => pausePicksAutoScroll();
+
+        el.addEventListener('touchstart', handleStart, { passive: true });
+        el.addEventListener('touchend', handleEnd, { passive: true });
+        el.addEventListener('mousedown', handleStart);
+        window.addEventListener('mouseup', handleEnd);
+
+        const intervalId = setInterval(() => {
+            if (picksPausedRef.current) return;
+            if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 2) {
+                el.scrollLeft = 0;
+            } else {
+                el.scrollLeft += 1;
+            }
+        }, 30);
+
+        return () => {
+            clearInterval(intervalId);
+            if (picksPauseTimeoutRef.current) clearTimeout(picksPauseTimeoutRef.current);
             el.removeEventListener('touchstart', handleStart);
             el.removeEventListener('touchend', handleEnd);
             el.removeEventListener('mousedown', handleStart);
@@ -1166,6 +1212,63 @@ const Store: React.FC = () => {
                         {!selectedBrand && !selectedGender && !selectedCategory && !skuParam && !selectedProduct && !window.location.pathname.includes('/producto/') && (
                             <>
                                 <Hero />
+
+                                {/* Sección Editorial: Nuestros Elegidos (curaduría manual vía "Últimos Ingresos" en el admin) */}
+                                {popularProducts.length > 0 && (
+                                    <section className="py-10">
+                                        <h2 className="text-center uppercase tracking-[0.3em] text-sm md:text-base font-bold text-[var(--color-text)] mb-6 px-4">
+                                            NUESTROS ELEGIDOS
+                                        </h2>
+                                        <div className="relative px-4 md:px-12">
+                                            {picksScrollPos > 20 && (
+                                                <button
+                                                    onClick={() => { pausePicksAutoScroll(); picksScrollRef.current?.scrollBy({ left: -420, behavior: 'smooth' }); }}
+                                                    className="hidden md:flex absolute left-1 top-[38%] -translate-y-1/2 z-20 w-11 h-11 rounded-none bg-white border-2 border-[var(--color-text)]/20 items-center justify-center text-[var(--color-text)] active:scale-95 transition-all shadow-xl"
+                                                >
+                                                    <ChevronLeft size={22} strokeWidth={2.5} />
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => { pausePicksAutoScroll(); picksScrollRef.current?.scrollBy({ left: 420, behavior: 'smooth' }); }}
+                                                className="hidden md:flex absolute right-1 top-[38%] -translate-y-1/2 z-20 w-11 h-11 rounded-none bg-white border-2 border-[var(--color-text)]/20 items-center justify-center text-[var(--color-text)] active:scale-95 transition-all shadow-xl"
+                                            >
+                                                <ChevronRight size={22} strokeWidth={2.5} />
+                                            </button>
+                                            <div
+                                                ref={picksScrollRef}
+                                                onScroll={(e) => setPicksScrollPos((e.target as HTMLDivElement).scrollLeft)}
+                                                className="flex gap-3 md:gap-5 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
+                                            >
+                                                {popularProducts.map((product: any) => (
+                                                    <div
+                                                        key={product.id}
+                                                        onClick={() => setSelectedProduct(product)}
+                                                        className="relative shrink-0 group cursor-pointer flex flex-col"
+                                                        style={{ width: '26vw', minWidth: '260px' }}
+                                                    >
+                                                        <div className="aspect-[3/4] relative overflow-hidden">
+                                                            <img
+                                                                src={product.image}
+                                                                alt={product.name}
+                                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                                                loading="lazy"
+                                                            />
+                                                        </div>
+                                                        <div className="pt-3 px-1 flex flex-col gap-1">
+                                                            <p className="text-[var(--color-text)] text-[11px] md:text-sm font-semibold uppercase tracking-wide truncate">
+                                                                {product.name}
+                                                            </p>
+                                                            <span className="text-[var(--color-text)] text-[13px] md:text-base font-black tracking-tighter">
+                                                                ${product.price.toLocaleString()}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </section>
+                                )}
+
                                 <div id="brands">
                                     <BrandMarquee />
                                 </div>
