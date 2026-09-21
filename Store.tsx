@@ -1937,6 +1937,12 @@ const Store: React.FC = () => {
                                     const cat = (p.category?.name || '').toUpperCase();
                                     return cat.includes('ACCESORIO') || cat.includes('CALZADO') || cat.includes('BOLSO') || cat.includes('CARTERA') ? 1 : 0;
                                 };
+                                // En Hombre/Mujer, la temporada nueva (Anticipo SS27) arranca primero.
+                                if (selectedGender) {
+                                    const aAnticipo = a.isAnticipoSS27 ? 0 : 1;
+                                    const bAnticipo = b.isAnticipoSS27 ? 0 : 1;
+                                    if (aAnticipo !== bAnticipo) return aAnticipo - bAnticipo;
+                                }
                                 return isBottom(a) - isBottom(b);
                             });
                             const visible = ordered.slice(0, visibleProductsCount);
