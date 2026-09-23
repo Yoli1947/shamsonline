@@ -87,7 +87,22 @@ export default function Products() {
                     .or(`name.ilike.%${term}%,sku.ilike.%${term}%,provider_sku.ilike.%${term}%`)
                     .limit(200)
                 if (error) throw error
-                const results = data || []
+                // La DB no devuelve nada ordenado por relevancia — lo ordenamos acá:
+                // primero lo que arranca con lo que se escribió, después lo que lo
+                // contiene en cualquier lado, y alfabético como desempate.
+                const termLower = term.toLowerCase()
+                const relevance = (p) => {
+                    const name = (p.name || '').toLowerCase()
+                    if (name.startsWith(termLower)) return 0
+                    if (name.includes(termLower)) return 1
+                    return 2
+                }
+                const results = (data || []).sort((a, b) => {
+                    const relA = relevance(a)
+                    const relB = relevance(b)
+                    if (relA !== relB) return relA - relB
+                    return (a.name || '').localeCompare(b.name || '')
+                })
                 setDbSearchResults(results)
                 setProducts(results)   // <-- reemplaza directamente lo que se muestra
             } catch (e) {
