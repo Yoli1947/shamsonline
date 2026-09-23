@@ -76,6 +76,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onOpenD
       <div
         className="relative aspect-[2/3] md:aspect-[3/4] overflow-hidden rounded-sm md:rounded-none bg-[var(--color-background-alt)] border border-[var(--color-border)] neo-glow transition-all duration-700 shadow-sm cursor-zoom-in"
         onClick={() => onOpenDetail(product)}
+        onMouseEnter={() => { if (images.length > 1) setHoverIndex(1); }}
+        onMouseLeave={() => setHoverIndex(0)}
         onTouchStart={(e) => {
           (e.currentTarget as any).touchStartX = e.touches[0].clientX;
         }}

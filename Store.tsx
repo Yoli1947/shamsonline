@@ -1418,6 +1418,7 @@ const Store: React.FC = () => {
                                                 const discountPct = product.__listPrice
                                                     ? Math.round((1 - product.__currentPrice / product.__listPrice) * 100)
                                                     : null;
+                                                const saleSecondImage = (product.images || []).find((url: string) => url && url !== product.image);
                                                 return (
                                                     <div
                                                         key={product.id}
@@ -1429,9 +1430,17 @@ const Store: React.FC = () => {
                                                             <img
                                                                 src={product.image}
                                                                 alt={product.name}
-                                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                                                className={`w-full h-full object-cover transition-opacity duration-500 ${saleSecondImage ? 'group-hover:opacity-0' : 'group-hover:scale-105 transition-transform'}`}
                                                                 loading="lazy"
                                                             />
+                                                            {saleSecondImage && (
+                                                                <img
+                                                                    src={saleSecondImage}
+                                                                    alt={product.name}
+                                                                    className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                                                                    loading="lazy"
+                                                                />
+                                                            )}
                                                             {discountPct !== null && (
                                                                 <span className="absolute top-3 left-3 bg-red-600 text-white text-[10px] md:text-xs font-black px-2 py-1 uppercase tracking-tighter">
                                                                     -{discountPct}%
