@@ -1239,7 +1239,9 @@ const Store: React.FC = () => {
                                                 onScroll={(e) => setPicksScrollPos((e.target as HTMLDivElement).scrollLeft)}
                                                 className="flex gap-3 md:gap-5 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
                                             >
-                                                {popularProducts.map((product: any) => (
+                                                {popularProducts.map((product: any) => {
+                                                    const secondImage = (product.images || []).find((url: string) => url && url !== product.image);
+                                                    return (
                                                     <div
                                                         key={product.id}
                                                         onClick={() => setSelectedProduct(product)}
@@ -1250,9 +1252,17 @@ const Store: React.FC = () => {
                                                             <img
                                                                 src={product.image}
                                                                 alt={product.name}
-                                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                                                className={`w-full h-full object-cover transition-opacity duration-500 ${secondImage ? 'group-hover:opacity-0' : 'group-hover:scale-105 transition-transform'}`}
                                                                 loading="lazy"
                                                             />
+                                                            {secondImage && (
+                                                                <img
+                                                                    src={secondImage}
+                                                                    alt={product.name}
+                                                                    className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                                                                    loading="lazy"
+                                                                />
+                                                            )}
                                                         </div>
                                                         <div className="pt-3 px-1 flex flex-col gap-1">
                                                             <p className="text-[var(--color-text)] text-[11px] md:text-sm font-semibold uppercase tracking-wide truncate">
@@ -1263,7 +1273,8 @@ const Store: React.FC = () => {
                                                             </span>
                                                         </div>
                                                     </div>
-                                                ))}
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     </section>
