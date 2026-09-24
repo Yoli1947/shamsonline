@@ -1899,14 +1899,6 @@ const Store: React.FC = () => {
                             const isAbrigo = (p: any) => { const cat = (p.category || '').toUpperCase(); return cat.includes('ABRIGO') || cat.includes('CAMPERA') || cat.includes('PAÑO') || cat.includes('PILOTO'); };
                             const getGenders = (p: any) => (p.features || []).map((f: string) => f?.toLowerCase());
 
-                            // "Anticipo SS27" arranca primero en Toda la Colección, el resto de la
-                            // colección se arma como siempre debajo (sin repetir estos productos).
-                            const anticipoItems = filteredProducts.filter((p: any) => p.isAnticipoSS27);
-                            const restProducts = filteredProducts.filter((p: any) => !p.isAnticipoSS27);
-
-                            const clothing = restProducts.filter(p => !isBottom(p));
-                            const accessories = restProducts.filter(p => isBottom(p));
-
                             // Prioriza los abrigos más caros al frente de cada cola de género
                             const byAbrigoCaroFirst = (a: any, b: any) => {
                                 const aAb = isAbrigo(a) ? 1 : 0;
@@ -1915,16 +1907,29 @@ const Store: React.FC = () => {
                                 return (b.price || 0) - (a.price || 0);
                             };
 
-                            const hombreQueue = clothing.filter(p => getGenders(p).includes('hombre')).sort(byAbrigoCaroFirst);
-                            const mujerQueue = clothing.filter(p => getGenders(p).includes('mujer')).sort(byAbrigoCaroFirst);
-                            const otrosQueue = clothing.filter(p => { const g = getGenders(p); return !g.includes('hombre') && !g.includes('mujer'); }).sort(byAbrigoCaroFirst);
+                            // Round-robin Hombre/Mujer/Otros (accesorios al final de ese grupo),
+                            // para que la colección se vea mezclada, como armando conjuntos.
+                            const buildGroupOrder = (items: any[]) => {
+                                const clothing = items.filter(p => !isBottom(p));
+                                const accessories = items.filter(p => isBottom(p));
+                                const hombreQueue = clothing.filter(p => getGenders(p).includes('hombre')).sort(byAbrigoCaroFirst);
+                                const mujerQueue = clothing.filter(p => getGenders(p).includes('mujer')).sort(byAbrigoCaroFirst);
+                                const otrosQueue = clothing.filter(p => { const g = getGenders(p); return !g.includes('hombre') && !g.includes('mujer'); }).sort(byAbrigoCaroFirst);
+                                const queues = [hombreQueue, mujerQueue, otrosQueue];
+                                const result: any[] = [];
+                                while (queues.some(q => q.length > 0)) { for (const q of queues) { if (q.length > 0) result.push(q.shift()); } }
+                                return [...result, ...accessories];
+                            };
 
-                            // Round-robin Hombre/Mujer/Otros para que la colección se vea mezclada, como armando conjuntos
-                            const queues = [hombreQueue, mujerQueue, otrosQueue];
-                            const result: any[] = [];
-                            while (queues.some(q => q.length > 0)) { for (const q of queues) { if (q.length > 0) result.push(q.shift()); } }
+                            // "Anticipo SS27" (temporada nueva) arranca primero en Toda la Colección.
+                            // La temporada de invierno (OI) queda relegada al final de todo.
+                            const isInvierno = (p: any) => (p.season || '').toUpperCase().startsWith('OI');
+                            const anticipoItems = filteredProducts.filter((p: any) => p.isAnticipoSS27);
+                            const nonAnticipo = filteredProducts.filter((p: any) => !p.isAnticipoSS27);
+                            const restProducts = nonAnticipo.filter((p: any) => !isInvierno(p));
+                            const winterProducts = nonAnticipo.filter((p: any) => isInvierno(p));
 
-                            const ordered = [...anticipoItems, ...result, ...accessories];
+                            const ordered = [...anticipoItems, ...buildGroupOrder(restProducts), ...buildGroupOrder(winterProducts)];
                             const visible = ordered.slice(0, visibleProductsCount);
 
                             return (
@@ -1957,11 +1962,16 @@ const Store: React.FC = () => {
                                     const cat = (p.category?.name || '').toUpperCase();
                                     return cat.includes('ACCESORIO') || cat.includes('CALZADO') || cat.includes('BOLSO') || cat.includes('CARTERA') ? 1 : 0;
                                 };
-                                // En Hombre/Mujer, la temporada nueva (Anticipo SS27) arranca primero.
+                                // En Hombre/Mujer, la temporada nueva (Anticipo SS27) arranca primero
+                                // y la de invierno (OI) queda relegada al final de todo.
                                 if (selectedGender) {
                                     const aAnticipo = a.isAnticipoSS27 ? 0 : 1;
                                     const bAnticipo = b.isAnticipoSS27 ? 0 : 1;
                                     if (aAnticipo !== bAnticipo) return aAnticipo - bAnticipo;
+                                    const isInvierno = (p: any) => (p.season || '').toUpperCase().startsWith('OI') ? 1 : 0;
+                                    const aWinter = isInvierno(a);
+                                    const bWinter = isInvierno(b);
+                                    if (aWinter !== bWinter) return aWinter - bWinter;
                                 }
                                 return isBottom(a) - isBottom(b);
                             });

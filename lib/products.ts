@@ -58,6 +58,7 @@ export function mapProductsToUI(dbProducts: any[]) {
             is_active: p.is_active,
             sort_order: p.sort_order,
             createdAt: p.created_at || null,
+            season: p.season || null,
             brandCardUrl: p.brand?.card_image_url,
             is_featured: p.is_featured,
             isSalePick: !!p.is_sale_pick,
