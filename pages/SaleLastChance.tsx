@@ -48,7 +48,7 @@ const SaleLastChance: React.FC = () => {
         let isMounted = true;
 
         try {
-            const cached = JSON.parse(localStorage.getItem('shams_products_v19') || '[]');
+            const cached = JSON.parse(localStorage.getItem('shams_products_v20') || '[]');
             if (cached.length > 0) {
                 setProducts(cached);
                 setLoading(false);

@@ -24,7 +24,14 @@ export function mapProductsToUI(dbProducts: any[]) {
 
         const galleryImages: any[] = [];
         if (p.images && p.images.length > 0) {
-            p.images.forEach((img: any) => galleryImages.push({ url: img.url, color: img.alt_text || 'Principal', isPrimary: !!img.is_primary }));
+            // La DB no garantiza el orden de las fotos embebidas: la principal va
+            // primero y el resto respeta el orden que se definió en el admin.
+            [...p.images]
+                .sort((a: any, b: any) => {
+                    if (!!a.is_primary !== !!b.is_primary) return a.is_primary ? -1 : 1;
+                    return (a.sort_order ?? 0) - (b.sort_order ?? 0);
+                })
+                .forEach((img: any) => galleryImages.push({ url: img.url, color: img.alt_text || 'Principal', isPrimary: !!img.is_primary }));
         }
 
         const legacyUrls = [p.image_url, p.image_url_2, p.image_url_3, p.image_url_4].filter(Boolean);
