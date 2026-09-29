@@ -1215,7 +1215,7 @@ const Store: React.FC = () => {
                                 {popularProducts.length > 0 && (
                                     <section className="py-10">
                                         <h2 className="text-center uppercase tracking-[0.3em] text-sm md:text-base font-bold text-[var(--color-text)] mb-6 px-4">
-                                            NUESTROS ELEGIDOS
+                                            NUESTROS ELEGIDOS PARA MAMÁ
                                         </h2>
                                         <div className="relative px-4 md:px-12">
                                             {picksScrollPos > 20 && (
