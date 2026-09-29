@@ -6,19 +6,9 @@ const slides = [
   {
     image: "/banners/perramus-verano-foto.jpg",
     title: "MULTIBRAND / PERRAMUS",
-    subtitle: "NUEVA TEMPORADA",
-    description: "Descubrí la nueva temporada de verano de Perramus en Multibrand.",
-    objectPosition: "center top",
-    letterbox: true,
-    split: { videoSrc: "/banners/perramus-verano-video.mp4", width: '50%', side: 'right', wordmark: "PERRAMUS" },
-    captionOverlay: {
-      kicker: "Preview",
-      title: "Sense of Discovery",
-      subtitle: "(Love of adventure)",
-      brand: "PERRAMUS, SINCE 1922",
-      chapter: "CHAPTER I — THE NEW COLLECTION SS27",
-      cta: "Discover Now"
-    },
+    subtitle: "DÍA DE LA MADRE",
+    description: "Regalale Perramus en su día.",
+    fullVideo: "/banners/perramus-dia-de-la-madre.mp4",
     hideOverlayText: true
   },
   {
@@ -62,8 +52,10 @@ const Hero: React.FC = () => {
     // El slide con video necesita más tiempo: el archivo tarda unos segundos en
     // empezar a reproducirse, y con la duración normal (4s) rotaba antes de que
     // se llegara a ver.
-    const hasVideo = !!(slides[currentSlide] as any)?.split?.videoSrc;
-    const duration = hasVideo ? (isMobile ? 7000 : 10000) : (isMobile ? 2500 : 4000);
+    const current = slides[currentSlide] as any;
+    const hasVideo = !!current?.split?.videoSrc;
+    const duration = current?.fullVideo ? (isMobile ? 9000 : 12000)
+      : hasVideo ? (isMobile ? 7000 : 10000) : (isMobile ? 2500 : 4000);
     const timer = setTimeout(nextSlide, duration);
     return () => clearTimeout(timer);
   }, [nextSlide, currentSlide]);
@@ -87,7 +79,37 @@ const Hero: React.FC = () => {
             index === currentSlide ? 'opacity-100 z-10 scale-100' : 'opacity-0 z-0 scale-105'
           } ${(slide as any).bgColor || 'bg-black'}`}
         >
-          {(slide as any).letterbox ? (
+          {(slide as any).fullVideo ? (
+            <div className="absolute inset-0">
+              <video
+                src={(slide as any).fullVideo}
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+              <div className="absolute inset-x-0 bottom-10 md:bottom-16 flex flex-col items-center gap-2 md:gap-3 text-center px-4 z-20">
+                <p className="text-white text-[10px] md:text-sm font-bold uppercase tracking-[0.35em] drop-shadow-lg">
+                  Perramus
+                </p>
+                <h2 className="font-serif font-bold text-white uppercase tracking-tight text-3xl sm:text-4xl md:text-6xl drop-shadow-2xl">
+                  {slide.subtitle}
+                </h2>
+                <p className="text-white text-[10px] md:text-sm tracking-[0.2em] uppercase font-light drop-shadow-2xl">
+                  {slide.description}
+                </p>
+                <button
+                  onClick={scrollToCollection}
+                  className="mt-2 md:mt-4 bg-white text-black px-6 py-3 md:px-12 md:py-4 rounded-none font-bold text-[10px] md:text-xs tracking-[0.3em] md:tracking-[0.4em] ver-coleccion-btn transition-all flex items-center gap-2 md:gap-3 shadow-2xl uppercase border border-white/20 group relative z-[70] cursor-pointer"
+                >
+                  SHOP NOW <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
+                </button>
+              </div>
+            </div>
+          ) : (slide as any).letterbox ? (
             <div className={`absolute inset-0 flex flex-col items-center justify-start md:justify-center pt-4 md:pt-0 gap-6 md:gap-10 px-4 ${(slide as any).bgColor || 'bg-black'}`}>
               <div className={`relative w-full ${(slide as any).mobileAspect === '3/4' || (slide as any).split ? 'aspect-[3/4]' : 'aspect-[4/3]'} ${(slide as any).desktopAspect === '3/2' ? 'md:aspect-[3/2]' : 'md:aspect-[1920/636]'}`}>
                 <img
