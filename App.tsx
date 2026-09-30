@@ -1,7 +1,8 @@
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useLayoutEffect } from 'react';
+import { useLayoutEffect, useEffect } from 'react';
 import { AuthProvider } from './context/AuthContext';
+import { supabase } from './lib/supabase';
 import { SettingsProvider } from './context/SettingsContext';
 
 // Carga inmediata: Store principal y widgets siempre visibles
@@ -56,6 +57,41 @@ const ScrollToTop = () => {
   return null;
 };
 
+// Contador de visitas propio (se ve en el Dashboard del admin). Cada página
+// cuenta una vez por sesión del navegador, así abrir/cerrar un producto no
+// infla los números. El visitante se identifica con un id anónimo aleatorio.
+const VisitTracker = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    if (pathname.startsWith('/admin')) return;
+    // Solo el sitio real: las pruebas en localhost usan la misma base y no deben contar.
+    if (!['multibrandrosario.com', 'www.multibrandrosario.com'].includes(window.location.hostname)) return;
+    try {
+      const seen: string[] = JSON.parse(sessionStorage.getItem('mb_seen_paths') || '[]');
+      if (seen.includes(pathname)) return;
+      sessionStorage.setItem('mb_seen_paths', JSON.stringify([...seen, pathname]));
+
+      let visitorId = localStorage.getItem('mb_visitor_id');
+      if (!visitorId) {
+        visitorId = crypto.randomUUID();
+        localStorage.setItem('mb_visitor_id', visitorId);
+      }
+
+      const referrer = document.referrer && !document.referrer.startsWith(window.location.origin)
+        ? document.referrer.slice(0, 300)
+        : null;
+
+      supabase
+        .from('page_views')
+        .insert({ path: pathname.slice(0, 300), visitor_id: visitorId, referrer })
+        .then(() => {}, () => {});
+    } catch {
+      // Sin storage (modo privado estricto, etc.): simplemente no se cuenta.
+    }
+  }, [pathname]);
+  return null;
+};
+
 // Muestra widgets solo en páginas públicas
 const PublicFloatingWidgets = () => {
   const { pathname } = useLocation();
@@ -81,6 +117,7 @@ const App: React.FC = () => {
       <SettingsProvider>
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <ScrollToTop />
+        <VisitTracker />
         <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* Public Store Route */}
