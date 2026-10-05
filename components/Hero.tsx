@@ -21,14 +21,16 @@ const slides = [
     shrinkMobile: true
   },
   {
-    image: "/banners/nautica-banner.webp",
+    image: "/banners/nautica-verano-2027.webp",
     title: "MULTIBRAND / NAUTICA",
-    subtitle: "AUTUMN / WINTER 2026",
-    description: "Herencia náutica, mirada contemporánea.",
-    objectPosition: "80% center",
+    subtitle: "SUMMER 2027",
+    description: "Herencia náutica. Una nueva forma de vivir el verano.",
+    objectPosition: "85% center",
     letterbox: true,
     mobileAspect: "3/4",
-    captionLogo: "/banners/nautica-logo.png",
+    // La imagen ya trae su propio texto en el panel blanco: no se superpone
+    // logo/descripción, solo el botón debajo de ese texto.
+    ownText: true,
     hideOverlayText: true,
     bgColor: "bg-white",
     captionDark: true
@@ -192,7 +194,17 @@ const Hero: React.FC = () => {
                   </div>
                 )}
                 {/* Texto y marca superpuestos sobre la imagen (lado de la foto, no sobre el panel izquierdo) */}
-                {!(slide as any).split && (
+                {(slide as any).ownText && (
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 md:bottom-[16%] md:left-[21.4%] z-20">
+                    <button
+                      onClick={scrollToCollection}
+                      className="bg-black text-white px-6 py-3 md:px-10 md:py-3.5 rounded-none font-bold text-[10px] md:text-xs tracking-[0.3em] md:tracking-[0.4em] transition-all flex items-center gap-2 md:gap-3 shadow-xl uppercase group cursor-pointer whitespace-nowrap hover:bg-[#1f2a44]"
+                    >
+                      SHOP NOW <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
+                    </button>
+                  </div>
+                )}
+                {!(slide as any).split && !(slide as any).ownText && (
                   <div
                     className="absolute inset-0 flex flex-col items-center justify-center gap-2 md:gap-4 text-center px-3 py-3"
                   >
