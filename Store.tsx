@@ -1371,12 +1371,14 @@ const Store: React.FC = () => {
                                 })
                                 .map((p: any) => {
                                     // La curaduría es manual (isSalePick) — un producto puede entrar acá
-                                    // aunque no tenga descuento cargado, así que el precio "de lista"
-                                    // solo se calcula si realmente hay uno.
+                                    // aunque no tenga descuento cargado. Solo se tacha un precio si hay un
+                                    // SALE real (compareAtPrice); el precio mostrado es el mismo que cobra
+                                    // el carrito (un sale_price legado ya no se muestra como precio).
                                     const hasNewSaleFlag = !!p.compareAtPrice && p.compareAtPrice > p.originalPrice;
-                                    const hasLegacySale = !!p.originalPrice && p.originalPrice > p.price;
-                                    const listPrice = hasNewSaleFlag ? p.compareAtPrice : (hasLegacySale ? p.originalPrice : null);
-                                    const currentPrice = hasNewSaleFlag ? p.originalPrice : p.price;
+                                    const listPrice = hasNewSaleFlag ? p.compareAtPrice : null;
+                                    const currentPrice = hasNewSaleFlag
+                                        ? p.originalPrice
+                                        : (p.originalPrice > p.price ? p.originalPrice : p.price);
                                     return { ...p, __listPrice: listPrice, __currentPrice: currentPrice };
                                 })
                                 .sort((a: any, b: any) => {

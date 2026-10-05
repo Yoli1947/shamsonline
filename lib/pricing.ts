@@ -1,12 +1,12 @@
 import { Product } from '../types';
 
 /**
- * Precio de crédito/débito y de transferencia para un producto.
+ * Precio de crédito/débito y de transferencia/efectivo para un producto.
  *
- * Cuando el producto está en SALE (compareAtPrice != null), el precio de
- * transferencia se calcula siempre sobre el price vigente (ya con el SALE
- * aplicado) al % configurado — ignorando cualquier sale_price legado, para
- * no aplicar el descuento dos veces.
+ * El precio de transferencia es SIEMPRE el de crédito menos el % configurado,
+ * igual que lo que cobra el checkout. Antes, si el producto tenía un sale_price
+ * legado, se mostraba ese valor como precio de transferencia (ej. -26%), que
+ * no coincidía con lo que después se cobraba.
  */
 export function getProductPricing(product: Product, transferDiscount: number) {
     const isOnSale = !!product.compareAtPrice && product.compareAtPrice > product.originalPrice;
@@ -15,11 +15,7 @@ export function getProductPricing(product: Product, transferDiscount: number) {
         ? product.originalPrice
         : (product.originalPrice > product.price ? product.originalPrice : (product.price || 0));
 
-    const transferPrice = isOnSale
-        ? Math.round(product.originalPrice * (1 - transferDiscount / 100))
-        : (product.originalPrice > product.price
-            ? product.price
-            : Math.round((product.price || 0) * (1 - transferDiscount / 100)));
+    const transferPrice = Math.round(creditPrice * (1 - transferDiscount / 100));
 
     const discountPct = creditPrice > 0 ? Math.round((creditPrice - transferPrice) / creditPrice * 100) : 0;
     const saleDiscountPct = isOnSale ? Math.round((1 - product.originalPrice / product.compareAtPrice!) * 100) : 0;
