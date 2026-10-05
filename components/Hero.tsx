@@ -12,13 +12,17 @@ const slides = [
     hideOverlayText: true
   },
   {
-    image: "/banners/hunter-22.webp",
+    image: "/banners/hunter-kate.webp",
     title: "MULTIBRAND / HUNTER",
     subtitle: "COLECCIÓN EXCLUSIVA",
     description: "Resiliencia y estilo icónico para el aire libre. La sofisticación de las botas Hunter en Multibrand.",
-    objectPosition: "center",
+    // Foto 4:3: en desktop se corre el recorte hacia arriba para no cortar la
+    // cara; en celular se centra en la modelo (está a la derecha de la foto).
+    objectPosition: "62% 30%",
     logo: true,
-    shrinkMobile: true
+    // El bloque de texto va a la izquierda (desktop) / abajo (celular) para no
+    // tapar a la modelo ni las botas.
+    overlayAlign: 'left'
   },
   {
     image: "/banners/nautica-verano-2027.webp",
@@ -270,8 +274,12 @@ const Hero: React.FC = () => {
       ))}
 
       {/* Content Area */}
-      {!(slides[currentSlide] as any).hideOverlayText && (
-      <div className="relative z-[60] text-center px-4 md:px-6 max-w-5xl mt-12 md:mt-16">
+      {!(slides[currentSlide] as any).hideOverlayText && (() => {
+        const alignLeft = (slides[currentSlide] as any).overlayAlign === 'left';
+        return (
+      <div className={`relative z-[60] text-center px-4 md:px-6 ${alignLeft
+        ? 'mt-auto mb-24 md:mb-0 md:mt-0 md:self-start md:ml-[6%] md:text-left max-w-xl'
+        : 'max-w-5xl mt-12 md:mt-16'}`}>
 
         {/* Animated Slide Content */}
         <div key={currentSlide} className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
@@ -285,7 +293,7 @@ const Hero: React.FC = () => {
 
           {/* Title */}
           {(slides[currentSlide] as any).logo ? (
-            <div className="mb-6 flex justify-center">
+            <div className={`mb-6 flex justify-center ${alignLeft ? 'md:justify-start' : ''}`}>
               <div className="inline-block bg-white border-4 border-[#E2001A] px-8 py-3 md:px-14 md:py-5 shadow-2xl">
                 <span className="text-black font-black text-3xl md:text-7xl tracking-tight uppercase">
                   {slides[currentSlide].title.split(' / ')[1]}
@@ -299,20 +307,21 @@ const Hero: React.FC = () => {
           )}
 
           {/* Description */}
-          <p className="text-white/90 text-sm md:text-xl max-w-2xl mx-auto mb-12 font-light leading-relaxed tracking-widest drop-shadow-xl italic">
+          <p className={`text-white/90 text-sm md:text-xl max-w-2xl mx-auto mb-12 font-light leading-relaxed tracking-widest drop-shadow-xl italic ${alignLeft ? 'md:mx-0' : ''}`}>
             {slides[currentSlide].description}
           </p>
 
           {/* Button */}
           <button
             onClick={scrollToCollection}
-            className="bg-white text-black px-12 py-4 md:px-16 md:py-5 rounded-none font-bold text-[11px] md:text-xs tracking-[0.5em] ver-coleccion-btn transition-all flex items-center gap-4 mx-auto shadow-2xl uppercase border-2 border-[#E2001A] group relative z-[70] cursor-pointer"
+            className={`bg-white text-black px-12 py-4 md:px-16 md:py-5 rounded-none font-bold text-[11px] md:text-xs tracking-[0.5em] ver-coleccion-btn transition-all flex items-center gap-4 mx-auto shadow-2xl uppercase border-2 border-[#E2001A] group relative z-[70] cursor-pointer ${alignLeft ? 'md:mx-0' : ''}`}
           >
             SHOP NOW <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
           </button>
         </div>
       </div>
-      )}
+        );
+      })()}
 
       {/* Manual Transition Controls */}
       <button 
