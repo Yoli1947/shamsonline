@@ -12,7 +12,7 @@ const slides = [
     hideOverlayText: true
   },
   {
-    image: "/banners/hunter-kate.webp",
+    image: "/banners/hunter-kate-v2.webp",
     title: "MULTIBRAND / HUNTER",
     subtitle: "COLECCIÓN EXCLUSIVA",
     description: "Resiliencia y estilo icónico para el aire libre. La sofisticación de las botas Hunter en Multibrand.",
