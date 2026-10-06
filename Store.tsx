@@ -1907,24 +1907,27 @@ const Store: React.FC = () => {
                                 return (b.price || 0) - (a.price || 0);
                             };
 
-                            // Round-robin Hombre/Mujer/Otros (accesorios al final de ese grupo),
-                            // para que la colección se vea mezclada, como armando conjuntos.
+                            // Dentro de cada grupo arranca Mujer, después Hombre, después el resto
+                            // (unisex / sin género) y los accesorios al final de ese grupo.
                             const buildGroupOrder = (items: any[]) => {
                                 const clothing = items.filter(p => !isBottom(p));
                                 const accessories = items.filter(p => isBottom(p));
-                                const hombreQueue = clothing.filter(p => getGenders(p).includes('hombre')).sort(byAbrigoCaroFirst);
-                                const mujerQueue = clothing.filter(p => getGenders(p).includes('mujer')).sort(byAbrigoCaroFirst);
-                                const otrosQueue = clothing.filter(p => { const g = getGenders(p); return !g.includes('hombre') && !g.includes('mujer'); }).sort(byAbrigoCaroFirst);
-                                const queues = [hombreQueue, mujerQueue, otrosQueue];
-                                const result: any[] = [];
-                                while (queues.some(q => q.length > 0)) { for (const q of queues) { if (q.length > 0) result.push(q.shift()); } }
-                                return [...result, ...accessories];
+                                const isMujer = (p: any) => getGenders(p).includes('mujer');
+                                const isHombre = (p: any) => !isMujer(p) && getGenders(p).includes('hombre');
+                                const mujer = clothing.filter(isMujer).sort(byAbrigoCaroFirst);
+                                const hombre = clothing.filter(isHombre).sort(byAbrigoCaroFirst);
+                                const otros = clothing.filter(p => !isMujer(p) && !isHombre(p)).sort(byAbrigoCaroFirst);
+                                return [...mujer, ...hombre, ...otros, ...accessories];
                             };
 
                             // "Anticipo SS27" (temporada nueva) arranca primero en Toda la Colección.
                             // La temporada de invierno (OI) queda relegada al final de todo.
                             const isInvierno = (p: any) => (p.season || '').toUpperCase().startsWith('OI');
-                            const anticipoItems = filteredProducts.filter((p: any) => p.isAnticipoSS27);
+                            const anticipoAll = filteredProducts.filter((p: any) => p.isAnticipoSS27);
+                            const anticipoItems = [
+                                ...anticipoAll.filter((p: any) => getGenders(p).includes('mujer')),
+                                ...anticipoAll.filter((p: any) => !getGenders(p).includes('mujer')),
+                            ];
                             const nonAnticipo = filteredProducts.filter((p: any) => !p.isAnticipoSS27);
                             const restProducts = nonAnticipo.filter((p: any) => !isInvierno(p));
                             const winterProducts = nonAnticipo.filter((p: any) => isInvierno(p));
