@@ -6,8 +6,8 @@ const slides = [
   {
     image: "/banners/perramus-verano-foto.jpg",
     title: "MULTIBRAND / PERRAMUS",
-    subtitle: "DÍA DE LA MADRE",
-    description: "Regalale Perramus en su día.",
+    subtitle: "EL PLACER DE IR DESPACIO.",
+    description: "Prendas livianas para acompañar los días a otro ritmo.",
     fullVideo: "/banners/perramus-dia-de-la-madre.mp4",
     hideOverlayText: true
   },
@@ -99,7 +99,7 @@ const Hero: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
               <div className="absolute inset-x-0 bottom-10 md:bottom-16 flex flex-col items-center gap-2 md:gap-3 text-center px-4 z-20">
                 <p className="text-white text-[10px] md:text-sm font-bold uppercase tracking-[0.35em] drop-shadow-lg">
-                  Perramus
+                  CHAPTER III — SS27
                 </p>
                 <h2 className="font-serif font-bold text-white uppercase tracking-tight text-3xl sm:text-4xl md:text-6xl drop-shadow-2xl">
                   {slide.subtitle}
@@ -367,6 +367,5 @@ const Hero: React.FC = () => {
 };
 
 export default Hero;
-
 
 
