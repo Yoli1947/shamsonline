@@ -1,26 +1,28 @@
 @echo off
-cd /d %~dp0
-echo ============================================
-echo      INICIANDO SUBIDA DE CAMBIOS DE SHAMS
-echo ============================================
+title Enviar commits a GitHub
+cd /d "%~dp0"
 
-echo 1. Actualizando banner de MAXG...
-if exist "%USERPROFILE%\Downloads\maxg bannn (1).jpg" (
-    copy /y "%USERPROFILE%\Downloads\maxg bannn (1).jpg" "public\maxg\maxg banner.jpg"
-    echo Banner actualizado.
+echo ======================================================
+echo   ENVIAR COMMITS A GITHUB
+echo ======================================================
+echo.
+echo Este script solo envia commits ya creados.
+echo No agrega archivos ni crea commits automaticamente.
+echo Los cambios sin commit no se enviaran.
+echo.
+git status --short
+echo.
+git push
+if errorlevel 1 (
+    echo.
+    echo ERROR: No se pudieron enviar los commits a GitHub.
+    echo Revisa tu inicio de sesion de GitHub y vuelve a intentar.
+    pause
+    exit /b 1
 )
 
-echo 2. Generando compilado (npm run build)...
-call npm run build
-
-echo 3. Guardando cambios en Git...
-git add .
-git commit -m "Fix filtros moviles sticky final"
-
-echo 4. Subiendo a GitHub para el servidor...
-git push
-
-echo ============================================
-echo   PROCESO TERMINADO - TIENDA ACTUALIZADA
-echo ============================================
+echo.
+echo Commits enviados a GitHub.
+echo Para publicar el sitio, ejecuta SUBIR_AL_SERVIDOR_HOSTINGER.bat
+echo y verifica https://multibrandrosario.com al finalizar.
 pause

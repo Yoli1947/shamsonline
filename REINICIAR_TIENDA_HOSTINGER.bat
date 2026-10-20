@@ -1,27 +1,30 @@
 @echo off
-title SHAMS - Medico del Servidor
-cd /d %~dp0
+title Reinicio opcional de Multibrand
+cd /d "%~dp0"
 
 echo ======================================================
-echo     INICIANDO MANTENIMIENTO DEL SERVIDOR - SHAMS
+echo   REINICIO OPCIONAL DE MULTIBRAND
 echo ======================================================
-
-echo 1. Corrigiendo permisos de archivos en el servidor...
-echo (Si te pide la contraseña de root, escribila y dale ENTER)
-ssh -o ConnectTimeout=10 root@76.13.234.137 "chown -R www-data:www-data /var/www/shamsonline/dist && chmod -R 755 /var/www/shamsonline/dist"
-
-echo 2. Reiniciando servicio Web (Nginx)...
-ssh -o ConnectTimeout=10 root@76.13.234.137 "systemctl restart nginx"
-
-if %ERRORLEVEL% NEQ 0 (
-    echo.
-    echo ❌ ERROR: No se pudo conectar. Revisa tu internet o contraseña.
-) else (
-    echo.
-    echo ======================================================
-    echo      ¡SERVICIOS REINICIADOS CON EXITO!
-    echo      Probá entrar ahora a shamsonline.com.ar ✨
-    echo ======================================================
+echo.
+echo No reinicies normalmente despues de publicar:
+echo el servicio sirve automaticamente el nuevo contenido de dist.
+echo Usa esto solo si el sitio sigue sin actualizarse despues de
+echo verificarlo con Ctrl+F5 o en una ventana de incognito.
+echo.
+set /p CONFIRM=Escribi S para reiniciar multibrand-web:
+if /I not "%CONFIRM%"=="S" (
+    echo Reinicio cancelado.
+    exit /b 1
 )
 
+ssh -o ConnectTimeout=10 tienda@76.13.234.137 "sudo systemctl restart multibrand-web"
+if errorlevel 1 (
+    echo.
+    echo ERROR: No se pudo reiniciar multibrand-web.
+    pause
+    exit /b 1
+)
+
+echo.
+echo Servicio multibrand-web reiniciado.
 pause

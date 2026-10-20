@@ -8,13 +8,14 @@ EchoGiftCard.com es la plataforma central de emisión y gestión de gift cards d
 
 | Dato | Valor |
 |------|-------|
-| **Dominio** | shamsonline.com.ar |
+| **Dominio** | multibrandrosario.com |
 | **Stack** | React 19 + Vite + TypeScript + Supabase |
 | **Supabase project ref** | `rsvcgduyogqljwzbohkz` |
 | **Edge Functions URL** | `https://rsvcgduyogqljwzbohkz.supabase.co/functions/v1/` |
-| **Código fuente en VPS** | `/var/www/shamsonline/` |
-| **Archivos compilados** | `/var/www/shamsonline/dist/` |
-| **Servidor** | Nginx sirve archivos estáticos desde `/dist` |
+| **Repositorio** | `Yoli1947/shamsonline` |
+| **Código fuente en VPS** | `/var/www/multibrand/` |
+| **Archivos compilados** | `/var/www/multibrand/dist/` |
+| **Servidor** | Servicio `multibrand-web` en el puerto `8081` |
 
 ## Lo que ya está hecho (no tocar)
 
@@ -62,7 +63,7 @@ El frontend NUNCA habla directo con EchoGiftCard. Siempre pasa por las Edge Func
 
 ### 1.1 Crear la página
 
-Crear archivo: **`/var/www/shamsonline/pages/GiftCards.tsx`**
+Crear archivo en el repositorio: **`pages/GiftCards.tsx`**
 
 Esta página debe tener:
 
@@ -184,7 +185,7 @@ En el Navbar, agregar:
 
 ### 2.1 Crear componente GiftCardInput
 
-Crear archivo: **`/var/www/shamsonline/components/GiftCardInput.tsx`**
+Crear archivo en el repositorio: **`components/GiftCardInput.tsx`**
 
 ```typescript
 import { useState } from 'react';
@@ -349,7 +350,7 @@ async function handleCheckout() {
 
 ## Parte 3: Actualizar mp-webhook
 
-El webhook actual está en `/var/www/shamsonline/supabase/functions/mp-webhook/index.ts`.
+El webhook actual está en `supabase/functions/mp-webhook/index.ts` dentro del repositorio.
 
 Agregar este código **después** del bloque `case 'approved':` que actualiza la orden:
 
@@ -451,7 +452,7 @@ if (mpStatus === 'approved') {
 
 ```bash
 export SUPABASE_ACCESS_TOKEN=<token>
-cd /var/www/shamsonline
+cd <ruta-local-del-repositorio>
 npx supabase functions deploy mp-webhook --no-verify-jwt --project-ref rsvcgduyogqljwzbohkz
 ```
 
@@ -597,16 +598,39 @@ const res = await fetch(`${FUNCTIONS_URL}/echo-redeem`, {
 
 ---
 
-## Parte 7: Build y deploy
+## Parte 7: Publicar cambios en el sitio
 
-Después de hacer los cambios en el frontend:
+El sitio público se sirve desde `/var/www/multibrand/dist` en el VPS
+`76.13.234.137`, mediante el servicio `multibrand-web` en el puerto `8081`.
+No se publica desde el panel de Hostinger y no se suben archivos compilados
+desde la PC.
 
-```bash
-cd /var/www/shamsonline
-npm run build
-```
+1. En la PC, realiza los cambios, crea un commit y envíalo a GitHub con `git push`.
+   GitHub se autentica mediante el gestor de credenciales configurado en la PC;
+   no guardes tokens en la URL del remoto.
+2. Conéctate al servidor:
 
-Nginx sirve automáticamente desde `/var/www/shamsonline/dist/`, no hace falta reiniciar nada.
+   ```bash
+   ssh tienda@76.13.234.137
+   ```
+
+3. Trae los cambios y compila el sitio:
+
+   ```bash
+   cd /var/www/multibrand && git pull && npm run build
+   ```
+
+   Si `git pull` informa que hay cambios locales, detente y pide ayuda.
+   No fuerces el pull, no hagas reset y no borres cambios del servidor.
+4. Verifica `https://multibrandrosario.com` con `Ctrl+F5` o en una ventana
+   de incógnito. Normalmente no hace falta reiniciar el servicio; solo si el
+   sitio sigue sin actualizarse, ejecuta `sudo systemctl restart multibrand-web`
+   como usuario `tienda`.
+
+El servidor usa una deploy key de solo lectura para GitHub. Desde el servidor
+no se hacen commits ni `git push`. No uses `SUBIR_AL_SERVIDOR_HOSTINGER.bat`
+para copiar archivos compilados: ese script solo realiza el `git pull` y la
+compilación segura descritos arriba.
 
 ---
 
