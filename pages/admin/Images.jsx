@@ -14,7 +14,12 @@ export default function Images() {
         setUploading(true)
         const newResults = []
 
-        for (const file of Array.from(files)) {
+        // Ordenar por nombre con orden numérico natural: _1, _2, ..., _10 (no _1, _10, _2)
+        const sortedFiles = Array.from(files).sort((a, b) =>
+            a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
+        )
+
+        for (const file of sortedFiles) {
             const result = { name: file.name, status: 'uploading' }
             setResults(prev => [result, ...prev])
 
