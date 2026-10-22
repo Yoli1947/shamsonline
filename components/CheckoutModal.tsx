@@ -548,13 +548,33 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onConfir
                                 {/* Métodos de pago */}
                                 <h3 className="text-sm font-black uppercase tracking-widest text-black border-b border-[#e0e0e0] pb-2">Medio de pago</h3>
                                 <div className="space-y-2">
-                                    {[
-                                        { id: 'transferencia', label: `${transferDiscount}% OFF — Transferencia / Depósito bancario`, desc: `Realizá tu pago por transferencia y obtenés un ${transferDiscount}% de descuento. Usá el número de pedido como referencia.` },
+                                    {(() => {
+                                        // Aviso para Mercado Pago: si al cliente le sale recargo, que pida link de pago por WhatsApp
+                                        const whatsappNumber = settings.whatsapp_number || '5493412175258';
+                                        const whatsappMsg = `¡Hola! Quiero pagar mi compra de $${finalTotal.toLocaleString()} con Mercado Pago en hasta 6 cuotas sin recargo. ¿Me pasan el link de pago?`;
+                                        const mpNotice: React.ReactNode = (
+                                            <>
+                                                <p>
+                                                    <strong className="text-black">¿Te aparece recargo al pagar en cuotas?</strong> Pedinos un link de pago por WhatsApp y pagá <strong className="text-black">hasta 6 cuotas sin recargo</strong>.
+                                                </p>
+                                                <a
+                                                    href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMsg)}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="mt-2 inline-flex items-center gap-1 font-bold text-emerald-700 underline hover:text-emerald-800"
+                                                >
+                                                    Pedir link de pago por WhatsApp <ExternalLink size={12} />
+                                                </a>
+                                            </>
+                                        );
+                                        return [
+                                        { id: 'transferencia', label: `${transferDiscount}% OFF — Transferencia / Depósito bancario`, desc: `Realizá tu pago por transferencia y obtenés un ${transferDiscount}% de descuento. Usá el número de pedido como referencia.` as React.ReactNode },
                                         { id: 'efectivo', label: `${transferDiscount}% OFF — Efectivo en sucursal`, desc: `Abonás en el local al retirar tu pedido y obtenés un ${transferDiscount}% de descuento.` },
-                                        { id: 'mercadopago_saldo', label: 'Mercado Pago — Saldo o Tarjetas Guardadas', desc: null },
-                                        { id: 'mercadopago', label: 'Mercado Pago — Tarjeta de Crédito o Débito', desc: null },
+                                        { id: 'mercadopago_saldo', label: 'Mercado Pago — Saldo o Tarjetas Guardadas', desc: mpNotice },
+                                        { id: 'mercadopago', label: 'Mercado Pago — Tarjeta de Crédito o Débito', desc: mpNotice },
                                         ...(NAVE_ENABLED ? [{ id: 'nave', label: 'Nave (Naranja X / Galicia) — Tarjeta de Crédito o Débito', desc: 'Pagá con tu tarjeta a través de Nave, la plataforma de pagos de Banco Galicia y NaranjaX.' }] : []),
-                                    ].map(method => {
+                                    ];
+                                    })().map(method => {
                                         const isSelected = formData.paymentMethod === method.id;
                                         return (
                                             <div key={method.id}>
