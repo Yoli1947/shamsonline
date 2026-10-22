@@ -264,7 +264,10 @@ export default function ProductForm({ product, onSuccess, onCancel }) {
     }, [catRef]);
 
     const handleImageChange = (e) => {
-        const files = Array.from(e.target.files)
+        // Ordenar por nombre con orden numérico natural: _1, _2, ..., _10 (no _1, _10, _2)
+        const files = Array.from(e.target.files).sort((a, b) =>
+            a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
+        )
         if (files.length > 0) {
             const newImages = files.map(file => {
                 // Auto-detect color from filename
