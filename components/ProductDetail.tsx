@@ -14,9 +14,25 @@ interface ProductDetailProps {
     onAddToCart: (p: Product, size?: string, color?: string) => void;
     isFavorite?: boolean;
     onToggleFavorite?: (id: string) => void;
+    onSelectSku?: (sku: string) => void;
 }
 
-const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose, onAddToCart, isFavorite, onToggleFavorite }) => {
+interface ColorSibling {
+    sku: string;
+    color: string;
+    image: string;
+    inStock: boolean;
+}
+
+// Cada color de un artículo es un producto aparte cuyo SKU solo cambia en las
+// letras finales (ej. P11101051H habano, P11101051V verde). El "código base"
+// es el SKU sin esas letras.
+const getBaseSku = (sku?: string) => {
+    const match = sku?.trim().match(/^(.*\d)[A-Za-z]+$/);
+    return match && /\d{4,}/.test(match[1]) ? match[1] : null;
+};
+
+const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose, onAddToCart, isFavorite, onToggleFavorite, onSelectSku }) => {
     const { settings } = useSettings();
     const [currentImgIndex, setCurrentImgIndex] = useState(0);
     const transferDiscount = settings.transfer_discount || 15;
@@ -53,6 +69,40 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
     }, [isOpen, product?.id]);
 
     const effectiveVariants = liveVariants ?? product.variants ?? [];
+
+    // Otros colores del mismo artículo (productos publicados con el mismo código base)
+    const [colorSiblings, setColorSiblings] = useState<ColorSibling[]>([]);
+    useEffect(() => {
+        const baseSku = getBaseSku(product?.sku);
+        if (!isOpen || !baseSku) { setColorSiblings([]); return; }
+        let cancelled = false;
+        (async () => {
+            const { data, error } = await supabase
+                .from('products')
+                .select('sku, name, image_url, images:product_images(url, is_primary, sort_order), variants:product_variants(color, stock)')
+                .eq('is_published', true)
+                .or('is_active.eq.true,is_active.is.null')
+                .ilike('sku', `${baseSku}%`)
+                .limit(30);
+            if (cancelled || error || !data) return;
+            const siblings: ColorSibling[] = (data as any[])
+                .filter(p => getBaseSku(p.sku) === baseSku && !/prueba|test/i.test(p.name || ''))
+                .map(p => {
+                    const images = [...(p.images || [])].sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+                    const primary = images.find((img: any) => img.is_primary) || images[0];
+                    const color = p.variants?.find((v: any) => v.color)?.color || p.sku.slice(baseSku.length);
+                    return {
+                        sku: p.sku,
+                        color,
+                        image: p.image_url || primary?.url || '',
+                        inStock: (p.variants || []).some((v: any) => (v.stock || 0) > 0),
+                    };
+                })
+                .sort((a, b) => a.sku.localeCompare(b.sku));
+            setColorSiblings(siblings.length > 1 ? siblings : []);
+        })();
+        return () => { cancelled = true; };
+    }, [isOpen, product?.sku]);
 
     // Reset image index and selections when product o modal visibility changes
     useEffect(() => {
@@ -527,6 +577,39 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose,
                                 <span className="text-red-500 text-xs font-black tracking-[0.3em] uppercase">
                                     ARTÍCULO AGOTADO
                                 </span>
+                            </div>
+                        )}
+
+                        {/* Otros colores del artículo */}
+                        {colorSiblings.length > 0 && (
+                            <div className="mb-6">
+                                <span className="text-[10px] font-black tracking-[0.3em] text-[var(--color-text-muted)] uppercase block mb-3">
+                                    DISPONIBLE EN {colorSiblings.length} COLORES:
+                                </span>
+                                <div className="flex flex-wrap gap-2">
+                                    {colorSiblings.map(sibling => {
+                                        const isCurrent = sibling.sku === product.sku;
+                                        return (
+                                            <button
+                                                key={sibling.sku}
+                                                type="button"
+                                                onClick={() => !isCurrent && onSelectSku?.(sibling.sku)}
+                                                disabled={isCurrent || !onSelectSku}
+                                                title={sibling.inStock ? sibling.color : `${sibling.color} (agotado)`}
+                                                className={`flex flex-col items-center w-16 text-center transition-all ${isCurrent ? '' : 'hover:opacity-80'} ${sibling.inStock ? '' : 'opacity-40'}`}
+                                            >
+                                                <div className={`w-16 h-20 bg-white overflow-hidden border-2 ${isCurrent ? 'border-[var(--color-text)]' : 'border-[var(--color-border)]'}`}>
+                                                    {sibling.image && (
+                                                        <img src={sibling.image} alt={sibling.color} loading="lazy" className="w-full h-full object-contain" />
+                                                    )}
+                                                </div>
+                                                <span className={`mt-1 text-[9px] uppercase tracking-wider leading-tight ${isCurrent ? 'font-black text-[var(--color-text)]' : 'font-semibold text-[var(--color-text-muted)]'}`}>
+                                                    {sibling.color}
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         )}
 

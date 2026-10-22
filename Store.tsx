@@ -55,6 +55,18 @@ const Store: React.FC = () => {
         }
     };
 
+    // Abrir otro color del mismo artículo desde la ficha de producto
+    const openProductBySku = async (sku: string) => {
+        const found = products.find(p => p.sku === sku);
+        if (found) { openProduct(found); return; }
+        try {
+            const dbProd = await getProductBySku(sku);
+            if (dbProd) openProduct(mapProductsToUI([dbProd])[0]);
+        } catch (err) {
+            console.error('Error abriendo el color seleccionado:', err);
+        }
+    };
+
     const closeProduct = () => {
         setSelectedProduct(null);
         navigate('/', { replace: true });
@@ -2273,6 +2285,7 @@ const Store: React.FC = () => {
                         }}
                         isFavorite={favorites.includes(selectedProduct.id)}
                         onToggleFavorite={toggleFavorite}
+                        onSelectSku={openProductBySku}
                     />
                 )
             }
