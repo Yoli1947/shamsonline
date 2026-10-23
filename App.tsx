@@ -1,6 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useLayoutEffect, useEffect } from 'react';
+import { useLayoutEffect, useEffect, useRef } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { supabase } from './lib/supabase';
 import { SettingsProvider } from './context/SettingsContext';
@@ -45,10 +45,18 @@ const OutletMaintenance = lazy(() => import('./pages/OutletMaintenance'));
 
 const ScrollToTop = () => {
   const location = useLocation();
+  const prevPathRef = useRef<string | null>(null);
   useLayoutEffect(() => {
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
     }
+    // Abrir/cerrar la ficha de un producto cambia la URL entre "/" y
+    // "/producto/:sku", pero es la misma página de la tienda con un modal:
+    // no se vuelve arriba, así el cliente sigue donde estaba mirando.
+    const isStorePath = (p: string) => p === '/' || p.startsWith('/producto/');
+    const prevPath = prevPathRef.current;
+    prevPathRef.current = location.pathname;
+    if (prevPath !== null && isStorePath(prevPath) && isStorePath(location.pathname)) return;
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;

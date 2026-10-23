@@ -1226,7 +1226,9 @@ const Store: React.FC = () => {
                     </div>
                 ) : (
                     <>
-                        {!selectedBrand && !selectedGender && !selectedCategory && !skuParam && !selectedProduct && !window.location.pathname.includes('/producto/') && (
+                        {/* Las secciones de la home quedan montadas detrás de la ficha de producto:
+                            si se ocultaran al abrirla, la página se achica y se pierde el lugar. */}
+                        {!selectedBrand && !selectedGender && !selectedCategory && (
                             <>
                                 <Hero />
 
