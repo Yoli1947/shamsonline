@@ -31,7 +31,14 @@ const slides = [
     description: "Herencia náutica. Una nueva forma de vivir el verano.",
     objectPosition: "85% center",
     letterbox: true,
-    mobileAspect: "3/4",
+    mobileAspect: "1/1",
+    // En celular el recorte deja afuera el panel blanco con el texto de la
+    // imagen: se repite ese texto debajo de la foto.
+    mobileCaption: {
+      kicker: "Summer 2027",
+      title: "Classic Nautical Cool",
+      text: "Herencia náutica. Una nueva forma de vivir el verano. Descubrí Summer 2027."
+    },
     // La imagen ya trae su propio texto en el panel blanco: no se superpone
     // logo/descripción, solo el botón debajo de ese texto.
     ownText: true,
@@ -117,7 +124,7 @@ const Hero: React.FC = () => {
             </div>
           ) : (slide as any).letterbox ? (
             <div className={`absolute inset-0 flex flex-col items-center justify-start md:justify-center pt-4 md:pt-0 gap-6 md:gap-10 px-4 ${(slide as any).bgColor || 'bg-black'}`}>
-              <div className={`relative w-full ${(slide as any).mobileAspect === '3/4' || (slide as any).split ? 'aspect-[3/4]' : 'aspect-[4/3]'} ${(slide as any).desktopAspect === '3/2' ? 'md:aspect-[3/2]' : 'md:aspect-[1920/636]'}`}>
+              <div className={`relative w-full ${(slide as any).mobileCaption ? 'max-h-[calc(90vh-var(--navbar-height,220px)-200px)] md:max-h-none' : ''} ${(slide as any).mobileAspect === '1/1' ? 'aspect-square' :(slide as any).mobileAspect === '3/4' || (slide as any).split ? 'aspect-[3/4]' : 'aspect-[4/3]'} ${(slide as any).desktopAspect === '3/2' ? 'md:aspect-[3/2]' : 'md:aspect-[1920/636]'}`}>
                 <img
                   src={slide.image}
                   alt={slide.title}
@@ -251,6 +258,13 @@ const Hero: React.FC = () => {
                   </div>
                 )}
               </div>
+              {(slide as any).mobileCaption && (
+                <div className="md:hidden -mt-2 flex flex-col items-center text-center gap-2 px-4 text-[#1f2a44]">
+                  <p className="text-[11px] tracking-[0.1em]">{(slide as any).mobileCaption.kicker}</p>
+                  <h2 className="font-serif italic text-[26px] leading-tight">{(slide as any).mobileCaption.title}</h2>
+                  <p className="text-[12px] leading-snug max-w-[300px]">{(slide as any).mobileCaption.text}</p>
+                </div>
+              )}
             </div>
           ) : (
             <img
