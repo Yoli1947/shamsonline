@@ -48,10 +48,17 @@ const Store: React.FC = () => {
     const { sku: skuParam } = useParams<{ sku?: string }>();
     const { settings } = useSettings();
 
+    // Los filtros (marca, género, categoría, orden) viven en la query string:
+    // se conservan al abrir y cerrar un producto para volver a la misma vista.
+    const filtersQuery = () => {
+        const qs = searchParams.toString();
+        return qs ? `?${qs}` : '';
+    };
+
     const openProduct = (product: Product) => {
         setSelectedProduct(product);
         if (product.sku) {
-            navigate(`/producto/${product.sku}`, { replace: true });
+            navigate(`/producto/${product.sku}${filtersQuery()}`, { replace: true });
         }
     };
 
@@ -69,7 +76,7 @@ const Store: React.FC = () => {
 
     const closeProduct = () => {
         setSelectedProduct(null);
-        navigate('/', { replace: true });
+        navigate(`/${filtersQuery()}`, { replace: true, preventScrollReset: true });
     };
 
     useEffect(() => {
