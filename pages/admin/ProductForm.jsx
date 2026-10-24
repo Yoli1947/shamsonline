@@ -311,9 +311,14 @@ export default function ProductForm({ product, onSuccess, onCancel }) {
                     color: detectedColor // Assigned automatically
                 };
             })
+            // Los productos que llegan del sistema de ventas vienen sin publicar:
+            // al cargarles fotos, si tienen stock, se tilda "Publicar en la tienda"
+            // (se puede destildar antes de guardar).
+            const hasStock = variants.some(v => Number(v.stock) > 0)
             setFormData(prev => ({
                 ...prev,
-                images: [...prev.images, ...newImages]
+                images: [...prev.images, ...newImages],
+                isPublished: hasStock ? true : prev.isPublished
             }))
         }
     }
