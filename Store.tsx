@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Link, useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -167,6 +167,20 @@ const Store: React.FC = () => {
         picksPauseTimeoutRef.current = setTimeout(() => { picksPausedRef.current = false; }, 1800);
     };
 
+    // Los carruseles se desmontan al entrar a una marca/filtro y se vuelven a
+    // montar al volver a la home: el auto-scroll se engancha al elemento actual
+    // (callback ref + estado), no a uno viejo que ya no está en la página.
+    const [saleScrollEl, setSaleScrollEl] = useState<HTMLDivElement | null>(null);
+    const setSaleScrollNode = useCallback((el: HTMLDivElement | null) => {
+        (saleScrollRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+        setSaleScrollEl(el);
+    }, []);
+    const [picksScrollEl, setPicksScrollEl] = useState<HTMLDivElement | null>(null);
+    const setPicksScrollNode = useCallback((el: HTMLDivElement | null) => {
+        (picksScrollRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+        setPicksScrollEl(el);
+    }, []);
+
     const [isBrandFilterOpen, setIsBrandFilterOpen] = useState(false);
     const [isSizeFilterOpen, setIsSizeFilterOpen] = useState(false);
     const [isCategoryFilterOpen, setIsCategoryFilterOpen] = useState(false);
@@ -214,7 +228,7 @@ const Store: React.FC = () => {
     // al llegar al final. Usa scrollLeft nativo (no una animación CSS) para
     // convivir con el arrastre táctil real del usuario en el celular.
     useEffect(() => {
-        const el = saleScrollRef.current;
+        const el = saleScrollEl;
         if (!el) return;
 
         const handleStart = () => {
@@ -245,11 +259,11 @@ const Store: React.FC = () => {
             el.removeEventListener('mousedown', handleStart);
             window.removeEventListener('mouseup', handleEnd);
         };
-    }, [products]);
+    }, [saleScrollEl]);
 
     // Auto-scroll del carrusel "Nuestros Elegidos" (debajo del Hero) — mismo mecanismo que el de Sale.
     useEffect(() => {
-        const el = picksScrollRef.current;
+        const el = picksScrollEl;
         if (!el) return;
 
         const handleStart = () => {
@@ -280,7 +294,7 @@ const Store: React.FC = () => {
             el.removeEventListener('mousedown', handleStart);
             window.removeEventListener('mouseup', handleEnd);
         };
-    }, [products]);
+    }, [picksScrollEl]);
 
     const [brands, setBrands] = useState<any[]>([]);
     const [quickDiscountBrands, setQuickDiscountBrands] = useState<{ brand: string; bestDiscount: number; image: string; count: number }[]>([]);
@@ -1254,7 +1268,7 @@ const Store: React.FC = () => {
                                                 <ChevronRight size={22} strokeWidth={2.5} />
                                             </button>
                                             <div
-                                                ref={picksScrollRef}
+                                                ref={setPicksScrollNode}
                                                 onScroll={(e) => setPicksScrollPos((e.target as HTMLDivElement).scrollLeft)}
                                                 className="flex gap-3 md:gap-5 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
                                             >
@@ -1431,7 +1445,7 @@ const Store: React.FC = () => {
                                             <ChevronRight size={22} strokeWidth={2.5} />
                                         </button>
                                         <div
-                                            ref={saleScrollRef}
+                                            ref={setSaleScrollNode}
                                             onScroll={(e) => setSaleScrollPos((e.target as HTMLDivElement).scrollLeft)}
                                             className="flex gap-3 md:gap-4 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
                                         >
