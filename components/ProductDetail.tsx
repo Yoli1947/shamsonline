@@ -5,6 +5,7 @@ import { Product } from '../types';
 import { COLOR_MAP, SIZE_ORDER, sortSizes } from '../lib/constants';
 import { useSettings } from '../context/SettingsContext';
 import { getProductPricing } from '../lib/pricing';
+import { getBaseSku } from '../lib/products';
 import { supabase } from '../lib/supabase';
 
 interface ProductDetailProps {
@@ -23,14 +24,6 @@ interface ColorSibling {
     image: string;
     inStock: boolean;
 }
-
-// Cada color de un artículo es un producto aparte cuyo SKU solo cambia en las
-// letras finales (ej. P11101051H habano, P11101051V verde). El "código base"
-// es el SKU sin esas letras.
-const getBaseSku = (sku?: string) => {
-    const match = sku?.trim().match(/^(.*\d)[A-Za-z]+$/);
-    return match && /\d{4,}/.test(match[1]) ? match[1] : null;
-};
 
 const ProductDetail: React.FC<ProductDetailProps> = ({ product, isOpen, onClose, onAddToCart, isFavorite, onToggleFavorite, onSelectSku }) => {
     const { settings } = useSettings();

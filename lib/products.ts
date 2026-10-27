@@ -1,6 +1,10 @@
 // Mapea productos crudos de Supabase (con sus joins de brand/category/images/variants)
 // al shape de Product que usa el storefront. Extraído de Store.tsx para poder
 // reutilizarlo en otras páginas (ej. SaleLastChance) sin duplicar la lógica.
+
+// Cuántos días se considera "ingreso reciente" para mostrarlo primero en la tienda.
+const RECENT_DAYS = 30;
+
 export function mapProductsToUI(dbProducts: any[]) {
     const cleanProductName = (name: string) => {
         if (!name) return 'Sin Nombre';
@@ -74,20 +78,73 @@ export function mapProductsToUI(dbProducts: any[]) {
         };
     });
 
-    return mapped.sort((a, b) => {
+    return mapped.sort(compareStoreProducts);
+}
+
+type SortableProduct = { createdAt?: string | null; sort_order?: number; name?: string };
+
+// Orden por defecto de la tienda:
+//  1. Ingresos de los últimos RECENT_DAYS días, del más nuevo al más viejo
+//     (van antes que el orden manual: si no, los sort_order viejos los tapan).
+//  2. Orden manual (sort_order) del admin.
+//  3. El resto, del más nuevo al más viejo.
+export function isRecentProduct(p: SortableProduct) {
+    const recentSince = new Date(Date.now() - RECENT_DAYS * 24 * 60 * 60 * 1000).toISOString();
+    return !!p.createdAt && p.createdAt >= recentSince;
+}
+
+export function compareStoreProducts(a: SortableProduct, b: SortableProduct) {
+    const recentA = isRecentProduct(a);
+    const recentB = isRecentProduct(b);
+    if (recentA !== recentB) return recentA ? -1 : 1;
+
+    if (!recentA) {
         const sortA = a.sort_order || 99999;
         const sortB = b.sort_order || 99999;
-        if (sortA !== sortB) {
-            return sortA - sortB;
-        }
-        // Sin sort_order manual, el más nuevo (recién ingresado) va primero.
-        if (a.createdAt && b.createdAt && a.createdAt !== b.createdAt) {
-            return a.createdAt < b.createdAt ? 1 : -1;
-        }
-        const nameA = a.name || '';
-        const nameB = b.name || '';
-        return nameA.localeCompare(nameB, 'es', { sensitivity: 'base' });
-    });
+        if (sortA !== sortB) return sortA - sortB;
+    }
+    if (a.createdAt && b.createdAt && a.createdAt !== b.createdAt) {
+        return a.createdAt < b.createdAt ? 1 : -1;
+    }
+    return (a.name || '').localeCompare(b.name || '', 'es', { sensitivity: 'base' });
+}
+
+// Cada color de un artículo es un producto aparte cuyo SKU solo cambia en las
+// letras finales (ej. P11101051H habano, P11101051V verde). El "código base"
+// es el SKU sin esas letras.
+export const getBaseSku = (sku?: string | null) => {
+    const match = sku?.trim().match(/^(.*\d)[A-Za-z]+$/);
+    return match && /\d{4,}/.test(match[1]) ? match[1] : null;
+};
+
+// Línea de producto: primera palabra significativa del nombre, sin la marca
+// (ej. "HUNTER SCUBA JOGGER NEGRO" -> "SCUBA").
+const BRAND_WORDS = new Set(['HUNTER', 'PERRAMUS', 'NAUTICA']);
+const getProductLine = (name?: string) =>
+    (name || '').toUpperCase().split(/\s+/).find(w => w.length > 1 && !BRAND_WORDS.has(w)) || '';
+
+// Reordena mezclando: evita que los colores del mismo artículo queden en la
+// misma fila (ventana de 4) y que dos productos de la misma línea queden
+// pegados. Respeta el orden original todo lo posible: en cada lugar pone el
+// primer producto pendiente que no choque; si todos chocan, el primero.
+export function spreadSimilarProducts<T extends { sku?: string | null; name?: string; id?: string }>(items: T[]): T[] {
+    const ARTICLE_WINDOW = 4;
+    const LINE_WINDOW = 1;
+    const pending = items.map(item => ({
+        item,
+        article: getBaseSku(item.sku) || item.sku || item.id || '',
+        line: getProductLine(item.name),
+    }));
+    const result: typeof pending = [];
+    while (pending.length) {
+        const recentArticles = result.slice(-ARTICLE_WINDOW).map(p => p.article);
+        const recentLines = result.slice(-LINE_WINDOW).map(p => p.line);
+        let idx = pending.findIndex(p => !recentArticles.includes(p.article) && !recentLines.includes(p.line));
+        if (idx === -1) idx = pending.findIndex(p => !recentArticles.includes(p.article));
+        if (idx === -1) idx = 0;
+        result.push(pending.splice(idx, 1)[0]);
+    }
+    return result.map(p => p.item);
 }
 
 // Descuento "real" de SALE: solo cuenta cuando el producto tiene compareAtPrice

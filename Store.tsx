@@ -14,7 +14,7 @@ import ProductDetail from './components/ProductDetail';
 import { getAllProducts, getBrands, getCategories, getLastSyncDate, getProductBySku } from './lib/admin'; // Import DB function
 import { supabase } from './lib/supabase';
 import { createOrder } from './lib/orders';
-import { mapProductsToUI } from './lib/products';
+import { mapProductsToUI, compareStoreProducts, isRecentProduct, spreadSimilarProducts } from './lib/products';
 import { usePageSEO } from './lib/seo';
 import { Product, CartItem } from './types';
 import { Filter, Loader, X, Ruler, Trash2, Tag, Search, Users, Mail, Phone, MapPin, HelpCircle, ShoppingBag, Instagram, ShieldCheck, ChevronLeft, ChevronRight, Flame, Truck, RefreshCw, CreditCard, ArrowRight } from 'lucide-react';
@@ -1167,7 +1167,10 @@ const Store: React.FC = () => {
 
         return true;
     }).sort((a, b) => {
-        if (!selectedOrder) return 0;
+        // Sin orden elegido: orden por defecto de la tienda (ingresos recientes
+        // primero). Se aplica acá porque el catálogo llega por partes y desde la
+        // caché del navegador, sin un orden global garantizado.
+        if (!selectedOrder) return compareStoreProducts(a, b);
 
         const discountA = a.originalPrice > 0 ? (a.originalPrice - a.price) / a.originalPrice : 0;
         const discountB = b.originalPrice > 0 ? (b.originalPrice - b.price) / b.originalPrice : 0;
@@ -1955,19 +1958,22 @@ const Store: React.FC = () => {
                                 return [...mujer, ...hombre, ...otros, ...accessories];
                             };
 
-                            // "Anticipo SS27" (temporada nueva) arranca primero en Toda la Colección.
-                            // La temporada de invierno (OI) queda relegada al final de todo.
+                            // Los ingresos recientes arrancan primero en Toda la Colección (más nuevo
+                            // primero: filteredProducts ya viene así ordenado). Después "Anticipo SS27"
+                            // (temporada nueva) y la temporada de invierno (OI) relegada al final de todo.
+                            const recentItems = filteredProducts.filter((p: any) => isRecentProduct(p));
+                            const notRecent = filteredProducts.filter((p: any) => !isRecentProduct(p));
                             const isInvierno = (p: any) => (p.season || '').toUpperCase().startsWith('OI');
-                            const anticipoAll = filteredProducts.filter((p: any) => p.isAnticipoSS27);
+                            const anticipoAll = notRecent.filter((p: any) => p.isAnticipoSS27);
                             const anticipoItems = [
                                 ...anticipoAll.filter((p: any) => getGenders(p).includes('mujer')),
                                 ...anticipoAll.filter((p: any) => !getGenders(p).includes('mujer')),
                             ];
-                            const nonAnticipo = filteredProducts.filter((p: any) => !p.isAnticipoSS27);
+                            const nonAnticipo = notRecent.filter((p: any) => !p.isAnticipoSS27);
                             const restProducts = nonAnticipo.filter((p: any) => !isInvierno(p));
                             const winterProducts = nonAnticipo.filter((p: any) => isInvierno(p));
 
-                            const ordered = [...anticipoItems, ...buildGroupOrder(restProducts), ...buildGroupOrder(winterProducts)];
+                            const ordered = [...recentItems, ...anticipoItems, ...buildGroupOrder(restProducts), ...buildGroupOrder(winterProducts)];
                             const visible = ordered.slice(0, visibleProductsCount);
 
                             return (
@@ -2000,9 +2006,14 @@ const Store: React.FC = () => {
                                     const cat = (p.category?.name || '').toUpperCase();
                                     return cat.includes('ACCESORIO') || cat.includes('CALZADO') || cat.includes('BOLSO') || cat.includes('CARTERA') ? 1 : 0;
                                 };
-                                // En Hombre/Mujer, la temporada nueva (Anticipo SS27) arranca primero
-                                // y la de invierno (OI) queda relegada al final de todo.
+                                // En Hombre/Mujer, los ingresos recientes arrancan primero, después la
+                                // temporada nueva (Anticipo SS27) y la de invierno (OI) al final de todo.
                                 if (selectedGender) {
+                                    const aRecent = isRecentProduct(a) ? 0 : 1;
+                                    const bRecent = isRecentProduct(b) ? 0 : 1;
+                                    if (aRecent !== bRecent) return aRecent - bRecent;
+                                    // Entre recientes se respeta el orden por fecha (más nuevo primero).
+                                    if (aRecent === 0) return 0;
                                     const aAnticipo = a.isAnticipoSS27 ? 0 : 1;
                                     const bAnticipo = b.isAnticipoSS27 ? 0 : 1;
                                     if (aAnticipo !== bAnticipo) return aAnticipo - bAnticipo;
@@ -2013,6 +2024,16 @@ const Store: React.FC = () => {
                                 }
                                 return isBottom(a) - isBottom(b);
                             });
+                            // En la página de una marca se mezclan los artículos (que no queden
+                            // todos los colores de uno juntos), por separado los ingresos recientes
+                            // y el resto, para que lo nuevo siga arriba.
+                            if (selectedBrand && !selectedOrder && !searchQuery) {
+                                const mixed = [
+                                    ...spreadSimilarProducts(ordered.filter(p => isRecentProduct(p))),
+                                    ...spreadSimilarProducts(ordered.filter(p => !isRecentProduct(p))),
+                                ];
+                                ordered.splice(0, ordered.length, ...mixed);
+                            }
                             const visible = ordered.slice(0, visibleProductsCount);
 
                             return (
