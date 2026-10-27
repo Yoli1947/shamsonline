@@ -109,6 +109,19 @@ export function compareStoreProducts(a: SortableProduct, b: SortableProduct) {
     return (a.name || '').localeCompare(b.name || '', 'es', { sensitivity: 'base' });
 }
 
+// Accesorios (gorras, bolsos, mochilas, paraguas...): van después de la ropa y
+// el calzado. En el storefront `category` es el nombre (string).
+export function isAccessoryProduct(p: { category?: any }) {
+    const cat = String((typeof p.category === 'string' ? p.category : p.category?.name) || '').toUpperCase();
+    return cat.includes('ACCESORIO') || cat.includes('BOLSO') || cat.includes('CARTERA');
+}
+
+// Grupo de la grilla: 0 ropa/calzado nuevos, 1 accesorios nuevos,
+// 2 ropa/calzado del resto, 3 accesorios del resto.
+export function getStoreTier(p: SortableProduct & { category?: any }) {
+    return (isRecentProduct(p) ? 0 : 2) + (isAccessoryProduct(p) ? 1 : 0);
+}
+
 // Cada color de un artículo es un producto aparte cuyo SKU solo cambia en las
 // letras finales (ej. P11101051H habano, P11101051V verde). El "código base"
 // es el SKU sin esas letras.

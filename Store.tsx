@@ -14,7 +14,7 @@ import ProductDetail from './components/ProductDetail';
 import { getAllProducts, getBrands, getCategories, getLastSyncDate, getProductBySku } from './lib/admin'; // Import DB function
 import { supabase } from './lib/supabase';
 import { createOrder } from './lib/orders';
-import { mapProductsToUI, compareStoreProducts, isRecentProduct, spreadSimilarProducts } from './lib/products';
+import { mapProductsToUI, compareStoreProducts, isRecentProduct, isAccessoryProduct, getStoreTier, spreadSimilarProducts } from './lib/products';
 import { usePageSEO } from './lib/seo';
 import { Product, CartItem } from './types';
 import { Filter, Loader, X, Ruler, Trash2, Tag, Search, Users, Mail, Phone, MapPin, HelpCircle, ShoppingBag, Instagram, ShieldCheck, ChevronLeft, ChevronRight, Flame, Truck, RefreshCw, CreditCard, ArrowRight } from 'lucide-react';
@@ -1959,9 +1959,14 @@ const Store: React.FC = () => {
                             };
 
                             // Los ingresos recientes arrancan primero en Toda la Colección (más nuevo
-                            // primero: filteredProducts ya viene así ordenado). Después "Anticipo SS27"
-                            // (temporada nueva) y la temporada de invierno (OI) relegada al final de todo.
-                            const recentItems = filteredProducts.filter((p: any) => isRecentProduct(p));
+                            // primero: filteredProducts ya viene así ordenado), con sus accesorios al
+                            // final. Después "Anticipo SS27" (temporada nueva) y la temporada de
+                            // invierno (OI) relegada al final de todo.
+                            const recentAll = filteredProducts.filter((p: any) => isRecentProduct(p));
+                            const recentItems = [
+                                ...recentAll.filter((p: any) => !isAccessoryProduct(p)),
+                                ...recentAll.filter((p: any) => isAccessoryProduct(p)),
+                            ];
                             const notRecent = filteredProducts.filter((p: any) => !isRecentProduct(p));
                             const isInvierno = (p: any) => (p.season || '').toUpperCase().startsWith('OI');
                             const anticipoAll = notRecent.filter((p: any) => p.isAnticipoSS27);
@@ -2001,37 +2006,27 @@ const Store: React.FC = () => {
                         })()
                     ) : (
                         (() => {
-                            const ordered = [...filteredProducts].sort((a, b) => {
-                                const isBottom = (p: any) => {
-                                    const cat = (p.category?.name || '').toUpperCase();
-                                    return cat.includes('ACCESORIO') || cat.includes('CALZADO') || cat.includes('BOLSO') || cat.includes('CARTERA') ? 1 : 0;
-                                };
-                                // En Hombre/Mujer, los ingresos recientes arrancan primero, después la
-                                // temporada nueva (Anticipo SS27) y la de invierno (OI) al final de todo.
-                                if (selectedGender) {
-                                    const aRecent = isRecentProduct(a) ? 0 : 1;
-                                    const bRecent = isRecentProduct(b) ? 0 : 1;
-                                    if (aRecent !== bRecent) return aRecent - bRecent;
-                                    // Entre recientes se respeta el orden por fecha (más nuevo primero).
-                                    if (aRecent === 0) return 0;
-                                    const aAnticipo = a.isAnticipoSS27 ? 0 : 1;
-                                    const bAnticipo = b.isAnticipoSS27 ? 0 : 1;
-                                    if (aAnticipo !== bAnticipo) return aAnticipo - bAnticipo;
-                                    const isInvierno = (p: any) => (p.season || '').toUpperCase().startsWith('OI') ? 1 : 0;
-                                    const aWinter = isInvierno(a);
-                                    const bWinter = isInvierno(b);
-                                    if (aWinter !== bWinter) return aWinter - bWinter;
-                                }
-                                return isBottom(a) - isBottom(b);
+                            // Sin un orden elegido por el cliente, la grilla va por grupos
+                            // (getStoreTier): ropa/calzado nuevos, accesorios nuevos, ropa/calzado
+                            // del resto, accesorios del resto. Dentro de los nuevos se respeta la
+                            // fecha; en Hombre/Mujer, dentro del resto va primero la temporada
+                            // nueva (Anticipo SS27) y la de invierno (OI) al final.
+                            const ordered = selectedOrder ? [...filteredProducts] : [...filteredProducts].sort((a, b) => {
+                                const tierA = getStoreTier(a);
+                                const tierB = getStoreTier(b);
+                                if (tierA !== tierB) return tierA - tierB;
+                                if (tierA < 2 || !selectedGender) return 0;
+                                const aAnticipo = a.isAnticipoSS27 ? 0 : 1;
+                                const bAnticipo = b.isAnticipoSS27 ? 0 : 1;
+                                if (aAnticipo !== bAnticipo) return aAnticipo - bAnticipo;
+                                const isInvierno = (p: any) => (p.season || '').toUpperCase().startsWith('OI') ? 1 : 0;
+                                return isInvierno(a) - isInvierno(b);
                             });
                             // En la página de una marca se mezclan los artículos (que no queden
-                            // todos los colores de uno juntos), por separado los ingresos recientes
-                            // y el resto, para que lo nuevo siga arriba.
+                            // todos los colores de uno juntos), grupo por grupo.
                             if (selectedBrand && !selectedOrder && !searchQuery) {
-                                const mixed = [
-                                    ...spreadSimilarProducts(ordered.filter(p => isRecentProduct(p))),
-                                    ...spreadSimilarProducts(ordered.filter(p => !isRecentProduct(p))),
-                                ];
+                                const mixed = [0, 1, 2, 3].flatMap(tier =>
+                                    spreadSimilarProducts(ordered.filter(p => getStoreTier(p) === tier)));
                                 ordered.splice(0, ordered.length, ...mixed);
                             }
                             const visible = ordered.slice(0, visibleProductsCount);
