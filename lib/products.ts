@@ -214,9 +214,10 @@ export function getDiscountPct(p: any): number {
 }
 
 // Prendas que vienen con travel bag (bolsa para guardarlas). Se detecta por la
-// descripción: "Bolsa para guardar prenda", "Bolsa interna para el
-// auto-guardado" o directamente "travel bag".
-const TRAVEL_BAG_RE = /travel\s*bag|bolsa\s+(interna\s+)?para\s+(el\s+)?(guardar|auto[\s-]*guardado)/i;
+// descripción: "travel bag" o una "bolsa" que en la misma frase habla de
+// guardar la prenda, hacerla packable o viajes ("Bolsa para guardar prenda",
+// "bolsa para hacer la prenda packable", "Bolsa packable para viajes"...).
+const TRAVEL_BAG_RE = /travel\s*bag|\bbolsa\b[^.\n]{0,40}(guard|packable|viaje)/i;
 export function hasTravelBag(p: { description?: string | null }) {
     return TRAVEL_BAG_RE.test(p.description || '');
 }
