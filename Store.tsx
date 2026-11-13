@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import BrandMarquee from './components/BrandMarquee';
 import ProductCard from './components/ProductCard';
+import ProductBadges from './components/ProductBadges';
 import CartDrawer from './components/CartDrawer';
 import FavoritesDrawer from './components/FavoritesDrawer';
 import PopularDrawer from './components/PopularDrawer';
@@ -1299,6 +1300,9 @@ const Store: React.FC = () => {
                                                                     loading="lazy"
                                                                 />
                                                             )}
+                                                            <div className="absolute top-3 left-3 flex flex-col gap-2">
+                                                                <ProductBadges product={product} />
+                                                            </div>
                                                         </div>
                                                         <div className="pt-3 px-1 flex flex-col gap-1">
                                                             <p className="text-[var(--color-text)] text-[11px] md:text-sm font-semibold uppercase tracking-wide truncate">
@@ -1479,11 +1483,14 @@ const Store: React.FC = () => {
                                                                     loading="lazy"
                                                                 />
                                                             )}
-                                                            {discountPct !== null && (
-                                                                <span className="absolute top-3 left-3 bg-red-600 text-white text-[10px] md:text-xs font-black px-2 py-1 uppercase tracking-tighter">
-                                                                    -{discountPct}%
-                                                                </span>
-                                                            )}
+                                                            <div className="absolute top-3 left-3 flex flex-col gap-2">
+                                                                {discountPct !== null && (
+                                                                    <span className="self-start bg-red-600 text-white text-[10px] md:text-xs font-black px-2 py-1 uppercase tracking-tighter">
+                                                                        -{discountPct}%
+                                                                    </span>
+                                                                )}
+                                                                <ProductBadges product={product} />
+                                                            </div>
                                                         </div>
                                                         <div className="pt-3 px-1 flex flex-col gap-2">
                                                             <p className="text-[var(--color-text)] text-[11px] md:text-sm font-semibold uppercase tracking-wide truncate">

@@ -234,3 +234,11 @@ export function hasLinen(p: { name?: string; description?: string | null }) {
 export function isReversible(p: { description?: string | null }) {
     return /\breversible\b/i.test(p.description || '');
 }
+
+// Prendas con partes desmontables (capucha, mangas, abrigo...) y bolsos con
+// correa desmontable. No cuenta lo que solo "simula" ser desmontable (Betim).
+export function isDetachable(p: { name?: string; description?: string | null }) {
+    let text = p.description || '';
+    if (p.name) text = text.split(p.name).join(' ');
+    return /desmontable/i.test(text) && !/simulando[^.\n]{0,40}desmontable/i.test(text);
+}

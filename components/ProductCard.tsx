@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { Plus, Heart, Share2, RefreshCw } from 'lucide-react';
+import { Plus, Heart, Share2 } from 'lucide-react';
 import { Product } from '../types';
 import { COLOR_MAP } from '../lib/constants';
 import { useSettings } from '../context/SettingsContext';
 import { getProductPricing } from '../lib/pricing';
-import { hasTravelBag, hasLinen, isReversible } from '../lib/products';
+import ProductBadges from './ProductBadges';
 
 interface ProductCardProps {
   product: Product;
@@ -137,29 +137,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onOpenD
           <span className="bg-white/80 backdrop-blur-sm text-[var(--color-text)] text-[8px] md:text-[9px] px-3 py-1.5 md:px-4 rounded-none uppercase font-semibold tracking-[0.15em] border border-[var(--color-border)] shadow-sm">
             {product.brand}
           </span>
-          {hasTravelBag(product) && (
-            <span className="w-11 h-11 md:w-12 md:h-12 bg-[#3a3a3a]/90 flex flex-col items-center justify-center leading-none shadow-sm" style={{ borderRadius: "9999px" }} title="Incluye travel bag">
-              <span className="text-white text-[10px] md:text-[11px] font-medium">Travel</span>
-              <span className="text-[#F5C518] text-[10px] md:text-[11px] font-medium">bag</span>
-            </span>
-          )}
-          {hasLinen(product) && (
-            <span className="self-start flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-2.5 py-1 shadow-sm" style={{ borderRadius: "9999px" }} title="Prenda de lino">
-              <svg width="16" height="12" viewBox="0 0 32 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="text-[var(--color-text)]" aria-hidden="true">
-                <path d="M16 13c-3-1-5-4-4-7 1-2 4-2 5 0 1-2 4-2 5 0 1 3-1 6-4 7" />
-                <path d="M16 13c-2 2-6 3-8 1-2-2-1-5 1-5" />
-                <path d="M16 13c2 2 6 3 8 1 2-2 1-5-1-5" />
-                <path d="M16 13v8" />
-              </svg>
-              <span className="text-[8px] md:text-[9px] font-semibold tracking-[0.15em] text-[var(--color-text)]">LINO</span>
-            </span>
-          )}
-          {isReversible(product) && (
-            <span className="self-start flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-2.5 py-1 shadow-sm" style={{ borderRadius: "9999px" }} title="Prenda reversible">
-              <RefreshCw size={12} className="stroke-[1.5px] text-[var(--color-text)]" aria-hidden="true" />
-              <span className="text-[8px] md:text-[9px] font-semibold tracking-[0.15em] text-[var(--color-text)]">REVERSIBLE</span>
-            </span>
-          )}
+          <ProductBadges product={product} />
           {isOutOfStock && (
             <span className="bg-[#B5451B]/80 backdrop-blur-md text-white text-[8px] md:text-[9px] px-3 py-1.5 md:px-4 rounded-none font-semibold tracking-[0.15em]">
               SOLD OUT
