@@ -1,9 +1,9 @@
 import React from 'react';
-import { RefreshCw } from 'lucide-react';
-import { hasTravelBag, hasLinen, isReversible, isDetachable } from '../lib/products';
+import { RefreshCw, Leaf } from 'lucide-react';
+import { hasTravelBag, hasLinen, isReversible, isDetachable, hasNaturalFibers } from '../lib/products';
 
-// Etiquetas de características de la prenda (Travel bag, Lino, Reversible,
-// Desmontable).
+// Etiquetas de características de la prenda (Travel bag, Lino, Fibras
+// naturales, Reversible, Desmontable).
 // Se usan en las tarjetas de la grilla y en los carruseles del inicio; van
 // dentro de una columna flex posicionada por quien las usa.
 const ProductBadges: React.FC<{ product: { name?: string; description?: string | null } }> = ({ product }) => (
@@ -23,6 +23,12 @@ const ProductBadges: React.FC<{ product: { name?: string; description?: string |
           <path d="M16 13v8" />
         </svg>
         <span className="text-[8px] md:text-[9px] font-semibold tracking-[0.15em] text-[var(--color-text)]">LINO</span>
+      </span>
+    )}
+    {hasNaturalFibers(product) && (
+      <span className="self-start flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-2.5 py-1 shadow-sm" style={{ borderRadius: "9999px" }} title="Fibras naturales">
+        <Leaf size={12} className="stroke-[1.5px] text-[var(--color-text)]" aria-hidden="true" />
+        <span className="text-[8px] md:text-[9px] font-semibold tracking-[0.15em] text-[var(--color-text)]">FIBRAS NATURALES</span>
       </span>
     )}
     {isReversible(product) && (

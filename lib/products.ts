@@ -235,10 +235,19 @@ export function isReversible(p: { description?: string | null }) {
     return /\breversible\b/i.test(p.description || '');
 }
 
-// Prendas con partes desmontables (capucha, mangas, abrigo...) y bolsos con
-// correa desmontable. No cuenta lo que solo "simula" ser desmontable (Betim).
+// Prendas con mangas, abrigo, chaleco o campera interna desmontable. No
+// cuentan la capucha, la correa, la pechera, el cuello ni el borde de piel de
+// la capucha, ni lo que solo "simula" ser desmontable (Betim).
+const DETACHABLE_RE = /mangas\s+y\s+capucha\s+desmontables|(manga|abrigo|chaleco|campera interna|abrigo de piel)s?\b((?!capucha)[^.\n]){0,40}?desmontables?/i;
 export function isDetachable(p: { name?: string; description?: string | null }) {
     let text = p.description || '';
     if (p.name) text = text.split(p.name).join(' ');
-    return /desmontable/i.test(text) && !/simulando[^.\n]{0,40}desmontable/i.test(text);
+    return DETACHABLE_RE.test(text);
+}
+
+// Prendas de fibras naturales: lo dice la descripción ("fibras vegetales y
+// naturales", "fibra natural") o son de ramio. "linen feel" no es lino real.
+export function hasNaturalFibers(p: { name?: string; description?: string | null }) {
+    const text = (p.description || '').replace(/linen feel/gi, '');
+    return /fibras?\s+(\w+\s+y\s+)?naturale?s?\b/i.test(text) || /\bramio\b/i.test(text);
 }
