@@ -116,10 +116,16 @@ export function isAccessoryProduct(p: { category?: any }) {
     return cat.includes('ACCESORIO') || cat.includes('BOLSO') || cat.includes('CARTERA');
 }
 
-// Grupo de la grilla: 0 ropa/calzado nuevos, 1 accesorios nuevos,
+// Temporada de verano (PV25, PV26, PV27...).
+export function isSummerProduct(p: { season?: string | null }) {
+    return (p.season || '').toUpperCase().startsWith('PV');
+}
+
+// Grupo de la grilla: 0 ropa/calzado de verano o nuevos, 1 accesorios nuevos,
 // 2 ropa/calzado del resto, 3 accesorios del resto.
-export function getStoreTier(p: SortableProduct & { category?: any }) {
-    return (isRecentProduct(p) ? 0 : 2) + (isAccessoryProduct(p) ? 1 : 0);
+export function getStoreTier(p: SortableProduct & { category?: any; season?: string | null }) {
+    if (isAccessoryProduct(p)) return isRecentProduct(p) ? 1 : 3;
+    return isRecentProduct(p) || isSummerProduct(p) ? 0 : 2;
 }
 
 // Marcas que van primero dentro de la ropa/calzado nuevos.
@@ -136,11 +142,26 @@ export function isShortProduct(p: { name?: string; category?: any }) {
     return /\bSHORTS?\b/.test(name) && !/\bBOOTS?\b/.test(name) && !cat.includes('CALZADO');
 }
 
-// Orden dentro de la ropa/calzado nuevos: primero Perramus/Hunter, después
-// sus shorts, después las demás marcas.
+// Orden dentro de la ropa/calzado nuevos: primero Perramus, después Hunter,
+// después sus shorts, después las demás marcas (Nautica...).
 export function getNewArrivalRank(p: { brand?: any; name?: string; category?: any }) {
-    if (!isPriorityBrand(p)) return 2;
-    return isShortProduct(p) ? 1 : 0;
+    if (!isPriorityBrand(p)) return 3;
+    if (isShortProduct(p)) return 2;
+    const brand = String((typeof p.brand === 'string' ? p.brand : p.brand?.name) || '').toUpperCase();
+    return brand === 'PERRAMUS' ? 0 : 1;
+}
+
+// Ordena la ropa/calzado de verano o nuevos según getNewArrivalRank, pero
+// intercalando Perramus y Hunter: dos Perramus, un Hunter, y así.
+export function orderNewArrivals<T extends { brand?: any; name?: string; category?: any }>(items: T[]): T[] {
+    const byRank = (r: number) => items.filter(p => getNewArrivalRank(p) === r);
+    const perramus = byRank(0);
+    const hunter = byRank(1);
+    const mixed: T[] = [];
+    while (perramus.length || hunter.length) {
+        mixed.push(...perramus.splice(0, 2), ...hunter.splice(0, 1));
+    }
+    return [...mixed, ...byRank(2), ...byRank(3)];
 }
 
 // Cada color de un artículo es un producto aparte cuyo SKU solo cambia en las

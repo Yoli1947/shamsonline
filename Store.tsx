@@ -14,7 +14,7 @@ import ProductDetail from './components/ProductDetail';
 import { getAllProducts, getBrands, getCategories, getLastSyncDate, getProductBySku } from './lib/admin'; // Import DB function
 import { supabase } from './lib/supabase';
 import { createOrder } from './lib/orders';
-import { mapProductsToUI, compareStoreProducts, isRecentProduct, isAccessoryProduct, getStoreTier, spreadSimilarProducts, getNewArrivalRank } from './lib/products';
+import { mapProductsToUI, compareStoreProducts, getStoreTier, spreadSimilarProducts, orderNewArrivals } from './lib/products';
 import { usePageSEO } from './lib/seo';
 import { Product, CartItem } from './types';
 import { Filter, Loader, X, Ruler, Trash2, Tag, Search, Users, Mail, Phone, MapPin, HelpCircle, ShoppingBag, Instagram, ShieldCheck, ChevronLeft, ChevronRight, Flame, Truck, RefreshCw, CreditCard, ArrowRight } from 'lucide-react';
@@ -1958,17 +1958,16 @@ const Store: React.FC = () => {
                                 return [...mujer, ...hombre, ...otros, ...accessories];
                             };
 
-                            // Los ingresos recientes arrancan primero en Toda la Colección (más nuevo
-                            // primero: filteredProducts ya viene así ordenado), con sus accesorios al
-                            // final. Después "Anticipo SS27" (temporada nueva) y la temporada de
-                            // invierno (OI) relegada al final de todo.
-                            const recentAll = filteredProducts.filter((p: any) => isRecentProduct(p));
+                            // Arrancan en Toda la Colección la ropa de verano y los ingresos recientes
+                            // (Perramus y Hunter intercalados, shorts, demás marcas; lo más nuevo
+                            // primero: filteredProducts ya viene así ordenado), y después los
+                            // accesorios nuevos. Luego "Anticipo SS27" y la temporada de invierno (OI)
+                            // relegada al final de todo.
                             const recentItems = [
-                                ...recentAll.filter((p: any) => !isAccessoryProduct(p))
-                                    .sort((a: any, b: any) => getNewArrivalRank(a) - getNewArrivalRank(b)),
-                                ...recentAll.filter((p: any) => isAccessoryProduct(p)),
+                                ...orderNewArrivals(filteredProducts.filter((p: any) => getStoreTier(p) === 0)),
+                                ...filteredProducts.filter((p: any) => getStoreTier(p) === 1),
                             ];
-                            const notRecent = filteredProducts.filter((p: any) => !isRecentProduct(p));
+                            const notRecent = filteredProducts.filter((p: any) => getStoreTier(p) >= 2);
                             const isInvierno = (p: any) => (p.season || '').toUpperCase().startsWith('OI');
                             const anticipoAll = notRecent.filter((p: any) => p.isAnticipoSS27);
                             const anticipoItems = [
@@ -2008,7 +2007,8 @@ const Store: React.FC = () => {
                     ) : (
                         (() => {
                             // Sin un orden elegido por el cliente, la grilla va por grupos
-                            // (getStoreTier): ropa/calzado nuevos, accesorios nuevos, ropa/calzado
+                            // (getStoreTier): ropa/calzado de verano o nuevos (Perramus, Hunter, shorts,
+                            // demás marcas; Perramus y Hunter intercalados), accesorios nuevos, ropa/calzado
                             // del resto, accesorios del resto. Dentro de los nuevos se respeta la
                             // fecha; en Hombre/Mujer, dentro del resto va primero la temporada
                             // nueva (Anticipo SS27) y la de invierno (OI) al final.
@@ -2016,7 +2016,6 @@ const Store: React.FC = () => {
                                 const tierA = getStoreTier(a);
                                 const tierB = getStoreTier(b);
                                 if (tierA !== tierB) return tierA - tierB;
-                                if (tierA === 0) return getNewArrivalRank(a) - getNewArrivalRank(b);
                                 if (tierA < 2 || !selectedGender) return 0;
                                 const aAnticipo = a.isAnticipoSS27 ? 0 : 1;
                                 const bAnticipo = b.isAnticipoSS27 ? 0 : 1;
@@ -2024,6 +2023,10 @@ const Store: React.FC = () => {
                                 const isInvierno = (p: any) => (p.season || '').toUpperCase().startsWith('OI') ? 1 : 0;
                                 return isInvierno(a) - isInvierno(b);
                             });
+                            if (!selectedOrder) {
+                                const top = orderNewArrivals(ordered.filter(p => getStoreTier(p) === 0));
+                                ordered.splice(0, top.length, ...top);
+                            }
                             // En la página de una marca se mezclan los artículos (que no queden
                             // todos los colores de uno juntos), grupo por grupo.
                             if (selectedBrand && !selectedOrder && !searchQuery) {
