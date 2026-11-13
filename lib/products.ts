@@ -122,6 +122,27 @@ export function getStoreTier(p: SortableProduct & { category?: any }) {
     return (isRecentProduct(p) ? 0 : 2) + (isAccessoryProduct(p) ? 1 : 0);
 }
 
+// Marcas que van primero dentro de la ropa/calzado nuevos.
+const PRIORITY_BRANDS = ['PERRAMUS', 'HUNTER'];
+export function isPriorityBrand(p: { brand?: any }) {
+    const brand = String((typeof p.brand === 'string' ? p.brand : p.brand?.name) || '').toUpperCase();
+    return PRIORITY_BRANDS.includes(brand);
+}
+
+// Shorts (no las botas "Original Short" de Hunter).
+export function isShortProduct(p: { name?: string; category?: any }) {
+    const name = (p.name || '').toUpperCase();
+    const cat = String((typeof p.category === 'string' ? p.category : p.category?.name) || '').toUpperCase();
+    return /\bSHORTS?\b/.test(name) && !/\bBOOTS?\b/.test(name) && !cat.includes('CALZADO');
+}
+
+// Orden dentro de la ropa/calzado nuevos: primero Perramus/Hunter, después
+// sus shorts, después las demás marcas.
+export function getNewArrivalRank(p: { brand?: any; name?: string; category?: any }) {
+    if (!isPriorityBrand(p)) return 2;
+    return isShortProduct(p) ? 1 : 0;
+}
+
 // Cada color de un artículo es un producto aparte cuyo SKU solo cambia en las
 // letras finales (ej. P11101051H habano, P11101051V verde). El "código base"
 // es el SKU sin esas letras.

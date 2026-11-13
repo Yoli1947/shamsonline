@@ -14,7 +14,7 @@ import ProductDetail from './components/ProductDetail';
 import { getAllProducts, getBrands, getCategories, getLastSyncDate, getProductBySku } from './lib/admin'; // Import DB function
 import { supabase } from './lib/supabase';
 import { createOrder } from './lib/orders';
-import { mapProductsToUI, compareStoreProducts, isRecentProduct, isAccessoryProduct, getStoreTier, spreadSimilarProducts } from './lib/products';
+import { mapProductsToUI, compareStoreProducts, isRecentProduct, isAccessoryProduct, getStoreTier, spreadSimilarProducts, getNewArrivalRank } from './lib/products';
 import { usePageSEO } from './lib/seo';
 import { Product, CartItem } from './types';
 import { Filter, Loader, X, Ruler, Trash2, Tag, Search, Users, Mail, Phone, MapPin, HelpCircle, ShoppingBag, Instagram, ShieldCheck, ChevronLeft, ChevronRight, Flame, Truck, RefreshCw, CreditCard, ArrowRight } from 'lucide-react';
@@ -1964,7 +1964,8 @@ const Store: React.FC = () => {
                             // invierno (OI) relegada al final de todo.
                             const recentAll = filteredProducts.filter((p: any) => isRecentProduct(p));
                             const recentItems = [
-                                ...recentAll.filter((p: any) => !isAccessoryProduct(p)),
+                                ...recentAll.filter((p: any) => !isAccessoryProduct(p))
+                                    .sort((a: any, b: any) => getNewArrivalRank(a) - getNewArrivalRank(b)),
                                 ...recentAll.filter((p: any) => isAccessoryProduct(p)),
                             ];
                             const notRecent = filteredProducts.filter((p: any) => !isRecentProduct(p));
@@ -2015,6 +2016,7 @@ const Store: React.FC = () => {
                                 const tierA = getStoreTier(a);
                                 const tierB = getStoreTier(b);
                                 if (tierA !== tierB) return tierA - tierB;
+                                if (tierA === 0) return getNewArrivalRank(a) - getNewArrivalRank(b);
                                 if (tierA < 2 || !selectedGender) return 0;
                                 const aAnticipo = a.isAnticipoSS27 ? 0 : 1;
                                 const bAnticipo = b.isAnticipoSS27 ? 0 : 1;
