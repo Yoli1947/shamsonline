@@ -212,3 +212,24 @@ export function getDiscountPct(p: any): number {
     if (!isOnSale) return 0;
     return Math.round((1 - p.originalPrice / p.compareAtPrice) * 100);
 }
+
+// Prendas que vienen con travel bag (bolsa para guardarlas). Se detecta por la
+// descripción: "Bolsa para guardar prenda", "Bolsa interna para el
+// auto-guardado" o directamente "travel bag".
+const TRAVEL_BAG_RE = /travel\s*bag|bolsa\s+(interna\s+)?para\s+(el\s+)?(guardar|auto[\s-]*guardado)/i;
+export function hasTravelBag(p: { description?: string | null }) {
+    return TRAVEL_BAG_RE.test(p.description || '');
+}
+
+// Prendas de lino (o con lino en la composición). Se busca en la descripción
+// sin el nombre, porque "LINO" también se usa como nombre de color.
+export function hasLinen(p: { name?: string; description?: string | null }) {
+    let text = p.description || '';
+    if (p.name) text = text.split(p.name).join(' ');
+    return /\blino\b/i.test(text);
+}
+
+// Prendas reversibles (lo dice la descripción).
+export function isReversible(p: { description?: string | null }) {
+    return /\breversible\b/i.test(p.description || '');
+}
