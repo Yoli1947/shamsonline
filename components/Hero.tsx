@@ -25,11 +25,11 @@ const slides = [
     overlayAlign: 'left'
   },
   {
-    image: "/banners/nautica-verano-2027.webp",
+    image: "/banners/nautica-verano-2027-v2.webp",
     title: "MULTIBRAND / NAUTICA",
     subtitle: "SUMMER 2027",
     description: "Herencia náutica. Una nueva forma de vivir el verano.",
-    objectPosition: "85% center",
+    objectPosition: "80% center",
     letterbox: true,
     mobileAspect: "1/1",
     // En celular el recorte deja afuera el panel blanco con el texto de la
